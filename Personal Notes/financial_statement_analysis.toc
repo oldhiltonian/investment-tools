@@ -1,8 +1,12 @@
 \contentsline {section}{\numberline {1}Introduction}{1}{}%
 \contentsline {section}{\numberline {2}Balance Sheets}{1}{}%
-\contentsline {subsection}{\numberline {2.1}Assets}{1}{}%
+\contentsline {subsection}{\numberline {2.1}Assets}{2}{}%
 \contentsline {subsection}{\numberline {2.2}Liabilities}{2}{}%
 \contentsline {subsection}{\numberline {2.3}Owners Equity}{2}{}%
 \contentsline {subsubsection}{\numberline {2.3.1}A Note on Book Value}{3}{}%
 \contentsline {section}{\numberline {3}Income Statements}{3}{}%
-\contentsline {section}{\numberline {4}Conclusion}{4}{}%
+\contentsline {section}{\numberline {4}Shares}{4}{}%
+\contentsline {subsection}{\numberline {4.1}Authorized, Issued \& Outstanding Shares}{4}{}%
+\contentsline {section}{\numberline {5}Financial Ratios}{4}{}%
+\contentsline {subsection}{\numberline {5.1}Earnings Per Share}{4}{}%
+\contentsline {section}{\numberline {6}Conclusion}{5}{}%
