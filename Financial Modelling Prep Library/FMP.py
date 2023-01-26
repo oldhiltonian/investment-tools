@@ -2,15 +2,12 @@
 # coding: utf-8
 
 # TODO
-# - Strip the class to a .py file for easier programming and just run this notebook as a script
-# - add cross-check functionality to calculate outstanding shares, eps, gross profit, operating income and compare it to the values provided in the actual statements. Assert similarity or fail stating that there is a discrepency
+# - Add yfinance support to get stock price data
+# - Check why the ebitda calculations in Company.cross_check() are so wrong
 # - create load_financial_statements()
 # - expand build_dataframe() to automatically save to excel
-# - create standard_ratios() to perform all calculations, or perhaps to literally do everything start-to-finish
+# - create analyse() to perform all calculations, or perhaps to literally do everything start-to-finish
 # - create plotting functionality
-
-# In[3]:
-
 
 import requests
 import pandas as pd
@@ -18,11 +15,12 @@ from pathlib import Path
 
 
 class Company:
-    def __init__(self, ticker, key, data='online', period='annual', limit=120):
+    def __init__(self, ticker, api_key, data='online', period='annual', limit=120):
         self._ticker = ticker
-        self.key = key
+        self.api_key = api_key
         if data == 'online':
-            self.balance_sheets, self.income_statements, self.cash_flow_statements                     = self.fetch_financial_statements(ticker, period=period, limit=limit)
+            self.balance_sheets, self.income_statements, self.cash_flow_statements = \
+                self.fetch_financial_statements(ticker, period=period, limit=limit)
         else:
             '''call load_financial_statements here'''
             msg = 'not implemented yet'
@@ -32,8 +30,8 @@ class Company:
         self.income_statements = self.build_dataframe(self.income_statements)
         self.cash_flow_statements = self.build_dataframe(self.cash_flow_statements)
         self.calculated_ratios = pd.DataFrame()
-        self.cross_check()
-        self.standard_ratios()
+        self.metric_errors, self.ratio_errors = self.cross_check()
+        self.standard_metrics = self.analyse()
 
 
     
@@ -55,9 +53,9 @@ class Company:
                 - cash_flow_statements (dict): A dictionary containing the json response of the cash flow statement API call
         '''
 
-        balance_sheets = requests.get(f'https://financialmodelingprep.com/api/v3/balance-sheet-statement/{company}?period={period}&limit={limit}&apikey={self.key}')
-        income_statements = requests.get(f'https://financialmodelingprep.com/api/v3/income-statement/{company}?period={period}&limit={limit}&apikey={self.key}')
-        cash_flow_statements = requests.get(f'https://financialmodelingprep.com/api/v3/cash-flow-statement/{company}?period={period}&limit={limit}&apikey={self.key}')
+        balance_sheets = requests.get(f'https://financialmodelingprep.com/api/v3/balance-sheet-statement/{company}?period={period}&limit={limit}&apikey={self.api_key}')
+        income_statements = requests.get(f'https://financialmodelingprep.com/api/v3/income-statement/{company}?period={period}&limit={limit}&apikey={self.api_key}')
+        cash_flow_statements = requests.get(f'https://financialmodelingprep.com/api/v3/cash-flow-statement/{company}?period={period}&limit={limit}&apikey={self.api_key}')
 
         return balance_sheets.json(), income_statements.json(), cash_flow_statements.json()
 
@@ -101,46 +99,65 @@ class Company:
 
     def cross_check(self):
         self._check_reported_values = pd.DataFrame()
+        self._check_calculated_values = pd.DataFrame()
         RND_expenses = self.income_statements['researchAndDevelopmentExpenses']
         SGA_expenses = self.income_statements['sellingGeneralAndAdministrativeExpenses']
         other_expenses = self.income_statements['otherExpenses']
         revenue = self.income_statements['revenue']
+        self.revenue = revenue
         cost_of_revenue = self.income_statements['costOfRevenue']
         depreciation_amortization = self.cash_flow_statements['depreciationAndAmortization']
         interest_expense = self.income_statements['interestExpense']
 
-        # income statement
-        # ebitda, ebit
+
+        metrics = ['ebitda', 'ebitdaratio', 'grossProfit', 'grossProfitRatio', 'operatingIncome', 'operatingIncomeRatio', \
+                    'incomeBeforeTax', 'incomeBeforeTaxRatio', 'netIncome', 'netIncomeRatio']
+        ratios = [i if 'ratio' in i.lower() else None for i in metrics]
+
+        # Calculated ratios from reported values on the financial statements
         self._check_calculated_values['ebitda'] = revenue - RND_expenses - SGA_expenses - other_expenses + depreciation_amortization
-
-        # # #ebitdaratio, 
-
-        # grossProfit,         # grossProfitRatio, 
+        self._check_calculated_values['ebitdaratio'] = self._check_calculated_values['ebitda']/revenue
         self._check_calculated_values['grossProfit'] = revenue - cost_of_revenue
-        self._check_calculated_values['grossProfitRatio'] = (self._check_calculated_values['grossProfit']/revenue)*100
-        
-        #operatingIncome, operatingIncomeRatio
+        self._check_calculated_values['grossProfitRatio'] = (self._check_calculated_values['grossProfit']/revenue)
         self._check_calculated_values['operatingIncome'] = revenue - cost_of_revenue - SGA_expenses - RND_expenses
-        self._check_calculated_values['operatingIncomeRatio'] = (self._check_calculated_values['operatingIncome']/revenue)*100
-
-        # incomeBeforeTax, 
-        self._check_calculated_values['incomeBeforeTax'] = self._check_calculated_values['operatingOncome'] - interest_expense
-        # incomeBeforeTaxRatio, 
-        self._check_calculated_values['incomeBeforeTaxRatio'] = (self._check_calculated_values['incomeBeforeTax']/revenue)*100
-
-        # netIncome
+        self._check_calculated_values['operatingIncomeRatio'] = (self._check_calculated_values['operatingIncome']/revenue)
+        self._check_calculated_values['incomeBeforeTax'] = self._check_calculated_values['operatingIncome'] - interest_expense
+        self._check_calculated_values['incomeBeforeTaxRatio'] = (self._check_calculated_values['incomeBeforeTax']/revenue)
         self._check_calculated_values['netIncome'] = 0.79*self._check_calculated_values['incomeBeforeTax']
-        # netIncomeRatio, 
-        self._check_calculated_values['incomeBeforeTaxRatio'] = (self._check_calculated_values['netIncome']/revenue)*100
+        self._check_calculated_values['netIncomeRatio'] = (self._check_calculated_values['netIncome']/revenue)
         
-        self._check_calculated_values = pd.DataFrame()
-        # Calculate the above values for this df then assert that they are equal for each.
-        # Actually, dont assert, but flag which ones are significantly different and then
-        #     format a message to be returned in response
-        return "NYE"
+        # Pulling reported metric values
+        for metric in metrics:
+            if metric in self.income_statements.keys():
+                self._check_reported_values[metric] = self.income_statements[metric]
+            elif metric in self.balance_sheets.keys():
+                self._check_reported_values[metric] = self.balance_sheets[metric]
+            elif metric in self.cash_flow_statements.keys():
+                self._check_reported_values[metric] = self.cash_flow_statements[metric]
+
+        # Ensuring dimensionality of the two dataframes
+        if len(self._check_calculated_values.keys()) != len(self._check_reported_values.keys()):
+            msg = '''Key mismatch between the reported and calculated tables.\nCheck the calculations in the Company.cross_check() method'''
+            raise Exception(msg)
+        metric_errors = self._check_calculated_values - self._check_reported_values
+        ratio_errors = self.metric_errors.drop(['ebitda','grossProfit', 'operatingIncome', 'incomeBeforeTax', 'netIncome'], inplace=True, axis=1)
+
+        # Error between calculated and reported values
+        error_tolerance = 0.05
+        error_messages  = []
+        line_count = len(ratio_errors)
+        for ratio in ratios:
+            if ratio is None:
+                continue
+            count = sum(ratio_errors[ratio] >= error_tolerance)
+            error_messages.append(f"There were {count}/{line_count} values in {ratio} that exceed the {error_tolerance} error tolerance.")
+        for message in error_messages:
+            print(message)
+
+        return metric_errors, ratio_errors
     
     
-    def standard_ratios(self):
+    def analyse(self):
         '''Stock Evaluation Ratios'''
         self.calculated_ratios['eps_calc'] = self.income_statements['netIncome']/self.balance_sheets['commonStock'] #authorized stock!!!
         self.calculated_ratios['eps_reported'] = self.income_statements['eps']
