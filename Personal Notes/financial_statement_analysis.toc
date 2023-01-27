@@ -18,4 +18,7 @@
 \contentsline {subsubsection}{\numberline {5.2.1}Gross Margin}{6}{}%
 \contentsline {subsubsection}{\numberline {5.2.2}Operating Profit Margin}{6}{}%
 \contentsline {subsubsection}{\numberline {5.2.3}Pretax Profit Margin}{7}{}%
-\contentsline {section}{\numberline {6}Conclusion}{7}{}%
+\contentsline {subsubsection}{\numberline {5.2.4}Net Profit Margin}{7}{}%
+\contentsline {subsubsection}{\numberline {5.2.5}Return on Invested Capital (ROIC)}{7}{}%
+\contentsline {subsubsection}{\numberline {5.2.6}Return on Equity (ROE)}{8}{}%
+\contentsline {section}{\numberline {6}Conclusion}{8}{}%

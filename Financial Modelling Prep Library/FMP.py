@@ -98,6 +98,7 @@ class Company:
 
 
     def cross_check(self):
+        '''Returns metric_errors, ratio_errors as dataframes'''
         self._check_reported_values = pd.DataFrame()
         self._check_calculated_values = pd.DataFrame()
         RND_expenses = self.income_statements['researchAndDevelopmentExpenses']
@@ -140,8 +141,7 @@ class Company:
             msg = '''Key mismatch between the reported and calculated tables.\nCheck the calculations in the Company.cross_check() method'''
             raise Exception(msg)
         metric_errors = self._check_calculated_values - self._check_reported_values
-        ratio_errors = self.metric_errors.drop(['ebitda','grossProfit', 'operatingIncome', 'incomeBeforeTax', 'netIncome'], inplace=True, axis=1)
-
+        ratio_errors = metric_errors.drop(['ebitda','grossProfit', 'operatingIncome', 'incomeBeforeTax', 'netIncome'], inplace=False, axis=1)
         # Error between calculated and reported values
         error_tolerance = 0.05
         error_messages  = []

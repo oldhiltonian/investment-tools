@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.12) (preloaded format=pdflatex 2023.1.20)  26 JAN 2023 20:24
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.12) (preloaded format=pdflatex 2023.1.20)  27 JAN 2023 20:45
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -322,17 +322,27 @@ Underfull \hbox (badness 10000) in paragraph at lines 194--195
 
  []
 
-
+[6]
 Underfull \hbox (badness 10000) in paragraph at lines 202--203
 
  []
 
-[6]
+
 Underfull \hbox (badness 10000) in paragraph at lines 207--208
 
  []
 
-[7] (financial_statement_analysis.aux) ) 
+
+Underfull \hbox (badness 10000) in paragraph at lines 222--223
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 235--236
+
+ []
+
+[7] [8] (financial_statement_analysis.aux) ) 
 Here is how much of TeX's memory you used:
  2770 strings out of 476404
  41601 string characters out of 2789996
@@ -341,22 +351,22 @@ Here is how much of TeX's memory you used:
  518351 words of font info for 53 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  57i,6n,62p,997b,196s stack positions out of 10000i,1000n,20000p,200000b,80000s
- <C:\Users\John\AppData\Local\MiKTeX\fo
-nts/pk/ljfour/jknappen/ec/dpi600\tcrm1000.pk><C:/Users/John/AppData/Local/Progr
-ams/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Users/John/AppData/Loc
-al/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/John/App
-Data/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/
-John/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C
-:/Users/John/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10
-.pfb><C:/Users/John/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/c
-m/cmr12.pfb><C:/Users/John/AppData/Local/Programs/MiKTeX/fonts/type1/public/ams
-fonts/cm/cmr17.pfb><C:/Users/John/AppData/Local/Programs/MiKTeX/fonts/type1/pub
-lic/amsfonts/cm/cmr7.pfb><C:/Users/John/AppData/Local/Programs/MiKTeX/fonts/typ
-e1/public/amsfonts/cm/cmsy10.pfb><C:/Users/John/AppData/Local/Programs/MiKTeX/f
-onts/type1/public/amsfonts/cm/cmti10.pfb>
-Output written on financial_statement_analysis.pdf (7 pages, 168672 bytes).
+ <C:\Users\John\AppData\Local\MiKTe
+X\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1000.pk><C:/Users/John/AppData/Local/P
+rograms/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Users/John/AppData
+/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/John
+/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Us
+ers/John/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pf
+b><C:/Users/John/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/c
+mr10.pfb><C:/Users/John/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfon
+ts/cm/cmr12.pfb><C:/Users/John/AppData/Local/Programs/MiKTeX/fonts/type1/public
+/amsfonts/cm/cmr17.pfb><C:/Users/John/AppData/Local/Programs/MiKTeX/fonts/type1
+/public/amsfonts/cm/cmr7.pfb><C:/Users/John/AppData/Local/Programs/MiKTeX/fonts
+/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/John/AppData/Local/Programs/MiKT
+eX/fonts/type1/public/amsfonts/cm/cmti10.pfb>
+Output written on financial_statement_analysis.pdf (8 pages, 173568 bytes).
 PDF statistics:
- 81 PDF objects out of 1000 (max. 8388607)
+ 85 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
