@@ -1,7 +1,7 @@
 \documentclass{article}
 \usepackage{amsmath} % for equations
 \usepackage{xcolor}
-\usepackage[top=0.5in, bottom=0.5in, left=0.5in, right=0.5in]{geometry}
+\usepackage[top=0.75in, bottom=0.75in, left=0.75in, right=0.75in]{geometry}
 
 \title{Introduction to Fundamental Analysis}
 \author{John Forrester Davidson}
@@ -228,7 +228,7 @@ Like the operating margin, it is also a measure of the efficiency of a company. 
 The net profit margin is calculated by deducting taxes from the pretax profit and then dividing by sales. It means essentially the same thing as the pretax profit margin. 
 
 \subsubsection{Return on Invested Capital (ROIC)}
-Return on Invested Capital is a measure of how well a company is investing its capital. \textcolor{red}{For now we define invested capital as the amount of long term debt plus equity carried on the balance sheet.} Recall that capitalization may be thought of as the sources of money that bought the capital assets. Therefore, the return on capital is a measure of how the company is able to use its assets to generate profit. 
+Return on Invested Capital is a measure of how well a company is investing its capital. \textcolor{red}{For now we define invested capital (total capitalization) as the amount of long term debt plus equity carried on the balance sheet.} Recall that capitalization may be thought of as the sources of money that bought the capital assets. Therefore, the return on capital is a measure of how the company is able to use its assets to generate profit. 
 
  \begin{equation}
     ROIC = \frac{Net\: Profit\: after\: Taxes}{Total\: Capitalization}
@@ -253,7 +253,161 @@ A related measure to ROE is the Return on Assets. This measures how management i
     ROA = \frac{Net\: Profit}{Total\: Assets}
 \end{equation}\\
 
-A ratio of 0.05 indicates that \$0.05 is generated \textit{as after-tax operating income} for every \$1.00 in assets.
+A ratio of 0.05 indicates that \$0.05 is generated \textit{as after-tax operating income} for every \$1.00 in assets. This is a good metric to use to compare companies in the same industry or to watch one company over time. It is seldom useful when comparing companies in different industries, as different industries generally require different levels of assets.
+
+
+\subsection{Debt and Interest Ratios}
+Leverage can be used to mean debt. A company with high debt relative to equity on the balance sheets is said to be highly leveraged. High leverage implies a large interest expense on the outstanding debt, and can therefore mean that a company is more risky is there is any doubt in the company's ability to make the interest payments. \\
+
+The first two metrics to follow deal directly with a company's ability to raise more money if needed. 
+
+\subsubsection{Interest Coverage Ratio}
+The interest coverage ratio (ICR) is sometimes called the times-interest-earned or the earnings coverage ratio. It measures a company's ability to pay the interest on its outstanding debt. It is calculated by dividing a company's earnings before interest and taxes (EBIT) (\textit{operating profit, the money earned that is available to pay interest charges}) by its total interest expense for a specific period of time, typically a year. \\
+
+ \begin{equation}
+    ICR = \frac{EBIT}{Total\: Interest}
+\end{equation}\\
+
+An ICR of 6x indicates that a company earns 6x the amount required in order to pay back its interest expenses. Larger values are indicate that the company would more easily be able to pay back its debt and would have an easier time borrowing additional capital. Note that taxes do not enter the equation, as interest charges are deducted before pretax profit and taxes are calculated. 
+
+The ICR answers two questions:
+\begin{itemize}
+\item How much money is the company earning that is available to pay interest?
+\item How many times larger is the available amount of earnings than it needs to be?
+\end{itemize}
+
+Since interest is paid with cash, we could simply look at the cash on the balance sheet to determine if the company has sufficient funds. But this is generally not a good indicator as it only represents the available cash at a single point in time. We are more interested in whether the company has sufficient cash flows over time to pay the required interest charges. We thus generally look at the income statement
+
+
+\subsubsection{Fixed Charge Coverage Ratio}
+The fixed charge coverage ratio (FCCR) measures a company's ability to meet its fixed financial obligations, such as interest payments and lease payments. This is calculated much like the interest coverage ratio, but includes other fixed charges such as fixed lease payments. The ratio is calculated by dividing a company's earnings before interest, taxes, depreciation and amortization (EBITDA) by its fixed charges, which include interest expenses and lease payments.
+
+ \begin{equation}
+    FCCR = \frac{EBITDA}{Total\: Fixed\: Charges}
+\end{equation}\\
+
+It is important to note that the EBITDA is used as the numerator in the calculation, because it excludes the non-cash expense of depreciation and amortization, which allows for a better comparison of a company's operating performance over time. FCCR is similar to the interest coverage ratio (ICR) but it gives a more comprehensive picture of a company's ability to meet its fixed financial obligations. While ICR only considers the interest expenses, FCCR takes into account both interest expenses and lease payments.
+
+
+\subsubsection{Debt to Total Capitalization (D/TC)}
+Debt to total capitalization, sometimes referred to as \textit{debt to total capital} or \textit{debt to cap} usually refers to long-term debt divided by total capitalization. Recall that total capitalization is the sum of a company's debt and equity, which represents the total value of the company's capital structure.
+
+ \begin{equation}
+    D/TC = \frac{Long\: Term\: Debt}{Total\: Capitalization}
+\end{equation}\\
+
+The less debt already in total nationalization, the easier (i.e. at lower interest) the company can borrow more money. Typical ratio values vary widely across industries, as some industries are more capital-intensive and may have a higher D/TC ratio than others. Therefore, it's important to compare the ratio with other companies in the same industry to determine if a company's leverage is relatively high or low.
+
+\subsubsection{Total Debt Ratio}
+The total debt ratio indicates how much debt a company has relative to its assets. The ratio is calculated by dividing a company's total debt by its total assets. 
+
+ \begin{equation}
+    Total Debt Ratio = \frac{Total\: Assets\: - Total\: Equity}{Total\: Assets}
+\end{equation}\\
+
+Unlike the debt-to-cap ratio above, the total debt ratio includes current liabilities such as Accounts Payable. The total debt ratio may thus flag issues that the debt-to-cap ratio might miss, e.g. if current liabilities were abnormally high. Generally speaking, companies with total debt ratios larger than 0.5 are considered to be highly leveraged, but typical ratio values are highly industry dependent. 
+
+\subsection{Liquidity \& Financial Condition Ratios}
+The significance of the next three ratios lies not in the values of the actual ratios, as these vary widely between industries and even between companies in the same industry. The focus is more on the changes that occur over a period of time within the same company. The changes in the ratios over time give an indication of the trajectory of a company's financial health. 
+
+\subsubsection{Current Ratio}
+The current ratio is defined as current assets divided by total liabilities. It measures a company's ability to pay off its short-term liabilities. Current assets are assets that can be easily converted into cash within a year, such as cash, marketable securities, accounts receivable and inventory. Current liabilities are obligations that are due within a year, such as accounts payable, short-term debt and taxes.
+
+ \begin{equation}
+    Current\: Ratio = \frac{Current\: Assets}{Current\: Liabilities}
+\end{equation}\\
+
+A higher ratio indicates that a company has a higher level of liquidity and is more able to meet its short-term obligations. A lower ratio, on the other hand, indicates that a company has a lower level of liquidity and may have difficulty meeting its short-term obligations. Creditors generally prefer ratios that refer high liquidity. However, a high current ratio may indicate poor use of cash or poor inventory control procedures. 
+
+\subsubsection{Quick Ratio}
+The quick ratio is another measure of a company's ability to pay off debt in the short-term. It is sometimes referred to as the acid test ratio. Quick assets are regarded as those current assets that can be converted into cash quickly, such as cash, marketable securities and accounts receivable, and is almost always equal to total current assets minus inventory. The metric is calculated as follows:
+
+ \begin{equation}
+    Quick\: Ratio = \frac{Current\: Assets - Inventory}{Current\: Liabilities} = \frac{Quick\: Assets}{Current\: Liabilities}
+\end{equation}\\
+
+The quick ratio is considered to be a more stringent measure of liquidity than the current ratio as it excludes inventory, which may not be as easily converted into cash as other current assets. A large inventory may indicate that a company has overbought or that it is struggling to make sales. 
+
+\subsubsection{Cash Ratio}
+This is simply a more stringent version of the quick ratio (acid test)
+
+\begin{equation}
+    Cash\: Ratio = \frac{Cash + Marketable Securities}{Current\: Liabilities} 
+\end{equation}\\
+
+It is considered to be the most conservative measure of liquidity because it only takes into account a company's most liquid assets (i.e., cash and cash equivalents) in relation to its current liabilities.
+
+\subsection{Efficiency Ratios}
+Efficiency ratios, also known as activity ratios, are financial metrics that measure a company's ability to manage its resources and operations effectively. These ratios provide insight into how efficiently a company is using its assets, such as inventory and accounts receivable, to generate revenue. They also help to assess the company's overall financial health and performance. These ratios can sometimes give early indications that a company has a problem.
+
+\subsubsection{Total Asset Turnover}
+Total asset turnover measures a company's ability to generate revenue from its total assets. It is calculated by dividing the company's net sales by its average total assets. Note that average assets is used due to the fact that a company's total assets is generally changing across the year. 
+
+ \begin{equation}
+    Total\: Asset\:Turnover = \frac{Sales}{Total\: Assets} 
+\end{equation}\\
+
+An asset turnover of 0.7 indicates that for every dollar of assets, 0.7 dollars of sales is generated. The higher the the ratio, the more efficient the company is at using its assets to generate sales. 
+
+\subsubsection{Inventory-to-Sales Ratio}
+A company's inventory is constantly turning over. A company generally wants enough inventory at hand to cater to customers orders, but not too much as it cost money to carry a larger-than-required inventory. The inventory-to-sales ratio measures a company's efficiency in managing its inventory. The best way to watch the inventory level is to look at it in elation to the company's sales. 
+
+\begin{equation}
+    Inventory\:to\:Sales\: Ratio = \frac{Inventory}{Sales} 
+\end{equation}\\
+
+Note that, since inventory is always changing, it may be more accurate to calculate the above ratio by using average levels of company inventory. \\
+
+Watching the ratio change over time may lead to useful insights regarding the company and its operations. Unexpected inventory build-ups may indicate declining sales, or large cancellations of orders. The reasons for such changes should always be investigated, as some may be justified while others may indicate problems. 
+
+\subsubsection{Inventory Turnover Ratio}
+You may prefer to invert the inventory-t-sales ratio and instead calculate the inventory turnover ratio as follows:
+
+\begin{equation}
+    Inventory\: Turnover Ratio = \frac{Sales}{Inventory} 
+\end{equation}\\
+
+If a company's inventory turnover ratio dropped from 3 to 2, we would say that the \textit{inventory turns} slowed sharply.\\
+
+\textcolor{red}{When calculating either inventory-to-sales or the inventory turnover ratio, some prefer to use COGS as opposed to sales. This is because sales may have changed just because the company's selling price for the inventory has changed, which may distort the ratio and seem to indicate that a disproportionately large amount of inventory has been sold. Using COGS will prevent this distortion. }
+
+\subsubsection{Inventory Turnover in Days}
+Another way to analyse inventory is to determine the number of days' sales currently held in inventory. This is calculated by dividing 365 days by the inventory turnover ratio and tells you the average number of days that an item sits on the shelf before being sold.
+
+\begin{equation}
+    Inventory\: Turnover\: in\: Days = \frac{365\: days}{Inventory\: Turnover} = Days
+\end{equation}\\
+
+Note that if quarterly figures are being calculated, then the number of days in a quarter must be used. 
+
+\subsubsection{Accounts Receivable to Sales Ratio}
+This ratio can help give an indication that something is wrong at a company. It is calculated as follows:
+
+\begin{equation}
+    Accounts\: Receivable\: to\: Sales = \frac{Accounts\: Receivable}{Sales} 
+\end{equation}\\
+
+If the ratio were to quickly increase then this would indicate that customers are not paying their bills, which could lead to issues in payment of the company's liabilities, such as interest payments. If this is not under good control then the company could be headed to bankruptcy. 
+
+\subsubsection{Accounts Receivable Turnover and Days Sales in Receivables}
+Receivables turnover is the inverse of the accounts receivable to sales ratio, describes how quickly the company collects on those sales. 
+
+\begin{equation}
+    Receivables\: Turnover= \frac{Sales}{Receivables} 
+\end{equation}\\
+
+Using the number of days worth of sales in the above receivables ratio, we can calculate the umber of days it takes the company to collect the credit on sales. This is sometimes referred to as the \textit{average receivables collection period}, or the \textit{day sales outstanding}
+
+\begin{equation}
+    Receivables\: Turnover\: in\: Days = \frac{365\: days}{Receivables\: Turnover} = Days
+\end{equation}\\
+
+
+If a large increase in Days Sales Outstanding is observed, then it may be a warning sign that the company's customers are delaying payments or in some cases stopping payments. This may indicate that the customers are having financial trouble and may go out of business, cutting off a stream of revenue to the company being analysed. It may also be possible that sales for the analysed company were weak, and that they attempted to gain sales by doing business with a riskier client. 
+
+
+
+
 
 
 

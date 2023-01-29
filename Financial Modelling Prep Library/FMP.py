@@ -5,9 +5,10 @@
 # - Add yfinance support to get stock price data
 # - Check why the ebitda calculations in Company.cross_check() are so wrong
 # - create load_financial_statements()
-# - expand build_dataframe() to automatically save to excel
+# - expand build_dataframe() to automatically save to excel/
 # - create analyse() to perform all calculations, or perhaps to literally do everything start-to-finish
 # - create plotting functionality
+# - add the following to Company.analyse(): all matrics from my personal notes from 5.2.2 Operating profit margin onwards
 
 import requests
 import pandas as pd
