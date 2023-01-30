@@ -4,8 +4,6 @@
 # TODO
 # - Add yfinance support to get stock price data
 # - Check why the ebitda calculations in Company.cross_check() are so wrong
-# - create load_financial_statements()
-# - expand build_dataframe() to automatically save to excel/
 # - create analyse() to perform all calculations, or perhaps to literally do everything start-to-finish
 # - create plotting functionality
 # - add the following to Company.analyse(): all matrics from my personal notes from 5.2.2 Operating profit margin onwards
@@ -18,8 +16,13 @@ import os
 
 class Company:
     def __init__(self, ticker, api_key, data='online', period='annual', limit=120):
-        self._ticker = ticker
+        data = data.lower()
+        assert(data in ['online', 'local'], "data must be 'online' or 'local'")
+        period = period.lower()
+        assert(period in ['annual', 'quarter'], "period must be 'annual' or 'quarter'")
+        self._ticker = ticker.upper().strip()
         self.api_key = api_key
+
         if data == 'online':
             self.balance_sheets, self.income_statements, self.cash_flow_statements = \
                 self.fetch_financial_statements(ticker, period=period, limit=limit)
@@ -38,13 +41,8 @@ class Company:
             self.income_statements.to_parquet(save_path/'income_statements.xlsx')
             self.cash_flow_statements.to_parquet(save_path/'cash_flow_statements.parquet')
             self.cash_flow_statements.to_parquet(save_path/'cash_flow_statements.xlsx')
-
         elif data == 'local':
             self.load_financial_statements(ticker, period)
-        
-        else:
-            msg = 'Something went wrong in loading the data'
-            raise Exception(msg)
             
 
         self.calculated_ratios = pd.DataFrame()
