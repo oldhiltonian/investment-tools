@@ -13,6 +13,7 @@
 import requests
 import pandas as pd
 from pathlib import Path
+import os
 
 
 class Company:
@@ -22,14 +23,30 @@ class Company:
         if data == 'online':
             self.balance_sheets, self.income_statements, self.cash_flow_statements = \
                 self.fetch_financial_statements(ticker, period=period, limit=limit)
+            self.balance_sheets = self.build_dataframe(self.balance_sheets)
+            self.income_statements = self.build_dataframe(self.income_statements)
+            self.cash_flow_statements = self.build_dataframe(self.cash_flow_statements)
+            save_path = Path.cwd()/'Company Financial Data'/ticker/period
+            try:
+                os.makedirs(save_path)
+            except Exception(save_path):
+                print(f"Creation of the directory {save_path} failed.")
+            
+            self.balance_sheets.to_parquet(save_path/'balance_sheets.parquet')
+            self.balance_sheets.to_excel(save_path/'balance_sheets.xlsx')
+            self.income_statements.to_parquet(save_path/'income_statements.parquet')
+            self.income_statements.to_parquet(save_path/'income_statements.xlsx')
+            self.cash_flow_statements.to_parquet(save_path/'cash_flow_statements.parquet')
+            self.cash_flow_statements.to_parquet(save_path/'cash_flow_statements.xlsx')
+
+        elif data == 'local':
+            self.load_financial_statements(ticker, period)
+        
         else:
-            '''call load_financial_statements here'''
-            msg = 'not implemented yet'
+            msg = 'Something went wrong in loading the data'
             raise Exception(msg)
             
-        self.balance_sheets = self.build_dataframe(self.balance_sheets)
-        self.income_statements = self.build_dataframe(self.income_statements)
-        self.cash_flow_statements = self.build_dataframe(self.cash_flow_statements)
+
         self.calculated_ratios = pd.DataFrame()
         self.metric_errors, self.ratio_errors = self.cross_check()
         self.standard_metrics = self.analyse()
@@ -61,11 +78,15 @@ class Company:
         return balance_sheets.json(), income_statements.json(), cash_flow_statements.json()
 
 
-    def load_financial_statements(self, company, period):
+    def load_financial_statements(self, ticker, period):
         '''
         Load from a local directory
         draw distinction between annual and quartely results using an f-string'''
-        pass
+        load_path = Path.cwd()/'Company Financial Data'/ticker/period
+        self.income_statements = pd.read_parquet(load_path/'income_statements.parquet')
+        self.balance_sheets = pd.read_parquet(load_path/'balance_sheets.parquet')
+        self.cash_flow_statements = pd.read_parquet(load_path/'cash_flow_statements.parquet')
+
 
     
     
