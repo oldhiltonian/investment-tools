@@ -17,9 +17,10 @@ import os
 class Company:
     def __init__(self, ticker, api_key, data='online', period='annual', limit=120):
         data = data.lower()
-        assert(data in ['online', 'local'], "data must be 'online' or 'local'")
+        assert data in ['online', 'local'], "data must be 'online' or 'local'"
         period = period.lower()
-        assert(period in ['annual', 'quarter'], "period must be 'annual' or 'quarter'")
+        self.period = period
+        assert period in ['annual', 'quarter'], "period must be 'annual' or 'quarter'"
         self._ticker = ticker.upper().strip()
         self.api_key = api_key
 
@@ -129,6 +130,7 @@ class Company:
         cost_of_revenue = self.income_statements['costOfRevenue']
         depreciation_amortization = self.cash_flow_statements['depreciationAndAmortization']
         interest_expense = self.income_statements['interestExpense']
+        interest_income = self.income_statements['interestIncome']
 
 
         metrics = ['ebitda', 'ebitdaratio', 'grossProfit', 'grossProfitRatio', 'operatingIncome', 'operatingIncomeRatio', \
@@ -142,7 +144,7 @@ class Company:
         self._check_calculated_values['grossProfitRatio'] = (self._check_calculated_values['grossProfit']/revenue)
         self._check_calculated_values['operatingIncome'] = revenue - cost_of_revenue - SGA_expenses - RND_expenses
         self._check_calculated_values['operatingIncomeRatio'] = (self._check_calculated_values['operatingIncome']/revenue)
-        self._check_calculated_values['incomeBeforeTax'] = self._check_calculated_values['operatingIncome'] - interest_expense
+        self._check_calculated_values['incomeBeforeTax'] = self._check_calculated_values['operatingIncome'] - interest_expense + interest_income
         self._check_calculated_values['incomeBeforeTaxRatio'] = (self._check_calculated_values['incomeBeforeTax']/revenue)
         self._check_calculated_values['netIncome'] = 0.79*self._check_calculated_values['incomeBeforeTax']
         self._check_calculated_values['netIncomeRatio'] = (self._check_calculated_values['netIncome']/revenue)
@@ -183,17 +185,62 @@ class Company:
         self.calculated_ratios['eps_reported'] = self.income_statements['eps']
         self.calculated_ratios['eps_diluted'] = self.income_statements['epsdiluted']
         ### Add P/E ratio here
-        self.calculated_ratios['bookValuePerShare'] = (self.balance_sheets['totalAssets']-self.balance_sheets['totalLiabilities'])                                                       /self.income_statements['outstandingShares_calc']
+        self.calculated_ratios['bookValuePerShare'] = (self.balance_sheets['totalAssets']-self.balance_sheets['totalLiabilities'])/self.income_statements['outstandingShares_calc']
         self.calculated_ratios['dividendPayoutRatio'] = self.cash_flow_statements['dividendsPaid']/self.income_statements['eps']
         ### Add dividend yield 
         
         '''Profitability Ratios'''
-        self.calculated_ratios['grossProfit_calc'] = self.income_statements['revenue'] - self.income_statements['costOfRevenue']
         self.calculated_ratios['grossProfitMargin'] = self.income_statements['grossProfit']/self.income_statements['revenue']
-        self.calculated_ratios['operatingIncome_calc'] = self.income_statements['revenue'] - self.income_statements['costOfRevenue']                                                     - self.income_statements['sellingGeneralAndAdministrativeExpenses']                                                     - self.income_statements['researchAndDevelopmentExpenses']
+        self.calculated_ratios['operatingIncome_calc'] = self.income_statements['revenue'] \
+                                                            - self.income_statements['costOfRevenue'] \
+                                                            - self.income_statements['sellingGeneralAndAdministrativeExpenses'] \
+                                                            - self.income_statements['researchAndDevelopmentExpenses']
         self.calculated_ratios['operatingProfitMargin'] = self.income_statements['operatingIncome']/self.income_statements['revenue']
-#         self.calculated_ratios['incomeBeforeTax_calc'] = self.income_statements['revenue'] - self.income_statements['']
-#         self.calculated_ratios['pretaxProfitMargin'] = 
+        self.calculated_ratios['pretaxProfitMargin'] = self.income_statements['incomeBeforeTax']/self.income_statements['revenue']
+        
+        total_capitalization = self.balance_sheets['totalEquity'] + self.balance_sheets['longTermDebt']
+        net_income = self.income_statements['netIncome']
+        self.calculated_ratios['ROIC'] = net_income/total_capitalization
+        self.calculated_ratios['ROE'] = net_income/self.balance_sheets['totalStockholdersEquity']
+        self.calculated_ratios['ROA'] = net_income/self.balance_sheets['totalAssets']
+
+        '''Debt and Interest Ratios'''
+        self.calculated_ratios['interestCoverage'] = self.income_statements['operatingIncome']/self.income_statements['interestExpense']
+        
+        # FIX (haha) the fixed charge ratio below
+        fixed_charges = self.income_statements['interestExpense'] # +  XXX
+        # self.calculated_ratios['fixed_charge_coverage'] = self.income_statements['ebitda']/
+
+        self.calculated_ratios['debtToTotalCap'] = self.balance_sheets['longTermDebt']/total_capitalization
+
+        total_debt = self.balance_sheets['totalAssets'] - self.balance_sheets['totalEquity']
+        self.calculated_ratios['totalDebtRatio'] = total_debt/self.balance_sheets['totalAssets']
+
+        '''Liquidity & FinancialCondition Ratios'''
+        self.calculated_ratios['currentRatio'] = self.balance_sheets['totalCurrentAssets']/self.balance_sheets['totalCurrentLiabilities']
+        quick_assets = self.balance_sheets['totalCurrentAssets'] - self.balance_sheets['inventory']
+        self.calculated_ratios['quickRatio'] = quick_assets/self.balance_sheets['totalCurrentLiabilities']
+        self.calculated_ratios['cashRatio'] = self.balance_sheets['cashAndCashEquivalents']/self.balance_sheets['totalCurrentLiabilities']
+
+
+        '''Efficiency Ratios'''
+        self.calculated_ratios['totalAssetTurnover'] = self.income_statements['revenue']/self.balance_sheets['totalAssets']
+        self.calculated_ratios['inventoryToSalesRatio'] = self.balance_sheets['inventory']/self.income_statements['revenue']
+        self.calculated_ratios['inventoryTurnoverRatio'] = 1/self.calculated_ratios['inventoryToSalesRatio']
+        days = 365 if self.period == 'annual' else 90
+        self.calculated_ratios['inventoryTurnoverInDays'] = days/self.calculated_ratios['inventoryTurnoverRatio']
+
+        accounts_receivable_to_sales_ratio = self.balance_sheets['netReceivables']/self.income_statements['revenue']
+        self.calculated_ratios['accountsReceivableToSalesRatio'] = accounts_receivable_to_sales_ratio
+        self.calculated_ratios['receivablesTurnover'] = self.income_statements['revenue']/self.balance_sheets['netReceivables']
+        self.calculated_ratios['receivablesTurnoverInDays'] = days/self.calculated_ratios['receivablesTurnover']
+
+
+
+
+
+
+
         
         
 
