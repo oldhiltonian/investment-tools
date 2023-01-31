@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # TODO
-# - Add yfinance support to get stock price data
+# - Split the stock price data into the periods as per the financial filings: get high and low or each period
 # - P/E ratio, dividend yield ratio, fixed charge ratio
 # - Check why the ebitda calculations in Company.cross_check() are so wrong
 # - create plotting functionality
@@ -11,6 +11,7 @@
 # - total asset turnover should take average asset values
 
 import yfinance as yf
+import datetime as dt
 from pandas_datareader import data as pdr
 import requests
 import pandas as pd
@@ -37,12 +38,7 @@ class Company:
             self.income_statements = self.build_dataframe(self.income_statements)
             self.cash_flow_statements = self.build_dataframe(self.cash_flow_statements)
             assert self.balance_sheets['date'].equals(self.income_statements['date']), 'Date mismatch in financial statements'
-
-            start_date = self.balance_sheets['date'].iloc[0]
-            end_date = self.balance_sheets['date'].iloc[-1]
-            price_interval = '3mo'
-            self.stock_price_data = pdr.get_data_yahoo(ticker, start_date, end_date, interval=price_interval)
-            
+            self.stock_price_data = self.fetch_stock_price_data()
 
             save_path = Path.cwd()/'Company Financial Data'/ticker/period
             try:
@@ -59,7 +55,7 @@ class Company:
             self.income_statements.to_parquet(save_path/'income_statements.xlsx')
             self.cash_flow_statements.to_parquet(save_path/'cash_flow_statements.parquet')
             self.cash_flow_statements.to_parquet(save_path/'cash_flow_statements.xlsx')
-            self.stock_price_data
+            self.stock_price_data = self.fetch_stock_price_data()
         elif data == 'local':
             self.load_financial_statements(ticker, period)
             
@@ -94,7 +90,16 @@ class Company:
 
         return balance_sheets.json(), income_statements.json(), cash_flow_statements.json()
 
-
+    def fetch_stock_price_data(self):
+            start_date = dt.date(*[int(i) for i in self.filing_date_strings.iloc[0].split('-')])
+            end_date = dt.date(*[int(i) for i in self.filing_date_strings.iloc[-1].split('-')])
+            price_interval = '1d'
+            raw_data = pdr.get_data_yahoo(self._ticker, start_date, end_date, interval=price_interval)
+            raw_data['date'] = raw_data.index.date
+            return raw_data
+            '''Add function calls here quarterise_stock_price or annualise_stock_price
+                to break the stock price data into the persiods as per the financial filings'''
+            
     
 
     def load_financial_statements(self, ticker, period):
@@ -131,6 +136,9 @@ class Company:
             data.append(list(statement.values()))
         df = pd.DataFrame(data, columns = statements[0].keys())
         df['index'] = df['date'].apply(lambda x: self.generate_index(x))
+        # Don;t like saving the date here as it happens 3 times
+        self.filing_date_strings = df['date']
+        df['date'] = df['date'].apply(lambda x: self.generate_date(x))
         df.set_index('index', inplace=True)
         if 'netIncome' and 'eps' in df.keys():
             df['outstandingShares_calc'] = df['netIncome']/df['eps']
@@ -283,7 +291,7 @@ class Company:
         
         if self.period == 'annual':
             return f"{self._ticker}-FY-{year}"
-            
+
         if month in (1,2,3):
             quarter = 1
         elif month in (4,5,6):
@@ -294,6 +302,11 @@ class Company:
             quarter = 4
         
         return f"{self._ticker}-Q{quarter}-{year}"
+
+    def generate_date(self, date_str):
+        '''Generates a dt.date object from a string of the format "1985-09-30 00:00:00-04:00" '''
+        year, month, day = [int(i) for i in date_str.split()[0].split('-')]
+        return dt.date(year, month, day)
         
 
 
