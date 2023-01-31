@@ -3,15 +3,21 @@
 
 # TODO
 # - Add yfinance support to get stock price data
+# - P/E ratio, dividend yield ratio, fixed charge ratio
 # - Check why the ebitda calculations in Company.cross_check() are so wrong
-# - create analyse() to perform all calculations, or perhaps to literally do everything start-to-finish
 # - create plotting functionality
-# - add the following to Company.analyse(): all matrics from my personal notes from 5.2.2 Operating profit margin onwards
+# - add EPS check to cross_check() as per the calculated value from outstanding shares
+# - change inventory calculations to take averages
+# - total asset turnover should take average asset values
 
+import yfinance as yf
+from pandas_datareader import data as pdr
 import requests
 import pandas as pd
 from pathlib import Path
 import os
+
+yf.pdr_override()
 
 
 class Company:
@@ -30,11 +36,22 @@ class Company:
             self.balance_sheets = self.build_dataframe(self.balance_sheets)
             self.income_statements = self.build_dataframe(self.income_statements)
             self.cash_flow_statements = self.build_dataframe(self.cash_flow_statements)
+            assert self.balance_sheets['date'].equals(self.income_statements['date']), 'Date mismatch in financial statements'
+
+            start_date = self.balance_sheets['date'].iloc[0]
+            end_date = self.balance_sheets['date'].iloc[-1]
+            price_interval = '3mo'
+            self.stock_price_data = pdr.get_data_yahoo(ticker, start_date, end_date, interval=price_interval)
+            
+
             save_path = Path.cwd()/'Company Financial Data'/ticker/period
             try:
                 os.makedirs(save_path)
-            except Exception(save_path):
-                print(f"Creation of the directory {save_path} failed.")
+            except FileExistsError:
+                print(f"{save_path} already exists.")
+                pass
+            except Exception:
+                print(f'Could not create directory {save_path}')
             
             self.balance_sheets.to_parquet(save_path/'balance_sheets.parquet')
             self.balance_sheets.to_excel(save_path/'balance_sheets.xlsx')
@@ -42,6 +59,7 @@ class Company:
             self.income_statements.to_parquet(save_path/'income_statements.xlsx')
             self.cash_flow_statements.to_parquet(save_path/'cash_flow_statements.parquet')
             self.cash_flow_statements.to_parquet(save_path/'cash_flow_statements.xlsx')
+            self.stock_price_data
         elif data == 'local':
             self.load_financial_statements(ticker, period)
             
@@ -76,6 +94,8 @@ class Company:
 
         return balance_sheets.json(), income_statements.json(), cash_flow_statements.json()
 
+
+    
 
     def load_financial_statements(self, ticker, period):
         '''
@@ -112,7 +132,6 @@ class Company:
         df = pd.DataFrame(data, columns = statements[0].keys())
         df['index'] = df['date'].apply(lambda x: self.generate_index(x))
         df.set_index('index', inplace=True)
-        df.drop(['date', 'symbol'], axis=1, inplace=True)
         if 'netIncome' and 'eps' in df.keys():
             df['outstandingShares_calc'] = df['netIncome']/df['eps']
         return df
@@ -248,6 +267,7 @@ class Company:
         '''perform analysis as per Buffetology'''
         pass
 
+
     def generate_index(self, date):
         '''
         Generates a financial index for a company based on a given date.
@@ -256,11 +276,14 @@ class Company:
             - date (str): A date in the format 'yyyy-mm-dd'.
 
         Returns:
-            A string in the format '{ticker}-Q{quarter}-{year}', where ticker is the ticker of the company, quarter is the quarter 
+            A string in the format '{ticker}-Q{quarter}-{year}' or '{ticker}-FY-{year}, where ticker is the ticker of the company, quarter is the quarter 
             of the date (1-4) and year is the year of the date.
         '''
         year, month, _ = [int(i) for i in date.split('-')]
         
+        if self.period == 'annual':
+            return f"{self._ticker}-FY-{year}"
+            
         if month in (1,2,3):
             quarter = 1
         elif month in (4,5,6):
