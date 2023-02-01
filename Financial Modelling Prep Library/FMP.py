@@ -2,10 +2,9 @@
 # coding: utf-8
 
 # TODO
-# - P/E ratio, dividend yield ratio, fixed charge ratio
+# - fixed charge ratio
 # - Check why the ebitda calculations in Company.cross_check() are so wrong
 # - create plotting functionality
-# - add EPS check to cross_check() as per the calculated value from outstanding shares
 # - change inventory calculations to take averages
 # - total asset turnover should take average asset values
 
@@ -36,7 +35,11 @@ class Company:
             self.balance_sheets = self.build_dataframe(self.balance_sheets)
             self.income_statements = self.build_dataframe(self.income_statements)
             self.cash_flow_statements = self.build_dataframe(self.cash_flow_statements)
-            assert self.balance_sheets['date'].equals(self.income_statements['date']), 'Date mismatch in financial statements'
+            matching_index_1 =  self.balance_sheets['date'].equals(self.income_statements['date'])
+            matching_index_2 = self.balance_sheets['date'].equals(self.cash_flow_statements['date'])
+            matching_indecies = matching_index_1 and matching_index_2
+            if not matching_indecies:
+                self.filter_for_common_indecies()
             self.stock_price_data = self.fetch_stock_price_data()
 
             save_path = Path.cwd()/'Company Financial Data'/ticker/period
@@ -176,7 +179,7 @@ class Company:
 
 
         metrics = ['ebitda', 'ebitdaratio', 'grossProfit', 'grossProfitRatio', 'operatingIncome', 'operatingIncomeRatio', \
-                    'incomeBeforeTax', 'incomeBeforeTaxRatio', 'netIncome', 'netIncomeRatio']
+                    'incomeBeforeTax', 'incomeBeforeTaxRatio', 'netIncome', 'netIncomeRatio', 'eps']
         ratios = [i if 'ratio' in i.lower() else None for i in metrics]
 
         # Calculated ratios from reported values on the financial statements
@@ -190,6 +193,8 @@ class Company:
         self._check_calculated_values['incomeBeforeTaxRatio'] = (self._check_calculated_values['incomeBeforeTax']/revenue)
         self._check_calculated_values['netIncome'] = 0.79*self._check_calculated_values['incomeBeforeTax']
         self._check_calculated_values['netIncomeRatio'] = (self._check_calculated_values['netIncome']/revenue)
+        self._check_calculated_values['eps'] = self._check_calculated_values['netIncome']/self.income_statements['outstandingShares_calc']
+
         
         # Pulling reported metric values
         for metric in metrics:
@@ -226,10 +231,14 @@ class Company:
         self.calculated_ratios['eps_calc'] = self.income_statements['netIncome']/self.balance_sheets['commonStock'] #authorized stock!!!
         self.calculated_ratios['eps_reported'] = self.income_statements['eps']
         self.calculated_ratios['eps_diluted'] = self.income_statements['epsdiluted']
-        ### Add P/E ratio here
+        self.calculated_ratios['PE_high'] = self.stock_price_data['low']/self.income_statements['netIncome']
+        self.calculated_ratios['PE_low'] = self.stock_price_data['high']/self.income_statements['netIncome']
+        self.calculated_ratios['PE_avg_close'] = self.stock_price_data['avg_close']/self.income_statements['netIncome']
         self.calculated_ratios['bookValuePerShare'] = (self.balance_sheets['totalAssets']-self.balance_sheets['totalLiabilities'])/self.income_statements['outstandingShares_calc']
         self.calculated_ratios['dividendPayoutRatio'] = self.cash_flow_statements['dividendsPaid']/self.income_statements['eps']
-        ### Add dividend yield 
+        self.calculated_ratios['dividend_yield_low'] = self.stock_price_data['high']/self.cash_flow_statements['dividendsPaid']
+        self.calculated_ratios['dividend_yield_high'] = self.stock_price_data['low']/self.cash_flow_statements['dividendsPaid']
+        self.calculated_ratios['dividend_yield_avg_close'] = self.stock_price_data['avg_close']/self.cash_flow_statements['dividendsPaid']
         
         '''Profitability Ratios'''
         self.calculated_ratios['grossProfitMargin'] = self.income_statements['grossProfit']/self.income_statements['revenue']
@@ -323,5 +332,15 @@ class Company:
         year, month, day = [int(i) for i in date_str.split()[0].split('-')]
         return dt.date(year, month, day)
         
+    def filter_for_common_indecies(self):
+        idx1 = self.balance_sheets.index
+        idx2 = self.income_statements.index
+        idx3 = self.cash_flow_statements.index
+        common_elements = idx1.intersection(idx2).intersection(idx3)
+        self.balance_sheets = self.balance_sheets.loc[common_elements]
+        self.income_statements = self.income_statements.loc[common_elements]
+        self.cash_flow_statements = self.cash_flow_statements.loc[common_elements]
+
+
 
 
