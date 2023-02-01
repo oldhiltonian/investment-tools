@@ -2,7 +2,6 @@
 # coding: utf-8
 
 # TODO
-# - Split the stock price data into the periods as per the financial filings: get high and low or each period
 # - P/E ratio, dividend yield ratio, fixed charge ratio
 # - Check why the ebitda calculations in Company.cross_check() are so wrong
 # - create plotting functionality
@@ -96,10 +95,25 @@ class Company:
             price_interval = '1d'
             raw_data = pdr.get_data_yahoo(self._ticker, start_date, end_date, interval=price_interval)
             raw_data['date'] = raw_data.index.date
-            return raw_data
-            '''Add function calls here quarterise_stock_price or annualise_stock_price
-                to break the stock price data into the persiods as per the financial filings'''
+            return self.periodise(raw_data)
             
+    def periodise(self, df):
+        working_array = []
+        for i in range(len(self.filing_date_strings)):
+            if i == 0 or i == len(self.filing_date_objects):
+                working_array.append(['skipped']*3)
+                continue
+
+            period_data = df[(df['date'] >= self.filing_date_objects.iloc[i-1]) & (df['date'] < self.filing_date_objects.iloc[i])]
+            max_price = max(period_data['High'])
+            min_price = min(period_data['Low'])
+            avg_close = period_data['Close'].mean()
+            working_array.append([max_price, min_price, avg_close])
+        index = self.filing_date_objects
+        cols = ['high', 'low', 'avg_close']
+        periodised = pd.DataFrame(working_array, index=index, columns=cols)
+        assert sum(periodised['high'] < periodised['low']) <= 1, 'Stock highs and lows not consistent'
+        return periodised
     
 
     def load_financial_statements(self, ticker, period):
@@ -139,6 +153,7 @@ class Company:
         # Don;t like saving the date here as it happens 3 times
         self.filing_date_strings = df['date']
         df['date'] = df['date'].apply(lambda x: self.generate_date(x))
+        self.filing_date_objects = df['date']
         df.set_index('index', inplace=True)
         if 'netIncome' and 'eps' in df.keys():
             df['outstandingShares_calc'] = df['netIncome']/df['eps']
