@@ -9,6 +9,7 @@
 # - total asset turnover should take average asset values
 
 import yfinance as yf
+import numpy as np
 import datetime as dt
 from pandas_datareader import data as pdr
 import requests
@@ -104,7 +105,7 @@ class Company:
         working_array = []
         for i in range(len(self.filing_date_strings)):
             if i == 0 or i == len(self.filing_date_objects):
-                working_array.append(['skipped']*3)
+                working_array.append([np.nan]*3)
                 continue
 
             period_data = df[(df['date'] >= self.filing_date_objects.iloc[i-1]) & (df['date'] < self.filing_date_objects.iloc[i])]
@@ -112,9 +113,9 @@ class Company:
             min_price = min(period_data['Low'])
             avg_close = period_data['Close'].mean()
             working_array.append([max_price, min_price, avg_close])
-        index = self.filing_date_objects
+
         cols = ['high', 'low', 'avg_close']
-        periodised = pd.DataFrame(working_array, index=index, columns=cols)
+        periodised = pd.DataFrame(working_array, index=self._frame_indecies, columns=cols)
         assert sum(periodised['high'] < periodised['low']) <= 1, 'Stock highs and lows not consistent'
         return periodised
     
@@ -231,14 +232,14 @@ class Company:
         self.calculated_ratios['eps_calc'] = self.income_statements['netIncome']/self.balance_sheets['commonStock'] #authorized stock!!!
         self.calculated_ratios['eps_reported'] = self.income_statements['eps']
         self.calculated_ratios['eps_diluted'] = self.income_statements['epsdiluted']
-        self.calculated_ratios['PE_high'] = self.stock_price_data['low']/self.income_statements['netIncome']
-        self.calculated_ratios['PE_low'] = self.stock_price_data['high']/self.income_statements['netIncome']
-        self.calculated_ratios['PE_avg_close'] = self.stock_price_data['avg_close']/self.income_statements['netIncome']
+        self.calculated_ratios['PE_high'] = self.stock_price_data['high']/self.income_statements['eps']
+        self.calculated_ratios['PE_low'] = self.stock_price_data['low']/self.income_statements['eps']
+        self.calculated_ratios['PE_avg_close'] = self.stock_price_data['avg_close']/self.income_statements['eps']
         self.calculated_ratios['bookValuePerShare'] = (self.balance_sheets['totalAssets']-self.balance_sheets['totalLiabilities'])/self.income_statements['outstandingShares_calc']
-        self.calculated_ratios['dividendPayoutRatio'] = self.cash_flow_statements['dividendsPaid']/self.income_statements['eps']
-        self.calculated_ratios['dividend_yield_low'] = self.stock_price_data['high']/self.cash_flow_statements['dividendsPaid']
-        self.calculated_ratios['dividend_yield_high'] = self.stock_price_data['low']/self.cash_flow_statements['dividendsPaid']
-        self.calculated_ratios['dividend_yield_avg_close'] = self.stock_price_data['avg_close']/self.cash_flow_statements['dividendsPaid']
+        self.calculated_ratios['dividendPayoutRatio'] = (-self.cash_flow_statements['dividendsPaid']/self.income_statements['outstandingShares_calc'])/self.income_statements['eps']
+        self.calculated_ratios['dividend_yield_low'] = (-self.cash_flow_statements['dividendsPaid']/self.income_statements['outstandingShares_calc'])/self.stock_price_data['high']
+        self.calculated_ratios['dividend_yield_high'] = (-self.cash_flow_statements['dividendsPaid']/self.income_statements['outstandingShares_calc'])/self.stock_price_data['low']
+        self.calculated_ratios['dividend_yield_avg_close'] = (-self.cash_flow_statements['dividendsPaid']/self.income_statements['outstandingShares_calc'])/self.stock_price_data['avg_close']
         
         '''Profitability Ratios'''
         self.calculated_ratios['grossProfitMargin'] = self.income_statements['grossProfit']/self.income_statements['revenue']
@@ -286,20 +287,6 @@ class Company:
         self.calculated_ratios['receivablesTurnover'] = self.income_statements['revenue']/self.balance_sheets['netReceivables']
         self.calculated_ratios['receivablesTurnoverInDays'] = days/self.calculated_ratios['receivablesTurnover']
 
-
-
-
-
-
-
-        
-        
-
-    def buffet_analysis():
-        '''perform analysis as per Buffetology'''
-        pass
-
-
     def generate_index(self, date):
         '''
         Generates a financial index for a company based on a given date.
@@ -337,9 +324,18 @@ class Company:
         idx2 = self.income_statements.index
         idx3 = self.cash_flow_statements.index
         common_elements = idx1.intersection(idx2).intersection(idx3)
+        self._frame_indecies = common_elements
         self.balance_sheets = self.balance_sheets.loc[common_elements]
         self.income_statements = self.income_statements.loc[common_elements]
         self.cash_flow_statements = self.cash_flow_statements.loc[common_elements]
+
+
+    def buffet_analysis():
+        '''perform analysis as per Buffetology'''
+        pass
+
+
+
 
 
 
