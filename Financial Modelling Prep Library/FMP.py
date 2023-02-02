@@ -2,11 +2,15 @@
 # coding: utf-8
 
 # TODO
-# - fixed charge ratio
-# - Check why the ebitda calculations in Company.cross_check() are so wrong
-# - create plotting functionality
 # - change inventory calculations to take averages
 # - total asset turnover should take average asset values
+# - fixed charge ratio
+# - Check why the ebitda calculations in Company.cross_check() are so wrong
+# - refactor to catch poor returns from the API requests and the subsequent failed calculations
+# - refactor to compose Company from subclasses: ABC financial statement, BS, IS, CFS, StockPrice, Buffet
+#- refactor to ensure that some ratios are 0 < x < 1
+# - create plotting functionality
+
 
 import yfinance as yf
 import numpy as np
@@ -24,8 +28,9 @@ class Company:
     def __init__(self, ticker, api_key, data='online', period='annual', limit=120):
         data = data.lower()
         assert data in ['online', 'local'], "data must be 'online' or 'local'"
-        period = period.lower()
+        period = period.lower().strip()
         self.period = period
+        self.period_length_days = 365 if period == 'annual' else 90
         assert period in ['annual', 'quarter'], "period must be 'annual' or 'quarter'"
         self._ticker = ticker.upper().strip()
         self.api_key = api_key
@@ -55,9 +60,9 @@ class Company:
             self.balance_sheets.to_parquet(save_path/'balance_sheets.parquet')
             self.balance_sheets.to_excel(save_path/'balance_sheets.xlsx')
             self.income_statements.to_parquet(save_path/'income_statements.parquet')
-            self.income_statements.to_parquet(save_path/'income_statements.xlsx')
+            self.income_statements.to_excel(save_path/'income_statements.xlsx')
             self.cash_flow_statements.to_parquet(save_path/'cash_flow_statements.parquet')
-            self.cash_flow_statements.to_parquet(save_path/'cash_flow_statements.xlsx')
+            self.cash_flow_statements.to_excel(save_path/'cash_flow_statements.xlsx')
             self.stock_price_data = self.fetch_stock_price_data()
         elif data == 'local':
             self.load_financial_statements(ticker, period)
@@ -94,6 +99,7 @@ class Company:
         return balance_sheets.json(), income_statements.json(), cash_flow_statements.json()
 
     def fetch_stock_price_data(self):
+            '''Need to catch if the request fails or returns a null frame'''
             start_date = dt.date(*[int(i) for i in self.filing_date_strings.iloc[0].split('-')])
             end_date = dt.date(*[int(i) for i in self.filing_date_strings.iloc[-1].split('-')])
             price_interval = '1d'
@@ -109,6 +115,7 @@ class Company:
                 continue
 
             period_data = df[(df['date'] >= self.filing_date_objects.iloc[i-1]) & (df['date'] < self.filing_date_objects.iloc[i])]
+            print(period_data)
             max_price = max(period_data['High'])
             min_price = min(period_data['Low'])
             avg_close = period_data['Close'].mean()
