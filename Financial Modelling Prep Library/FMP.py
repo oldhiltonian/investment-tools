@@ -5,11 +5,11 @@
 # - change inventory calculations to take averages
 # - total asset turnover should take average asset values
 # - fixed charge ratio
-# - Check why the ebitda calculations in Company.cross_check() are so wrong
 # - refactor to catch poor returns from the API requests and the subsequent failed calculations
 # - refactor to compose Company from subclasses: ABC financial statement, BS, IS, CFS, StockPrice, Buffet
 #- refactor to ensure that some ratios are 0 < x < 1
 # - create plotting functionality
+# - rename calculated_ratios to just ratios since you will pull from the reported values given a valid cross_check()
 
 
 import yfinance as yf
@@ -247,7 +247,7 @@ class Company:
         self.calculated_ratios['dividend_yield_low'] = (-self.cash_flow_statements['dividendsPaid']/self.income_statements['outstandingShares_calc'])/self.stock_price_data['high']
         self.calculated_ratios['dividend_yield_high'] = (-self.cash_flow_statements['dividendsPaid']/self.income_statements['outstandingShares_calc'])/self.stock_price_data['low']
         self.calculated_ratios['dividend_yield_avg_close'] = (-self.cash_flow_statements['dividendsPaid']/self.income_statements['outstandingShares_calc'])/self.stock_price_data['avg_close']
-        
+        self.cal
         '''Profitability Ratios'''
         self.calculated_ratios['grossProfitMargin'] = self.income_statements['grossProfit']/self.income_statements['revenue']
         self.calculated_ratios['operatingIncome_calc'] = self.income_statements['revenue'] \
