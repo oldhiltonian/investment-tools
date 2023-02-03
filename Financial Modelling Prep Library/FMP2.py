@@ -41,6 +41,8 @@ class FinancialData:
         
 
     def fetch_financial_statements(self, company, api_key, period, limit):
+        # need to throw an exception here if the API returns an error
+        # test that a tuple of json objects is returned
         balance_sheets = requests.get(f'https://financialmodelingprep.com/api/v3/balance-sheet-statement/{company}?period={period}&limit={limit}&apikey={api_key}')
         income_statements = requests.get(f'https://financialmodelingprep.com/api/v3/income-statement/{company}?period={period}&limit={limit}&apikey={api_key}')
         cash_flow_statements = requests.get(f'https://financialmodelingprep.com/api/v3/cash-flow-statement/{company}?period={period}&limit={limit}&apikey={api_key}')
@@ -48,9 +50,10 @@ class FinancialData:
 
 
     def build_dataframe(self, statements):
+        # throw an exception if statemetns != List(dict)
         keys = set(statements[0].keys())
         for statement in statements:
-            assert set(statement.keys()) == keys
+            assert set(statement.keys()) == keys, 'column mismatch across financial statement'
         data = []
         for statement in reversed(statements):
             data.append(list(statement.values()))
