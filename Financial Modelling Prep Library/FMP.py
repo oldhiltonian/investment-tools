@@ -115,7 +115,7 @@ class Company:
                 continue
 
             period_data = df[(df['date'] >= self.filing_date_objects.iloc[i-1]) & (df['date'] < self.filing_date_objects.iloc[i])]
-            print(period_data)
+            # print(period_data)
             max_price = max(period_data['High'])
             min_price = min(period_data['Low'])
             avg_close = period_data['Close'].mean()
@@ -191,7 +191,7 @@ class Company:
         ratios = [i if 'ratio' in i.lower() else None for i in metrics]
 
         # Calculated ratios from reported values on the financial statements
-        self._check_calculated_values['ebitda'] = revenue - RND_expenses - SGA_expenses - other_expenses + depreciation_amortization
+        self._check_calculated_values['ebitda'] = revenue - cost_of_revenue- RND_expenses - SGA_expenses - other_expenses + depreciation_amortization
         self._check_calculated_values['ebitdaratio'] = self._check_calculated_values['ebitda']/revenue
         self._check_calculated_values['grossProfit'] = revenue - cost_of_revenue
         self._check_calculated_values['grossProfitRatio'] = (self._check_calculated_values['grossProfit']/revenue)

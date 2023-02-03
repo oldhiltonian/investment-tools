@@ -28,7 +28,7 @@
 \contentsline {subsubsection}{\numberline {5.3.3}Debt to Total Capitalization (D/TC)}{10}{}%
 \contentsline {subsubsection}{\numberline {5.3.4}Total Debt Ratio}{10}{}%
 \contentsline {subsection}{\numberline {5.4}Liquidity \& Financial Condition Ratios}{10}{}%
-\contentsline {subsubsection}{\numberline {5.4.1}Current Ratio}{10}{}%
+\contentsline {subsubsection}{\numberline {5.4.1}Current Ratio}{11}{}%
 \contentsline {subsubsection}{\numberline {5.4.2}Quick Ratio}{11}{}%
 \contentsline {subsubsection}{\numberline {5.4.3}Cash Ratio}{11}{}%
 \contentsline {subsection}{\numberline {5.5}Efficiency Ratios}{11}{}%
