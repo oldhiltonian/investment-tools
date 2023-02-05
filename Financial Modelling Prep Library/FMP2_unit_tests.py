@@ -9,7 +9,7 @@ key_path = Path().home()/'desktop'/'FinancialModellingPrep_API.txt'
 with open(key_path) as file:
     api_key = file.read()
 
-
+'''Thus far I only have tests for the FinancialData class'''
 class TestFinancialData(unittest.TestCase):
     def setUp(self):
         self.api_key = api_key
