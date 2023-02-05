@@ -24,9 +24,6 @@ class FinancialData:
             self.balance_sheets = self.build_dataframe(bs)
             self.income_statements = self.build_dataframe(is_)
             self.cash_flow_statements = self.build_dataframe(cfs)
-            ### Delete these prints
-            print(f"financial statement lengths are BS: {len(self.balance_sheets)}, IS:{len(self.income_statements)}, CFS:{len(self.cash_flow_statements)}")
-            ### Delete these prints
             self.days_in_period = 356 if period == 'annual' else '90'
             
             matching_index_1 =  self.balance_sheets['date'].equals(self.income_statements['date'])
@@ -34,13 +31,10 @@ class FinancialData:
             matching_indecies = matching_index_1 and matching_index_2
             if not matching_indecies:
                 self.filter_for_common_indecies()
-            self._frame_indecies = self.balance_sheets.index
-            self.filing_date_objects = self.balance_sheets['date']
-
-            ### Delete these prints
-            print(f"financial statement lengths are BS: {len(self.balance_sheets)}, IS:{len(self.income_statements)}, CFS:{len(self.cash_flow_statements)}")
-            ### Delete these prints
-
+                self._frame_indecies = self.balance_sheets.index
+            else:
+                self._frame_indecies = self.balance_sheets.index
+            
             self.stock_price_data = self.fetch_stock_price_data()
             self.save_financial_attributes()
 
@@ -68,12 +62,12 @@ class FinancialData:
             data.append(list(statement.values()))
         df = pd.DataFrame(data, columns = statements[0].keys())
         df['index'] = df['date'].apply(lambda x: self.generate_index(x))
-        # Big problem here
         # Don;t like saving the date here as it happens 3 times
-        # self.filing_date_strings = df['date']
+        self.filing_date_strings = df['date']
         df['date'] = df['date'].apply(lambda x: self.generate_date(x))
-        # self.filing_date_objects = df['date']
+        self.filing_date_objects = df['date']
         df = df.set_index('index')
+        # this should be stripped out to a method just called on the income statement
         if 'netIncome' and 'eps' in df.keys():
             df['outstandingShares_calc'] = df['netIncome']/df['eps']
         return df
@@ -114,23 +108,22 @@ class FinancialData:
 
     def fetch_stock_price_data(self):
             '''Need to catch if the request fails or returns a null frame'''
-            start_date = dt.date(*[int(i) for i in str(self.filing_date_objects.iloc[0]).split()[0].split('-')])
-            end_date = dt.date(*[int(i) for i in str(self.filing_date_objects.iloc[-1]).split()[0].split('-')])
+            start_date = dt.date(*[int(i) for i in self.filing_date_strings.iloc[0].split('-')])
+            end_date = dt.date(*[int(i) for i in self.filing_date_strings.iloc[-1].split('-')])
             price_interval = '1d'
             raw_data = pdr.get_data_yahoo(self.ticker, start_date, end_date, interval=price_interval)
             raw_data['date'] = raw_data.index.date
-            print(raw_data.index.date)
             return self.periodise(raw_data)
 
     def periodise(self, df):
         working_array = []
-        for i in range(len(self.filing_date_objects)):
+        for i in range(len(self.filing_date_strings)):
             if i == 0 or i == len(self.filing_date_objects):
                 working_array.append([np.nan]*3)
                 continue
 
             period_data = df[(df['date'] >= self.filing_date_objects.iloc[i-1]) & (df['date'] < self.filing_date_objects.iloc[i])]
-            print(period_data)
+            # print(period_data)
             max_price = max(period_data['High'])
             min_price = min(period_data['Low'])
             avg_close = period_data['Close'].mean()

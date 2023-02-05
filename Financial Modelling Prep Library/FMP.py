@@ -3,11 +3,11 @@
 
 # TODO
 # - change inventory calculations to take averages
+# - add EPS to cross_check()
 # - total asset turnover should take average asset values
-# - fixed charge ratio
 # - refactor to catch poor returns from the API requests and the subsequent failed calculations
 # - refactor to compose Company from subclasses: ABC financial statement, BS, IS, CFS, StockPrice, Buffet
-#- refactor to ensure that some ratios are 0 < x < 1
+#-  refactor to ensure that some ratios are 0 < x < 1
 # - create plotting functionality
 # - rename calculated_ratios to just ratios since you will pull from the reported values given a valid cross_check()
 
@@ -63,7 +63,7 @@ class Company:
             self.income_statements.to_excel(save_path/'income_statements.xlsx')
             self.cash_flow_statements.to_parquet(save_path/'cash_flow_statements.parquet')
             self.cash_flow_statements.to_excel(save_path/'cash_flow_statements.xlsx')
-            self.stock_price_data = self.fetch_stock_price_data()
+            # self.stock_price_data = self.fetch_stock_price_data()
         elif data == 'local':
             self.load_financial_statements(ticker, period)
             
@@ -247,7 +247,8 @@ class Company:
         self.calculated_ratios['dividend_yield_low'] = (-self.cash_flow_statements['dividendsPaid']/self.income_statements['outstandingShares_calc'])/self.stock_price_data['high']
         self.calculated_ratios['dividend_yield_high'] = (-self.cash_flow_statements['dividendsPaid']/self.income_statements['outstandingShares_calc'])/self.stock_price_data['low']
         self.calculated_ratios['dividend_yield_avg_close'] = (-self.cash_flow_statements['dividendsPaid']/self.income_statements['outstandingShares_calc'])/self.stock_price_data['avg_close']
-        self.cal
+        self.calculated_ratios['editdaratio'] = self._check_calculated_values['ebitdaratio']
+
         '''Profitability Ratios'''
         self.calculated_ratios['grossProfitMargin'] = self.income_statements['grossProfit']/self.income_statements['revenue']
         self.calculated_ratios['operatingIncome_calc'] = self.income_statements['revenue'] \
@@ -266,9 +267,9 @@ class Company:
         '''Debt and Interest Ratios'''
         self.calculated_ratios['interestCoverage'] = self.income_statements['operatingIncome']/self.income_statements['interestExpense']
         
-        # FIX (haha) the fixed charge ratio below
-        fixed_charges = self.income_statements['interestExpense'] # +  XXX
-        # self.calculated_ratios['fixed_charge_coverage'] = self.income_statements['ebitda']/
+        # The fixed charges calculation below is likely incomplete
+        fixed_charges = self.income_statements['interestExpense'] + self.balance_sheets['capitalLeaseObligations']
+        self.calculated_ratios['fixed_charge_coverage'] = self.income_statements['ebitda']/fixed_charges
 
         self.calculated_ratios['debtToTotalCap'] = self.balance_sheets['longTermDebt']/total_capitalization
 
