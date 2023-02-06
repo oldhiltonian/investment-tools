@@ -294,6 +294,7 @@ class Analysis:
         df['operatingIncome_calc'] = revenue - COGS - SGA - RND_expense
         df['operatingProfitMargin'] = operating_income/revenue
         df['pretaxProfitMargin'] = income_before_tax/revenue
+        df['netProfitMargin'] = net_income/revenue
         df['ROIC'] = net_income/total_capitalization
         df['ROE'] = net_income/total_shareholder_equity
         df['ROA'] = net_income/total_assets
@@ -342,16 +343,18 @@ class Plots:
         self.n = n
         self.stock_eval_ratios = ['eps', 'eps_diluted', 'PE_high', 'PE_low', 'PE_avg_close', \
                                 'bookValuePerShare', 'dividendPayoutRatio', 'dividendYield_avg_close']
-        self.plot_stock_eval_ratios()
-
         self.profitability_ratios = ['grossProfitMargin', 'operatingProfitMargin', 'pretaxProfitMargin', 'netProfitMargin',\
                                      'ROIC', 'ROE', 'ROA']
-        self.debt_and_interest_ratios = ['interestCoverage', 'fixedChargeCoverage', 'debtToTotalCap', 'totalDebtRatio']
-
+        self.debt_interest_ratios = ['interestCoverage', 'fixedChargeCoverage', 'debtToTotalCap', 'totalDebtRatio']
         self.liquidity_ratios = ['currentRatio', 'quickRatio', 'cashRatio']
         self.efficiency_ratios = ['totalAssetTurnover', 'inventoryToSalesRatio', 'inventoryTurnoverRatio', \
                                   'inventoryTurnoverInDays', 'accountsReceivableToSalesRatio', 'receivablesTurnover', \
                                   'receivablesTurnoverInDays']
+        self.plot_stock_eval_ratios()
+        self.plot_profitability_ratios()
+        self.plot_debt_interest_ratios()
+        self.plot_liquidity_ratios()
+        self.plot_efficiency_ratios()
 
 
     def plot_stock_eval_ratios(self):
@@ -359,6 +362,32 @@ class Plots:
         nrows = -(-nplots//2)
         self.stock_eval_fig, self.stock_eval_axes = plt.subplots(nrows=nrows, ncols=2, figsize=(11.7, 8.3))
         self.plot(self.stock_eval_fig, self.stock_eval_axes, self.stock_eval_ratios)
+
+
+    def plot_profitability_ratios(self):
+        nplots = len(self.profitability_ratios)
+        nrows = -(-nplots//2)
+        self.profitability_fig, self.profitability_axes = plt.subplots(nrows=nrows, ncols=2, figsize=(11.7, 8.3))
+        self.plot(self.profitability_fig, self.profitability_axes, self.profitability_ratios)
+
+
+    def plot_debt_interest_ratios(self):
+        nplots = len(self.debt_interest_ratios)
+        nrows = -(-nplots//2)
+        self.debt_interest_fig, self.debt_interest_axes = plt.subplots(nrows=nrows, ncols=2, figsize=(11.7, 8.3))
+        self.plot(self.debt_interest_fig, self.debt_interest_axes, self.debt_interest_ratios)
+
+    def plot_liquidity_ratios(self):
+        nplots = len(self.liquidity_ratios)
+        nrows = -(-nplots//2)
+        self.liquidity_fig, self.liquidity_axes = plt.subplots(nrows=nrows, ncols=2, figsize=(11.7, 8.3))
+        self.plot(self.liquidity_fig, self.liquidity_axes, self.liquidity_ratios)
+
+    def plot_efficiency_ratios(self):
+        nplots = len(self.efficiency_ratios)
+        nrows = -(-nplots//2)
+        self.efficiency_fig, self.efficiency_axes = plt.subplots(nrows=nrows, ncols=2, figsize=(11.7, 8.3))
+        self.plot(self.efficiency_fig, self.efficiency_axes, self.efficiency_ratios)
 
 
     def plot(self, fig, ax, ratios):
