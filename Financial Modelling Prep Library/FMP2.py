@@ -1,7 +1,15 @@
+### TODO
+### - Fix plot x-axis to be a more inteligible value: FY22, or 2Q22
+### - Limit appropriate ratios to between -1 and 1
+### - Add R2 values to each appropriate subplot for correlation strengths
+### - Find out how to print the plots with corresponding headers (debt ratios, liquidity ratios etc) on an A$ page and pring to PDF
+### - Add functionality for the user to select how far back to look
+
 import yfinance as yf
 import numpy as np
 import datetime as dt
 from pandas_datareader import data as pdr
+from matplotlib import pyplot as plt
 import requests
 import pandas as pd
 from pathlib import Path
@@ -265,9 +273,9 @@ class Analysis:
         df['PE_avg_close'] = stock_price_avg/eps
         df['bookValuePerShare'] = (total_assets-total_liabilities)/outstanding_shares
         df['dividendPayoutRatio'] = (-dividends_paid/outstanding_shares)/eps
-        df['dividend_yield_low'] = (-dividends_paid/outstanding_shares)/stock_price_high
-        df['dividend_yield_high'] = (-dividends_paid/outstanding_shares)/stock_price_low 
-        df['dividend_yield_avg_close'] = (-dividends_paid/outstanding_shares)/stock_price_avg
+        df['dividendYield_low'] = (-dividends_paid/outstanding_shares)/stock_price_high
+        df['dividendYield_high'] = (-dividends_paid/outstanding_shares)/stock_price_low 
+        df['dividendYield_avg_close'] = (-dividends_paid/outstanding_shares)/stock_price_avg
         df['editdaratio'] = self.data.income_statements['ebitdaratio']
 
 
@@ -299,7 +307,7 @@ class Analysis:
         total_equity = self.data.balance_sheets['totalEquity']
         total_debt = total_assets - total_equity
         df['interestCoverage'] = operating_income/interest_expense
-        df['fixed_charge_coverage'] = ebitda/fixed_charges
+        df['fixedChargeCoverage'] = ebitda/fixed_charges
         df['debtToTotalCap'] = long_term_debt/total_capitalization
         df['totalDebtRatio'] = total_debt/total_assets
 
@@ -328,8 +336,48 @@ class Analysis:
         return df
 
 
+class Plots:
+    def __init__(self, data, n):
+        self.data = data
+        self.n = n
+        self.stock_eval_ratios = ['eps', 'eps_diluted', 'PE_high', 'PE_low', 'PE_avg_close', \
+                                'bookValuePerShare', 'dividendPayoutRatio', 'dividendYield_avg_close']
+        self.plot_stock_eval_ratios()
+
+        self.profitability_ratios = ['grossProfitMargin', 'operatingProfitMargin', 'pretaxProfitMargin', 'netProfitMargin',\
+                                     'ROIC', 'ROE', 'ROA']
+        self.debt_and_interest_ratios = ['interestCoverage', 'fixedChargeCoverage', 'debtToTotalCap', 'totalDebtRatio']
+
+        self.liquidity_ratios = ['currentRatio', 'quickRatio', 'cashRatio']
+        self.efficiency_ratios = ['totalAssetTurnover', 'inventoryToSalesRatio', 'inventoryTurnoverRatio', \
+                                  'inventoryTurnoverInDays', 'accountsReceivableToSalesRatio', 'receivablesTurnover', \
+                                  'receivablesTurnoverInDays']
+
+
+    def plot_stock_eval_ratios(self):
+        nplots = len(self.stock_eval_ratios)
+        nrows = -(-nplots//2)
+        self.stock_eval_fig, self.stock_eval_axes = plt.subplots(nrows=nrows, ncols=2, figsize=(11.7, 8.3))
+        self.plot(self.stock_eval_fig, self.stock_eval_axes, self.stock_eval_ratios)
+
+
+    def plot(self, fig, ax, ratios):
+        '''probably wanna determine the length of the associated ratios list and then create the fig, axes in here according to
+            how many you will need, as it will vary for each type of ratio
+            
+            so call e.g. plot_debt_ratios(), then that function determines len(debt_ratios) and calls another function plot() and passed the length?
+            '''
+        for counter, ratio in enumerate(ratios):
+            i, j = counter//2, counter%2
+            ax[i][j].plot(self.data[ratio][-self.n:])
+            ax[i][j].set_title(ratio)
+        fig.tight_layout()
+            
+
+
 class Company:
     def __init__(self, ticker, api_key, data='online', period='annual', limit=120):
         self.financial_data = FinancialData(ticker, api_key, data, period, limit)
         self.analysis = Analysis(self.financial_data)
         self.metrics = self.analysis.metrics
+        self.plots = Plots(self.metrics, 5)
