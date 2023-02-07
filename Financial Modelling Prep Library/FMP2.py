@@ -358,39 +358,45 @@ class Plots:
 
 
     def plot_stock_eval_ratios(self):
+        title = 'Stock Evaluation Ratios'
         nplots = len(self.stock_eval_ratios)
         nrows = -(-nplots//2)
         self.stock_eval_fig, self.stock_eval_axes = plt.subplots(nrows=nrows, ncols=2, figsize=(11.7, 8.3))
-        self.plot(self.stock_eval_fig, self.stock_eval_axes, self.stock_eval_ratios)
+        self.plot(self.stock_eval_fig, self.stock_eval_axes, self.stock_eval_ratios, title)
+        
 
 
     def plot_profitability_ratios(self):
+        title = 'Profitability Ratios'
         nplots = len(self.profitability_ratios)
         nrows = -(-nplots//2)
         self.profitability_fig, self.profitability_axes = plt.subplots(nrows=nrows, ncols=2, figsize=(11.7, 8.3))
-        self.plot(self.profitability_fig, self.profitability_axes, self.profitability_ratios)
+        self.plot(self.profitability_fig, self.profitability_axes, self.profitability_ratios, title)
 
 
     def plot_debt_interest_ratios(self):
+        title = 'Debt & Interest Ratios'
         nplots = len(self.debt_interest_ratios)
         nrows = -(-nplots//2)
         self.debt_interest_fig, self.debt_interest_axes = plt.subplots(nrows=nrows, ncols=2, figsize=(11.7, 8.3))
-        self.plot(self.debt_interest_fig, self.debt_interest_axes, self.debt_interest_ratios)
+        self.plot(self.debt_interest_fig, self.debt_interest_axes, self.debt_interest_ratios, title)
 
     def plot_liquidity_ratios(self):
+        title = 'Liquidity Ratios'
         nplots = len(self.liquidity_ratios)
         nrows = -(-nplots//2)
         self.liquidity_fig, self.liquidity_axes = plt.subplots(nrows=nrows, ncols=2, figsize=(11.7, 8.3))
-        self.plot(self.liquidity_fig, self.liquidity_axes, self.liquidity_ratios)
+        self.plot(self.liquidity_fig, self.liquidity_axes, self.liquidity_ratios, title)
 
     def plot_efficiency_ratios(self):
+        title = 'Efficiency Ratios'
         nplots = len(self.efficiency_ratios)
         nrows = -(-nplots//2)
         self.efficiency_fig, self.efficiency_axes = plt.subplots(nrows=nrows, ncols=2, figsize=(11.7, 8.3))
-        self.plot(self.efficiency_fig, self.efficiency_axes, self.efficiency_ratios)
+        self.plot(self.efficiency_fig, self.efficiency_axes, self.efficiency_ratios, title)
 
 
-    def plot(self, fig, ax, ratios):
+    def plot(self, fig, ax, ratios, title):
         '''probably wanna determine the length of the associated ratios list and then create the fig, axes in here according to
             how many you will need, as it will vary for each type of ratio
             
@@ -400,8 +406,10 @@ class Plots:
             i, j = counter//2, counter%2
             ax[i][j].plot(self.data[ratio][-self.n:])
             ax[i][j].set_title(ratio)
+        fig.suptitle(title)
         fig.tight_layout()
             
+
 
 
 class Company:
