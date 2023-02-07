@@ -338,76 +338,44 @@ class Analysis:
 
 
 class Plots:
+    '''
+    self.n needs to be handled properly
+    '''
     def __init__(self, data, n):
         self.data = data
         self.n = n
-        self.stock_eval_ratios = ['eps', 'eps_diluted', 'PE_high', 'PE_low', 'PE_avg_close', \
-                                'bookValuePerShare', 'dividendPayoutRatio', 'dividendYield_avg_close']
-        self.profitability_ratios = ['grossProfitMargin', 'operatingProfitMargin', 'pretaxProfitMargin', 'netProfitMargin',\
-                                     'ROIC', 'ROE', 'ROA']
-        self.debt_interest_ratios = ['interestCoverage', 'fixedChargeCoverage', 'debtToTotalCap', 'totalDebtRatio']
-        self.liquidity_ratios = ['currentRatio', 'quickRatio', 'cashRatio']
-        self.efficiency_ratios = ['totalAssetTurnover', 'inventoryToSalesRatio', 'inventoryTurnoverRatio', \
+        self.ratio_dict = {
+            'Stock Evaluation Ratios': ['eps', 'eps_diluted', 'PE_high', 'PE_low', 'PE_avg_close', \
+                                'bookValuePerShare', 'dividendPayoutRatio', 'dividendYield_avg_close'],
+
+            'Profitability Ratios': ['grossProfitMargin', 'operatingProfitMargin', 'pretaxProfitMargin', 'netProfitMargin',\
+                                     'ROIC', 'ROE', 'ROA'],
+
+            'Debt & Interest Ratios': ['interestCoverage', 'fixedChargeCoverage', 'debtToTotalCap', 'totalDebtRatio'],
+
+            'Liquidity Ratios': ['currentRatio', 'quickRatio', 'cashRatio'],
+
+            'Efficiency Ratios': ['totalAssetTurnover', 'inventoryToSalesRatio', 'inventoryTurnoverRatio', \
                                   'inventoryTurnoverInDays', 'accountsReceivableToSalesRatio', 'receivablesTurnover', \
                                   'receivablesTurnoverInDays']
-        self.plot_stock_eval_ratios()
-        self.plot_profitability_ratios()
-        self.plot_debt_interest_ratios()
-        self.plot_liquidity_ratios()
-        self.plot_efficiency_ratios()
+        }
 
+        self.plots = []
+        self.plot()
 
-    def plot_stock_eval_ratios(self):
-        title = 'Stock Evaluation Ratios'
-        nplots = len(self.stock_eval_ratios)
-        nrows = -(-nplots//2)
-        self.stock_eval_fig, self.stock_eval_axes = plt.subplots(nrows=nrows, ncols=2, figsize=(11.7, 8.3))
-        self.plot(self.stock_eval_fig, self.stock_eval_axes, self.stock_eval_ratios, title)
-        
-
-
-    def plot_profitability_ratios(self):
-        title = 'Profitability Ratios'
-        nplots = len(self.profitability_ratios)
-        nrows = -(-nplots//2)
-        self.profitability_fig, self.profitability_axes = plt.subplots(nrows=nrows, ncols=2, figsize=(11.7, 8.3))
-        self.plot(self.profitability_fig, self.profitability_axes, self.profitability_ratios, title)
-
-
-    def plot_debt_interest_ratios(self):
-        title = 'Debt & Interest Ratios'
-        nplots = len(self.debt_interest_ratios)
-        nrows = -(-nplots//2)
-        self.debt_interest_fig, self.debt_interest_axes = plt.subplots(nrows=nrows, ncols=2, figsize=(11.7, 8.3))
-        self.plot(self.debt_interest_fig, self.debt_interest_axes, self.debt_interest_ratios, title)
-
-    def plot_liquidity_ratios(self):
-        title = 'Liquidity Ratios'
-        nplots = len(self.liquidity_ratios)
-        nrows = -(-nplots//2)
-        self.liquidity_fig, self.liquidity_axes = plt.subplots(nrows=nrows, ncols=2, figsize=(11.7, 8.3))
-        self.plot(self.liquidity_fig, self.liquidity_axes, self.liquidity_ratios, title)
-
-    def plot_efficiency_ratios(self):
-        title = 'Efficiency Ratios'
-        nplots = len(self.efficiency_ratios)
-        nrows = -(-nplots//2)
-        self.efficiency_fig, self.efficiency_axes = plt.subplots(nrows=nrows, ncols=2, figsize=(11.7, 8.3))
-        self.plot(self.efficiency_fig, self.efficiency_axes, self.efficiency_ratios, title)
-
-
-    def plot(self, fig, ax, ratios, title):
-        '''probably wanna determine the length of the associated ratios list and then create the fig, axes in here according to
-            how many you will need, as it will vary for each type of ratio
-            
-            so call e.g. plot_debt_ratios(), then that function determines len(debt_ratios) and calls another function plot() and passed the length?
+    def plot(self):
+        '''Clean up all the above functions as they are all boilerplate anyway. Can likely bake them all into this one function
             '''
-        for counter, ratio in enumerate(ratios):
-            i, j = counter//2, counter%2
-            ax[i][j].plot(self.data[ratio][-self.n:])
-            ax[i][j].set_title(ratio)
-        fig.suptitle(title)
-        fig.tight_layout()
+        for ratio_type in self.ratio_dict.keys():
+            nplots = len(self.ratio_dict[ratio_type])
+            nrows = -(-nplots//2)
+            fig, ax = plt.subplots(nrows, 2, figsize=(11.7, 8.3))
+            for counter, ratio in enumerate(self.ratio_dict[ratio_type]):
+                i, j = counter//2, counter%2
+                ax[i][j].plot(self.data[ratio][-self.n:])
+                ax[i][j].set_title(ratio)
+            fig.suptitle(ratio_type)
+            fig.tight_layout()
             
 
 
