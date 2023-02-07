@@ -1,9 +1,11 @@
 ### TODO
+### - Print plots to a PDF with an appropriate save location
 ### - Fix plot x-axis to be a more inteligible value: FY22, or 2Q22
-### - Limit appropriate ratios to between -1 and 1
-### - Add R2 values to each appropriate subplot for correlation strengths
-### - Find out how to print the plots with corresponding headers (debt ratios, liquidity ratios etc) on an A$ page and pring to PDF
+### - Add R2 values to each appropriate subplot for correlation strengths and trendlines
+'''When the above three are done then you can call this your first ever useful piece of code :) '''
 ### - Add functionality for the user to select how far back to look
+### - Limit appropriate ratios to between -1 and 1
+
 
 import yfinance as yf
 import numpy as np
@@ -110,7 +112,7 @@ class FinancialData:
         self.cash_flow_statements = self.cash_flow_statements.loc[common_elements]
         assert len(self.cash_flow_statements) == len(self.balance_sheets), 'Indecies could not be filtered for common elements'
         assert len(self.income_statements) == len(self.balance_sheets), 'Indecies could not be filtered for common elements'
-        print(f"financial statement lengths are now each: {len(self.balance_sheets)}")
+        print(f"Financial statement lengths are now each: {len(self.balance_sheets)}")
 
 
 
@@ -155,7 +157,7 @@ class FinancialData:
         except FileExistsError:
             print(f"{save_path} already exists. Overwriting data.")
         except Exception:
-            msg = 'Could not create directory {save_path}'
+            msg = f'Could not create directory {save_path}'
             raise Exception(msg)
         
         self.balance_sheets.to_parquet(save_path/'balance_sheets.parquet')
@@ -177,6 +179,8 @@ class FinancialData:
         self.balance_sheets = pd.read_parquet(load_path/'balance_sheets.parquet')
         self.cash_flow_statements = pd.read_parquet(load_path/'cash_flow_statements.parquet')
         self.stock_price_data = pd.read_parquet(load_path/'stock_price_data.parquet')
+
+
 
 class Analysis:
     def __init__(self, financial_data):
@@ -238,17 +242,17 @@ class Analysis:
         if len(calculated.keys()) != len(reported.keys()):
             msg = '''Key mismatch between the reported and calculated tables.\nCheck the calculations in the Company.cross_check() method'''
             raise Exception(msg)
+        # Error between calculated and reported values
         metric_errors = calculated - reported
         ratio_errors = metric_errors.drop(['ebitda','grossProfit', 'operatingIncome', 'incomeBeforeTax', 'netIncome'], inplace=False, axis=1)
-        # Error between calculated and reported values
+        
         error_tolerance = 0.05
         error_messages  = []
         line_count = len(ratio_errors)
         for ratio in ratios:
-            if ratio is None:
-                continue
-            count = sum(ratio_errors[ratio] >= error_tolerance)
-            error_messages.append(f"There were {count}/{line_count} values in {ratio} that exceed the {error_tolerance} error tolerance.")
+            if ratio is not None:
+                count = sum(ratio_errors[ratio] >= error_tolerance)
+                error_messages.append(f"There were {count}/{line_count} values in {ratio} that exceed the {error_tolerance} error tolerance.")
         for message in error_messages:
             print(message)
 
@@ -291,7 +295,6 @@ class Analysis:
         net_income = self.data.income_statements['netIncome']
         total_shareholder_equity = self.data.balance_sheets['totalStockholdersEquity']
         df['grossProfitMargin'] = gross_profit/revenue
-        df['operatingIncome_calc'] = revenue - COGS - SGA - RND_expense
         df['operatingProfitMargin'] = operating_income/revenue
         df['pretaxProfitMargin'] = income_before_tax/revenue
         df['netProfitMargin'] = net_income/revenue
@@ -364,8 +367,6 @@ class Plots:
         self.plot()
 
     def plot(self):
-        '''Clean up all the above functions as they are all boilerplate anyway. Can likely bake them all into this one function
-            '''
         for ratio_type in self.ratio_dict.keys():
             nplots = len(self.ratio_dict[ratio_type])
             nrows = -(-nplots//2)
@@ -376,7 +377,7 @@ class Plots:
                 ax[i][j].set_title(ratio)
             fig.suptitle(ratio_type)
             fig.tight_layout()
-            
+            self.plots.append(fig)
 
 
 
@@ -386,3 +387,4 @@ class Company:
         self.analysis = Analysis(self.financial_data)
         self.metrics = self.analysis.metrics
         self.plots = Plots(self.metrics, 5)
+        self.charts = self.plots.plots
