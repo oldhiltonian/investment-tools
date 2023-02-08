@@ -12,6 +12,7 @@ import numpy as np
 import datetime as dt
 from pandas_datareader import data as pdr
 from matplotlib import pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 import requests
 import pandas as pd
 from pathlib import Path
@@ -342,7 +343,7 @@ class Analysis:
 
 class Plots:
     '''
-    self.n needs to be handled properly
+    self.n needs to be handled properly in the plot() function
     '''
     def __init__(self, data, n):
         self.data = data
@@ -381,10 +382,35 @@ class Plots:
 
 
 
+
 class Company:
     def __init__(self, ticker, api_key, data='online', period='annual', limit=120):
-        self.financial_data = FinancialData(ticker, api_key, data, period, limit)
-        self.analysis = Analysis(self.financial_data)
-        self.metrics = self.analysis.metrics
-        self.plots = Plots(self.metrics, 5)
-        self.charts = self.plots.plots
+        self.ticker = ticker
+        self.period = period
+        self._financial_data = FinancialData(ticker, api_key, data, period, limit)
+        self._analysis = Analysis(self._financial_data)
+        self.metrics = self._analysis.metrics
+        self._plots = Plots(self.metrics, 5)
+        self.trends = self._plots.plots
+        self.export()
+
+    def export(self):
+        self.print_charts()
+
+    def print_charts(self):
+        title_message = f"Financial Ratio Trends for {self.ticker}"
+        title_page, ax = plt.subplots(1,1, figsize=(11.7, 8.3))
+        title_page.suptitle(title_message)
+        self.figures = [title_page] + self.trends
+        end_date = self._financial_data.filing_date_objects[-1]
+        start_date = self._financial_data.filing_date_objects[0]
+        file_name = f"{self.ticker}_{self.period}__{str(start_date)}_to_{str(end_date)}.pdf"
+        file_path = Path.cwd()/'Company Analysis'/self.ticker/self.period
+        try:
+            os.makedirs(file_path)
+        except FileExistsError:
+            pass
+
+        with PdfPages(filename=file_path/file_name) as pdf:
+            for figure in self.figures:
+                pdf.savefig(figure)
