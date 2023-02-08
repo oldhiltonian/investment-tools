@@ -392,7 +392,6 @@ class Company:
         self.metrics = self._analysis.metrics
         self._plots = Plots(self.metrics, 5)
         self.trends = self._plots.plots
-        self.export()
 
     def export(self):
         self.print_charts()
