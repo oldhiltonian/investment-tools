@@ -1,8 +1,6 @@
 ### TODO
-### - Print plots to a PDF with an appropriate save location
 ### - Fix plot x-axis to be a more inteligible value: FY22, or 2Q22
 ### - Add R2 values to each appropriate subplot for correlation strengths and trendlines
-'''When the above three are done then you can call this your first ever useful piece of code :) '''
 ### - Add functionality for the user to select how far back to look
 ### - Limit appropriate ratios to between -1 and 1
 
@@ -125,8 +123,6 @@ class FinancialData:
             price_interval = '1d'
             raw_data = pdr.get_data_yahoo(self.ticker, start_date, end_date, interval=price_interval)
             raw_data['date'] = raw_data.index.date
-
-            print(len(raw_data.index.date))
             return self.periodise(raw_data)
 
     def periodise(self, df):
@@ -156,7 +152,7 @@ class FinancialData:
         try:
             os.makedirs(save_path)
         except FileExistsError:
-            print(f"{save_path} already exists. Overwriting data.")
+            print(f"Path already exists. Overwriting saved data.")
         except Exception:
             msg = f'Could not create directory {save_path}'
             raise Exception(msg)
