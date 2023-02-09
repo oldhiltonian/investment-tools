@@ -2,7 +2,7 @@ import unittest
 import requests
 import pandas as pd
 import datetime as dt
-from FMP2_edit import FinancialData
+from FMP import FinancialData
 from pathlib import Path
 
 key_path = Path().home()/'desktop'/'FinancialModellingPrep_API.txt'
