@@ -25,7 +25,7 @@ class FinancialData:
         self.data = data.lower().strip()
         self.period = period.lower().strip()
         self.limit = int(limit)
-        self.days_in_period = 356 if period == 'annual' else 90
+        self.days_in_period = 365 if period == 'annual' else 90
 
 
         if data == 'online':
