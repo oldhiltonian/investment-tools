@@ -19,6 +19,38 @@ import os
 yf.pdr_override()
 
 class FinancialData:
+    """
+    A class for handling financial data
+
+    The FinancialData class is used for fetching and processing financial data for
+    a given company. The data can be fetched from either a local source or from the 
+    Financial Modeling Prep API (https://financialmodelingprep.com/developer/docs/). 
+    
+    Args:
+    - ticker (str): Ticker symbol for the company to fetch financial data for
+    - api_key (str, optional): API key for accessing the Financial Modeling Prep API. 
+        Default is an empty string.
+    - data (str, optional): Data source. Valid options are 'local' and 'online'. 
+        Default is 'local'.
+    - period (str, optional): Period of the financial data to retrieve. Valid options 
+        are 'annual' and 'quarterly'. Default is 'annual'.
+    - limit (int, optional): Maximum number of financial records to retrieve. 
+        Default is 120.
+
+    Attributes:
+    - ticker (str): Ticker symbol for the company to fetch financial data for
+    - api_key (str): API key for accessing the Financial Modeling Prep API.
+    - data (str): Data source. Can be 'local' or 'online'.
+    - period (str): Period of the financial data to retrieve. Can be 'annual' or 'quarterly'.
+    - limit (int): Maximum number of financial records to retrieve.
+    - days_in_period (int): The number of days in a period (90 for quarterly, 356 for annual)
+    - balance_sheets (pandas.DataFrame): Balance sheets for the company
+    - income_statements (pandas.DataFrame): Income statements for the company
+    - cash_flow_statements (pandas.DataFrame): Cash flow statements for the company
+    - filing_date_objects (pandas.Series): A series of date objects, one for each 
+        inancial statement.
+    - stock_price_data (pandas.DataFrame): Stock price data for the company
+    """
     def __init__(self, ticker, api_key='', data='local', period='annual', limit=120):
         self.ticker = ticker.upper().strip()
         self.api_key = str(api_key)
@@ -53,14 +85,62 @@ class FinancialData:
     def fetch_financial_statements(self, company, api_key, period, limit):
         # need to throw an exception here if the API returns an error
         # test that a tuple of json objects is returned
+        """
+        This function fetches the balance sheet, income statement, and cash flow statement
+        for a given company, using the provided api_key, period, and limit.
+        
+        Args:
+            company (str): The company's ticker symbol or name.
+            api_key (str): The API key to be used to access financial data.
+            period (str): The reporting period to retrieve data for, e.g. 'quarter' or 'annual'.
+            limit (int): The number of reporting periods to retrieve.
+            
+        Returns:
+            Tuple[Dict, Dict, Dict]: The balance sheet, income statement, and cash flow statement
+            as a tuple of dictionaries in JSON format.
+            
+        Raises:
+            Exception: If the API returns an error.
+            
+        Example:
+            statements = fetch_financial_statements('AAPL', 'apikey', 'quarter', 4)
+            print(statements)
+        """
+
         balance_sheets = requests.get(f'https://financialmodelingprep.com/api/v3/balance-sheet-statement/{company}?period={period}&limit={limit}&apikey={api_key}')
+        assert balance_sheets.status_code == 200, f"API call failed. Code <{balance_sheets.status_code}>"
         income_statements = requests.get(f'https://financialmodelingprep.com/api/v3/income-statement/{company}?period={period}&limit={limit}&apikey={api_key}')
+        assert income_statements.status_code == 200, f"API call failed. Code <{income_statements.status_code}>"
         cash_flow_statements = requests.get(f'https://financialmodelingprep.com/api/v3/cash-flow-statement/{company}?period={period}&limit={limit}&apikey={api_key}')
+        assert cash_flow_statements.status_code == 200, f"API call failed. Code <{cash_flow_statements.status_code}>"
+
         return balance_sheets.json(), income_statements.json(), cash_flow_statements.json()
 
 
     def build_dataframe(self, statements):
         # throw an exception if statemetns != List(dict)
+        """
+        This function builds a pandas dataframe from a list of financial statement dictionaries.
+        
+        Args:
+            statements (List[Dict[str, Any]]): A list of dictionaries, where each dictionary represents
+            a financial statement.
+            
+        Returns:
+            pandas.DataFrame: A dataframe with the financial statement data, indexed by a generated date.
+            
+        Raises:
+            AssertionError: If the statements passed in as argument is not a list of dictionaries or if
+            there is a mismatch in the columns across the financial statements.
+            
+        Example:
+            statements = [{'date': '2022-01-01', 'revenue': 100, 'costs': 80},
+                        {'date': '2022-02-01', 'revenue': 120, 'costs': 90}]
+            df = build_dataframe(statements)
+        """
+        err_msg = "Empty statement. Perhaps check the .json() conversion off of the API response"
+        assert len(statements) > 0, err_msg
+
         keys = set(statements[0].keys())
         for statement in statements:
             assert set(statement.keys()) == keys, 'column mismatch across financial statement'
@@ -77,6 +157,23 @@ class FinancialData:
 
 
     def generate_index(self, date):
+        """
+        Generate an index string from the date string
+        
+        Parameters:
+        -----------
+        date : str
+            Date string in format "YYYY-MM-DD".
+        
+        Returns:
+        -------
+        str
+            Index string in the format "ticker-FY/QX-YYYY".
+        
+        Example:
+        -------
+        generate_index("2021-06-15") returns "ticker-Q2-2021"
+        """
         year, month, _ = [int(i) for i in date.split('-')]
         
         if self.period == 'annual':
@@ -95,11 +192,39 @@ class FinancialData:
 
 
     def generate_date(self, date_str):
+        """
+        Generate a date object from the date string
+        
+        Parameters:
+        -----------
+        date_str : str
+            Date string in format "YYYY-MM-DD".
+        
+        Returns:
+        -------
+        date
+            Date object.
+        
+        Example:
+        -------
+        generate_date("2021-06-15") returns date object "2021-06-15"
+        """
         year, month, day = [int(i) for i in date_str.split()[0].split('-')]
         return dt.date(year, month, day)
 
 
     def filter_for_common_indecies(self):
+        """
+        Filter for common indices between balance sheets, 
+            income statements, and cash flow statements.
+
+        This method is used to ensure that all financial statement dataframes have the
+            same set of indices. If the length of the dataframes is different, the 
+            method will drop any missing indices from the dataframes to ensure consistency.
+
+        Returns:
+            None
+        """
         print('Financial statements had different lengths...')
         print(f"Financial statement lengths are BS: {len(self.balance_sheets)}, IS:{len(self.income_statements)}, CFS:{len(self.cash_flow_statements)}")
         idx1 = self.balance_sheets.index
@@ -116,16 +241,40 @@ class FinancialData:
 
 
     def fetch_stock_price_data(self):
-            '''Need to catch if the request fails or returns a null frame'''
-            start_date = dt.date(*[int(i) for i in str(self.filing_date_objects.iloc[0]).split()[0].split('-')]) - dt.timedelta(days=370)
-            # end_date = dt.date(*[int(i) for i in str(self.filing_date_objects.iloc[-1]).split()[0].split('-')])
-            end_date = dt.date.today()
-            price_interval = '1d'
-            raw_data = pdr.get_data_yahoo(self.ticker, start_date, end_date, interval=price_interval)
-            raw_data['date'] = raw_data.index.date
-            return self.periodise(raw_data)
+
+        # '''Need to catch if the request fails or returns a null frame'''
+        """
+        This function fetches stock price data for the company using the provided data source.
+
+        Returns:
+        - pandas.DataFrame: Stock price data for the company in the form of a pandas dataframe.
+        
+        """
+        start_date = dt.date(*[int(i) for i in str(self.filing_date_objects.iloc[0]).split()[0].split('-')]) - dt.timedelta(days=370)
+        # end_date = dt.date(*[int(i) for i in str(self.filing_date_objects.iloc[-1]).split()[0].split('-')])
+        end_date = dt.date.today()
+        price_interval = '1d'
+        raw_data = pdr.get_data_yahoo(self.ticker, start_date, end_date, interval=price_interval)
+        raw_data['date'] = raw_data.index.date
+        return self.periodise(raw_data)
 
     def periodise(self, df):
+        """
+        This function takes a time series and a period as input and returns a new time series with the data aggregated to the given period.
+
+        Parameters:
+        timeseries (list or numpy array): The input time series data, represented as a list or a numpy array of numerical values.
+        period (int): The desired period of the aggregated time series. This should be a positive integer representing the number of time units in the desired period.
+
+        Returns:
+        numpy array: A pandas DataFrame containing the aggregated time series.
+
+        Example:
+        >>> periodise([1, 2, 3, 4, 5, 6], 2)
+        array([1.5, 3.5, 5.5])
+        >>> periodise([1, 2, 3, 4, 5, 6, 7, 8], 3)
+        array([2., 5., 8.])
+        """
         working_array = []
         for i in range(len(self.filing_date_objects)):
             if i == 0 or i == len(self.filing_date_objects):
@@ -148,6 +297,9 @@ class FinancialData:
 
 
     def save_financial_attributes(self):
+        """
+        This function saves the financial attributes of the object to disk as a pickle file.        
+        """
         save_path = Path.cwd()/'Company Financial Data'/self.ticker/self.period
         try:
             os.makedirs(save_path)
@@ -168,9 +320,14 @@ class FinancialData:
 
 
     def load_financial_statements(self):
-        '''
-        Load from a local directory
-        draw distinction between annual and quartely results using an f-string'''
+        """
+        This function loads financial statements from disk.
+        
+        Args:
+        - company (str): The company's ticker symbol or name.
+        - period (str): The reporting period of the financial statements to load, e.g. 'quarter' or 'annual'.
+        
+        """
         load_path = Path.cwd()/'Company Financial Data'/self.ticker/self.period
         self.income_statements = pd.read_parquet(load_path/'income_statements.parquet')
         self.balance_sheets = pd.read_parquet(load_path/'balance_sheets.parquet')
@@ -180,6 +337,30 @@ class FinancialData:
 
 
 class Analysis:
+    """Financial Data Analysis class
+
+    Analyzes financial data and returns important metrics and ratios.
+    
+    Parameters
+    ----------
+    financial_data : object
+        Financial data to be analyzed
+    
+    Attributes
+    ----------
+    data : object
+        Financial data
+    calculated_metrics : pd.DataFrame
+        Metrics calculated from the financial data
+    reported_metrics : pd.DataFrame
+        Metrics reported in the financial data
+    metric_errors : pd.DataFrame
+        Error between calculated and reported metrics
+    ratio_errors : pd.DataFrame
+        Error between calculated and reported ratios
+    metrics : dict
+        Dictionary of financial metrics and ratios
+    """
     def __init__(self, financial_data):
         self.data = financial_data
         clc, rep, met_err, rat_err = self.cross_check()
@@ -192,7 +373,13 @@ class Analysis:
 
 
     def cross_check(self):
-        '''Returns metric_errors, ratio_errors as dataframes'''
+        """
+        Calculates financial metrics and and compares them to the reported values.
+        
+        Returns pandas DataFrames representing the calculated values, reported values,
+        the error between the calculated and reported values, and the error of just
+        the financial ratios"""
+    
         reported = pd.DataFrame()
         calculated = pd.DataFrame()
         RND_expenses = self.data.income_statements['researchAndDevelopmentExpenses']
@@ -256,6 +443,8 @@ class Analysis:
         return calculated, reported, metric_errors, ratio_errors
 
     def analyse(self):
+        """Calculates and returns important financial metrics and ratios as a 
+            pandas DataFrame."""
         df = pd.DataFrame()
 
         '''Stock Evaluation Ratios'''
@@ -338,8 +527,20 @@ class Analysis:
 
 
 class Plots:
+    #self.n needs to be handled properly in the plot() function 
+    """
+    Class to handle the plotting of financial ratios.
+
+    Parameters:
+    data (DataFrame): The data used for plotting
+    n (int): The number of data points used for plotting
+
+    Attributes:
+    ratio_dict (dict): The financial ratios to be plotted
+    plots (list): List of all the plotted figures
+    """
     '''
-    self.n needs to be handled properly in the plot() function
+    
     '''
     def __init__(self, data, n):
         self.data = data
@@ -364,6 +565,12 @@ class Plots:
         self.plot()
 
     def plot(self):
+        """
+        Plots the financial ratios using matplotlib.
+
+        Returns:
+        None
+        """
         for ratio_type in self.ratio_dict.keys():
             nplots = len(self.ratio_dict[ratio_type])
             nrows = -(-nplots//2)
@@ -380,6 +587,23 @@ class Plots:
 
 
 class Company:
+    """
+    Class representing a company and its financial analysis
+
+    Args:
+    ticker (str): The stock symbol representing the company
+    api_key (str): API key for accessing financial data from a data source
+    data (str, optional): Source of data either from 'online' (default) or 'offline'
+    period (str, optional): Financial period to use for the analysis either 'annual' (default) or 'quarterly'
+    limit (int, optional): The number of financial periods to include in the analysis (default is 120)
+
+    Attributes:
+    ticker (str): The stock symbol representing the company
+    period (str): Financial period used for the analysis
+    metrics (dict): Dictionary of financial metrics for the company
+    trends (list of plot objects): List of plots showing the trend of the financial metrics over time
+
+    """
     def __init__(self, ticker, api_key, data='online', period='annual', limit=120):
         self.ticker = ticker
         self.period = period
@@ -390,9 +614,18 @@ class Company:
         self.trends = self._plots.plots
 
     def export(self):
+        # why did I make this method again??
+        """
+        Exports the financial trend charts to disk as a pdf file.
+        
+        """
         self.print_charts()
 
     def print_charts(self):
+        """
+        Creates the financial trend charts as a pdf file.
+        
+        """
         title_message = f"Financial Ratio Trends for {self.ticker}"
         title_page, ax = plt.subplots(1,1, figsize=(11.7, 8.3))
         title_page.suptitle(title_message)
