@@ -1,9 +1,3 @@
-### TODO
-### - Fix plot x-axis to be a more inteligible value: FY22, or 2Q22
-### - Add R2 values to each appropriate subplot for correlation strengths and trendlines
-### - Add functionality for the user to select how far back to look
-### - Limit appropriate ratios to between -1 and 1
-
 
 import yfinance as yf
 import numpy as np
@@ -20,7 +14,7 @@ yf.pdr_override()
 
 class FinancialData:
     """
-    A class for handling financial data
+    A class for pulling and organising financial data
 
     The FinancialData class is used for fetching and processing financial data for
     a given company. The data can be fetched from either a local source or from the 
@@ -43,12 +37,12 @@ class FinancialData:
     - data (str): Data source. Can be 'local' or 'online'.
     - period (str): Period of the financial data to retrieve. Can be 'annual' or 'quarterly'.
     - limit (int): Maximum number of financial records to retrieve.
-    - days_in_period (int): The number of days in a period (90 for quarterly, 356 for annual)
+    - days_in_period (int): The number of days in a period (90 for quarterly, 365 for annual)
     - balance_sheets (pandas.DataFrame): Balance sheets for the company
     - income_statements (pandas.DataFrame): Income statements for the company
     - cash_flow_statements (pandas.DataFrame): Cash flow statements for the company
     - filing_date_objects (pandas.Series): A series of date objects, one for each 
-        inancial statement.
+        financial statement.
     - stock_price_data (pandas.DataFrame): Stock price data for the company
     """
     def __init__(self, ticker, api_key='', data='local', period='annual', limit=120):
@@ -65,7 +59,6 @@ class FinancialData:
             self.balance_sheets = self.build_dataframe(bs)
             self.income_statements = self.build_dataframe(is_)
             self.cash_flow_statements = self.build_dataframe(cfs)
-            self.days_in_period = 356 if period == 'annual' else '90'
             
             matching_index_1 =  self.balance_sheets['date'].equals(self.income_statements['date'])
             matching_index_2 = self.balance_sheets['date'].equals(self.cash_flow_statements['date'])
@@ -74,7 +67,7 @@ class FinancialData:
                 self.filter_for_common_indecies()
             self._frame_indecies = self.balance_sheets.index
             self.filing_date_objects = self.balance_sheets['date']
-            self.stock_price_data = self.fetch_stock_price_data()
+            self.stock_price_data = self.fetch_stock_price_data_yf()
             self.save_financial_attributes()
 
         elif data == 'local':
@@ -83,7 +76,6 @@ class FinancialData:
         
 
     def fetch_financial_statements(self, company, api_key, period, limit):
-        # need to throw an exception here if the API returns an error
         # test that a tuple of json objects is returned
         """
         This function fetches the balance sheet, income statement, and cash flow statement
@@ -92,7 +84,7 @@ class FinancialData:
         Args:
             company (str): The company's ticker symbol or name.
             api_key (str): The API key to be used to access financial data.
-            period (str): The reporting period to retrieve data for, e.g. 'quarter' or 'annual'.
+            period (str): The reporting period to retrieve data for. Must be 'quarter' or 'annual'.
             limit (int): The number of reporting periods to retrieve.
             
         Returns:
@@ -100,20 +92,16 @@ class FinancialData:
             as a tuple of dictionaries in JSON format.
             
         Raises:
-            Exception: If the API returns an error.
+            AssertionError: If the API returns an error.
             
         Example:
-            statements = fetch_financial_statements('AAPL', 'apikey', 'quarter', 4)
-            print(statements)
         """
-
         balance_sheets = requests.get(f'https://financialmodelingprep.com/api/v3/balance-sheet-statement/{company}?period={period}&limit={limit}&apikey={api_key}')
         assert balance_sheets.status_code == 200, f"API call failed. Code <{balance_sheets.status_code}>"
         income_statements = requests.get(f'https://financialmodelingprep.com/api/v3/income-statement/{company}?period={period}&limit={limit}&apikey={api_key}')
         assert income_statements.status_code == 200, f"API call failed. Code <{income_statements.status_code}>"
         cash_flow_statements = requests.get(f'https://financialmodelingprep.com/api/v3/cash-flow-statement/{company}?period={period}&limit={limit}&apikey={api_key}')
         assert cash_flow_statements.status_code == 200, f"API call failed. Code <{cash_flow_statements.status_code}>"
-
         return balance_sheets.json(), income_statements.json(), cash_flow_statements.json()
 
 
@@ -132,11 +120,6 @@ class FinancialData:
         Raises:
             AssertionError: If the statements passed in as argument is not a list of dictionaries or if
             there is a mismatch in the columns across the financial statements.
-            
-        Example:
-            statements = [{'date': '2022-01-01', 'revenue': 100, 'costs': 80},
-                        {'date': '2022-02-01', 'revenue': 120, 'costs': 90}]
-            df = build_dataframe(statements)
         """
         err_msg = "Empty statement. Perhaps check the .json() conversion off of the API response"
         assert len(statements) > 0, err_msg
@@ -240,11 +223,10 @@ class FinancialData:
 
 
 
-    def fetch_stock_price_data(self):
-
+    def fetch_stock_price_data_yf(self):
         # '''Need to catch if the request fails or returns a null frame'''
         """
-        This function fetches stock price data for the company using the provided data source.
+        This function fetches Yahoo! finance stock price data for the company using the provided data source.
 
         Returns:
         - pandas.DataFrame: Stock price data for the company in the form of a pandas dataframe.
@@ -260,20 +242,14 @@ class FinancialData:
 
     def periodise(self, df):
         """
-        This function takes a time series and a period as input and returns a new time series with the data aggregated to the given period.
+        This function takes a DataFrame calculates values for certain date periods within the data. The
+        period start and end dates are found in FinancialData.filing_date_objects.
 
         Parameters:
-        timeseries (list or numpy array): The input time series data, represented as a list or a numpy array of numerical values.
-        period (int): The desired period of the aggregated time series. This should be a positive integer representing the number of time units in the desired period.
+        pandas DataFrame: The input time series data.
 
         Returns:
-        numpy array: A pandas DataFrame containing the aggregated time series.
-
-        Example:
-        >>> periodise([1, 2, 3, 4, 5, 6], 2)
-        array([1.5, 3.5, 5.5])
-        >>> periodise([1, 2, 3, 4, 5, 6, 7, 8], 3)
-        array([2., 5., 8.])
+        A pandas DataFrame containing the aggregated time series.
         """
         working_array = []
         for i in range(len(self.filing_date_objects)):
@@ -298,7 +274,7 @@ class FinancialData:
 
     def save_financial_attributes(self):
         """
-        This function saves the financial attributes of the object to disk as a pickle file.        
+        This function saves the financial attributes of the object to disk as a parquet file.        
         """
         save_path = Path.cwd()/'Company Financial Data'/self.ticker/self.period
         try:
@@ -321,12 +297,8 @@ class FinancialData:
 
     def load_financial_statements(self):
         """
-        This function loads financial statements from disk.
-        
-        Args:
-        - company (str): The company's ticker symbol or name.
-        - period (str): The reporting period of the financial statements to load, e.g. 'quarter' or 'annual'.
-        
+        This function loads financial statements from disk according to the company 
+        and period information in the class instance.
         """
         load_path = Path.cwd()/'Company Financial Data'/self.ticker/self.period
         self.income_statements = pd.read_parquet(load_path/'income_statements.parquet')
