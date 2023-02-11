@@ -65,7 +65,7 @@ class FinancialData:
             matching_indecies = matching_index_1 and matching_index_2
             if not matching_indecies:
                 self.filter_for_common_indecies()
-            self._frame_indecies = self.balance_sheets.index
+            self.frame_indecies = self.balance_sheets.index
             self.filing_date_objects = self.balance_sheets['date']
             self.stock_price_data = self.fetch_stock_price_data_yf()
             self.save_financial_attributes()
@@ -267,7 +267,7 @@ class FinancialData:
                 working_array.append([max_price, min_price, avg_close])
 
         cols = ['high', 'low', 'avg_close']
-        periodised = pd.DataFrame(working_array, index=self._frame_indecies, columns=cols)
+        periodised = pd.DataFrame(working_array, index=self.frame_indecies, columns=cols)
         assert sum(periodised['high'] < periodised['low']) <= 1, 'Stock highs and lows not consistent'
         return periodised
 
@@ -352,8 +352,8 @@ class Analysis:
         the error between the calculated and reported values, and the error of just
         the financial ratios"""
     
-        reported = pd.DataFrame()
-        calculated = pd.DataFrame()
+        reported = pd.DataFrame(index=self.data.frame_indecies)
+        calculated = pd.DataFrame(index=self.data.frame_indecies)
         RND_expenses = self.data.income_statements['researchAndDevelopmentExpenses']
         SGA_expenses = self.data.income_statements['sellingGeneralAndAdministrativeExpenses']
         other_expenses = self.data.income_statements['otherExpenses']
@@ -417,7 +417,7 @@ class Analysis:
     def analyse(self):
         """Calculates and returns important financial metrics and ratios as a 
             pandas DataFrame."""
-        df = pd.DataFrame()
+        df = pd.DataFrame(index=self.data.frame_indecies)
 
         '''Stock Evaluation Ratios'''
         total_assets = self.data.balance_sheets['totalAssets']
