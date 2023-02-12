@@ -5,6 +5,7 @@ import datetime as dt
 from pandas_datareader import data as pdr
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+from scipy.stats import linregress
 import requests
 import pandas as pd
 from pathlib import Path
@@ -542,18 +543,42 @@ class Plots:
 
         Returns:
         None
+
+        ###delete
+        ticker-Q2-2021 or FY
         """
+
+        x_labels = ['-'.join(str(i).split('-')[1:]) for i in self.data.index[-self.n:]]
+        
         for ratio_type in self.ratio_dict.keys():
             nplots = len(self.ratio_dict[ratio_type])
             nrows = -(-nplots//2)
             fig, ax = plt.subplots(nrows, 2, figsize=(11.7, 8.3))
             for counter, ratio in enumerate(self.ratio_dict[ratio_type]):
+                # plotting the actual metric values
+                y = self.data[ratio][-self.n:]
+                x = y.index
+                x_dummy = range(len(y))
                 i, j = counter//2, counter%2
-                ax[i][j].plot(self.data[ratio][-self.n:])
+                ax[i][j].plot(y, label='data')
                 ax[i][j].set_title(ratio)
+                ax[i][j].set_xticks(x)
+                ax[i][j].set_xticklabels([x_labels[i] if i%2==0 else ' ' for i in range(len(x_labels))])
+                # ax[i][j].set_xticklabels(x_labels)
+                # ax[i][j].set_xticks([x_axis[i] if i%1==0 else ' ' for i in range(len(x))])
+
+                # plotting the linear trendline and R2
+                slope, intercept, r_value, _, _ = linregress(x_dummy, y)
+                y_linear = slope*x_dummy + intercept
+                ax[i][j].plot(x_dummy, y_linear, alpha=0.5, linestyle='--', label='linear trend')
+                ax[i][j].plot([], [], ' ', label=f'R2: {r_value**2:.2f}')
+                ax[i][j].legend(loc='upper right', frameon=False, fontsize=8)
+
+            # formatting and append
             fig.suptitle(ratio_type)
             fig.tight_layout()
             self.plots.append(fig)
+        print(x_labels)
 
 
 
@@ -582,7 +607,7 @@ class Company:
         self._financial_data = FinancialData(ticker, api_key, data, period, limit)
         self._analysis = Analysis(self._financial_data)
         self.metrics = self._analysis.metrics
-        self._plots = Plots(self.metrics, 5)
+        self._plots = Plots(self.metrics, 10)
         self.trends = self._plots.plots
 
     def export(self):
