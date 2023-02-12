@@ -28,7 +28,7 @@ class FinancialData:
     - data (str, optional): Data source. Valid options are 'local' and 'online'. 
         Default is 'local'.
     - period (str, optional): Period of the financial data to retrieve. Valid options 
-        are 'annual' and 'quarterly'. Default is 'annual'.
+        are 'annual' and 'quarter'. Default is 'annual'.
     - limit (int, optional): Maximum number of financial records to retrieve. 
         Default is 120.
 
@@ -38,7 +38,7 @@ class FinancialData:
     - data (str): Data source. Can be 'local' or 'online'.
     - period (str): Period of the financial data to retrieve. Can be 'annual' or 'quarterly'.
     - limit (int): Maximum number of financial records to retrieve.
-    - days_in_period (int): The number of days in a period (90 for quarterly, 365 for annual)
+    - days_in_period (int): The number of days in a period (90 for quarter, 365 for annual)
     - balance_sheets (pandas.DataFrame): Balance sheets for the company
     - income_statements (pandas.DataFrame): Income statements for the company
     - cash_flow_statements (pandas.DataFrame): Cash flow statements for the company
@@ -53,6 +53,10 @@ class FinancialData:
         self.period = period.lower().strip()
         self.limit = int(limit)
         self.days_in_period = 365 if period == 'annual' else 90
+
+        assert self.data in ['online', 'local'], "data must be 'online' or 'local'"
+        assert self.period in ['annual', 'quarter'], "period must be 'annual' or 'quarter"
+
 
 
         if data == 'online':
@@ -564,8 +568,6 @@ class Plots:
                 ax[i][j].set_title(ratio)
                 ax[i][j].set_xticks(x)
                 ax[i][j].set_xticklabels([x_labels[i] if i%2==0 else ' ' for i in range(len(x_labels))])
-                # ax[i][j].set_xticklabels(x_labels)
-                # ax[i][j].set_xticks([x_axis[i] if i%1==0 else ' ' for i in range(len(x))])
 
                 # plotting the linear trendline and R2
                 slope, intercept, r_value, _, _ = linregress(x_dummy, y)
@@ -578,7 +580,6 @@ class Plots:
             fig.suptitle(ratio_type)
             fig.tight_layout()
             self.plots.append(fig)
-        print(x_labels)
 
 
 
