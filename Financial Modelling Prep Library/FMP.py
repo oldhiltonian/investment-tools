@@ -523,23 +523,43 @@ class Plots:
     def __init__(self, data, n):
         self.data = data
         self.n = n
-
-        self.ratio_dict = {
-            'Stock Evaluation Ratios': ['eps', 'eps_diluted', 'PE_high', 'PE_low', 'PE_avg_close', \
-                                'bookValuePerShare', 'dividendPayoutRatio', 'dividendYield_avg_close',
-                                'cashPositionPerShare', 'ebitdaratio'],
-
-            'Profitability Ratios': ['grossProfitMargin', 'operatingProfitMargin', 'pretaxProfitMargin', 'netProfitMargin',\
-                                     'ROIC', 'ROE', 'ROA'],
-
-            'Debt & Interest Ratios': ['interestCoverage', 'fixedChargeCoverage', 'debtToTotalCap', 'totalDebtRatio'],
-
-            'Liquidity Ratios': ['currentRatio', 'quickRatio', 'cashRatio'],
-
-            'Efficiency Ratios': ['totalAssetTurnover', 'inventoryToSalesRatio', 'inventoryTurnoverRatio', \
-                                  'inventoryTurnoverInDays', 'accountsReceivableToSalesRatio', 'receivablesTurnover', \
-                                  'receivablesTurnoverInDays']
-        }
+        self.metric_units_dict = {
+            'Stock Evaluation Ratios':  {'eps' : '$/share',
+                                         'eps_diluted': '$/share',
+                                         'PE_high': 'x',
+                                         'PE_low': 'x',
+                                         'PE_avg_close': 'x',
+                                         'bookValuePerShare': '$/share',
+                                         'dividendPayoutRatio': 'x',
+                                         'dividendYield_avg_close': 'x',
+                                         'cashPositionPerShare': '$/share',
+                                         'ebitdaratio': 'x'
+                                        },
+            'Profitability Ratios':     {'grossProfitMargin': 'x',
+                                         'operatingProfitMargin': 'x',
+                                         'pretaxProfitMargin': 'x',
+                                         'netProfitMargin': 'x',
+                                         'ROIC': 'x',
+                                         'ROE': 'x',
+                                         'ROA': 'x'
+                                        },
+            'Debt & Interest Ratios':   {'interestCoverage': 'x',
+                                         'fixedChargeCoverage': 'x',
+                                         'debtToTotalCap': 'x',
+                                         'totalDebtRatio': 'x'
+                                         },
+            'Liquidity Ratios':         {'currentRatio': 'x',
+                                         'quickRatio': 'x',
+                                         'cashRatio': 'x'},
+            'Profitability Ratios':     {'totalAssetTurnover': 'YYY',
+                                         'inventoryToSalesRatio': 'x',
+                                         'inventoryTurnoverRatio': 'YYY',
+                                         'inventoryTurnoverInDays': 'YYY',
+                                         'accountsReceivableToSalesRatio': 'YYY',
+                                         'receivablesTurnover': 'YYY',
+                                         'receivablesTurnoverInDays': 'YYY'
+                                         }
+ }
 
         self.plots = []
         self.plot()
@@ -557,24 +577,29 @@ class Plots:
 
         x_labels = ['-'.join(str(i).split('-')[1:]) for i in self.data.index[-self.n:]]
         
-        for ratio_type in self.ratio_dict.keys():
-            nplots = len(self.ratio_dict[ratio_type])
+        for metric_type in self.metric_units_dict.keys():
+            metrics_dict = self.metric_units_dict[metric_type]
+            metrics = metrics_dict.keys()
+            nplots = len(metrics_dict)
             nrows = -(-nplots//2)
             fig, ax = plt.subplots(nrows, 2, figsize=(11.7, 8.3))
-            for counter, ratio in enumerate(self.ratio_dict[ratio_type]):
+
+            for counter, metric in enumerate(metrics):
                 # targetting the right subplot
                 i, j = counter//2, counter%2
                 axis = ax[i][j]
 
                 # plotting the actual metric values
-                y = self.data[ratio][-self.n:]
+                y = self.data[metric][-self.n:]
                 x = y.index
                 x_dummy = range(len(y))
                 
                 axis.plot(y, label='data')
-                axis.set_title(ratio)
+                axis.set_title(metric)
                 axis.set_xticks(x)
                 axis.set_xticklabels([x_labels[i] if i%2==0 else ' ' for i in range(len(x_labels))])
+                y_label = self.metric_units_dict[metric_type][metric]
+                axis.set_ylabel(y_label)
 
                 # plotting the linear trendline and R2
                 slope, intercept, r_value, _, _ = linregress(x_dummy, y)
@@ -584,7 +609,7 @@ class Plots:
                 axis.legend(loc='upper right', frameon=False, fontsize=8)
 
             # formatting and append
-            fig.suptitle(ratio_type)
+            fig.suptitle(metric_type)
             fig.tight_layout()
             self.plots.append(fig)
 
