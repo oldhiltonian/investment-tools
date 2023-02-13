@@ -693,17 +693,29 @@ class Company:
             for figure in self.trends:
                 pdf.savefig(figure)
        
-       
-        pdf1 = PdfReader(open(title_path, 'rb'))
-        pdf2 = PdfReader(open(charts_path, 'rb'))
-        pdf_output = PdfWriter()
-        for page_num in range(len(pdf1.pages)):
-            pdf_output.add_page(pdf1.pages[page_num])
-        for page_num in range(len(pdf2.pages)):
-            pdf_output.add_page(pdf2.pages[page_num])
+        with open(title_path, 'rb') as f1:
+            with open(charts_path, 'rb') as f2:
+                pdf1 = PdfReader(f1, 'rb')
+                pdf2 = PdfReader(f2, 'rb')
+                pdf_output = PdfWriter()
+                for page_num in range(len(pdf1.pages)):
+                    pdf_output.add_page(pdf1.pages[page_num])
+                for page_num in range(len(pdf2.pages)):
+                    pdf_output.add_page(pdf2.pages[page_num])
+                with open(file_path/file_name, 'wb') as output_file:
+                    pdf_output.write(output_file)
+
+
+        # pdf1 = PdfReader(open(title_path, 'rb'))
+        # pdf2 = PdfReader(open(charts_path, 'rb'))
+        # pdf_output = PdfWriter()
+        # for page_num in range(len(pdf1.pages)):
+        #     pdf_output.add_page(pdf1.pages[page_num])
+        # for page_num in range(len(pdf2.pages)):
+        #     pdf_output.add_page(pdf2.pages[page_num])
         
-        with open(file_path/file_name, 'wb') as output_file:
-            pdf_output.write(output_file)
+        # with open(file_path/file_name, 'wb') as output_file:
+        #     pdf_output.write(output_file)
 
         
 
