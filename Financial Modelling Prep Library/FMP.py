@@ -427,8 +427,10 @@ class Analysis:
         '''Stock Evaluation Ratios'''
         total_assets = self.data.balance_sheets['totalAssets']
         total_liabilities = self.data.balance_sheets['totalLiabilities']
+        long_term_debt = self.data.balance_sheets['longTermDebt']
         dividends_paid = self.data.cash_flow_statements['dividendsPaid']
         outstanding_shares = self.data.income_statements['outstandingShares_calc']
+        cash_and_equivalents = self.data.balance_sheets['cashAndCashEquivalents']
         eps = self.data.income_statements['eps']
         stock_price_high = self.data.stock_price_data['high']
         stock_price_avg = self.data.stock_price_data['avg_close']
@@ -443,7 +445,8 @@ class Analysis:
         df['dividendYield_low'] = (-dividends_paid/outstanding_shares)/stock_price_high
         df['dividendYield_high'] = (-dividends_paid/outstanding_shares)/stock_price_low 
         df['dividendYield_avg_close'] = (-dividends_paid/outstanding_shares)/stock_price_avg
-        df['editdaratio'] = self.data.income_statements['ebitdaratio']
+        df['ebitdaratio'] = self.data.income_statements['ebitdaratio']
+        df['cashPositionPerShare'] = (1e6*(cash_and_equivalents-long_term_debt))/outstanding_shares
 
 
         '''Profitability Ratios'''
@@ -470,7 +473,6 @@ class Analysis:
         # The fixed_charges calculation below is likely incomplete
         fixed_charges = self.data.income_statements['interestExpense'] + self.data.balance_sheets['capitalLeaseObligations']
         ebitda = self.data.income_statements['ebitda']
-        long_term_debt = self.data.balance_sheets['longTermDebt']
         total_equity = self.data.balance_sheets['totalEquity']
         total_debt = total_assets - total_equity
         df['interestCoverage'] = operating_income/interest_expense
@@ -483,7 +485,6 @@ class Analysis:
         current_liabilities = self.data.balance_sheets['totalCurrentLiabilities']
         inventory = self.data.balance_sheets['inventory']
         quick_assets = current_assets - inventory
-        cash_and_equivalents = self.data.balance_sheets['cashAndCashEquivalents']
         df['currentRatio'] = current_assets/current_liabilities
         df['quickRatio'] = quick_assets/current_liabilities
         df['cashRatio'] = cash_and_equivalents/current_liabilities
@@ -522,9 +523,11 @@ class Plots:
     def __init__(self, data, n):
         self.data = data
         self.n = n
+
         self.ratio_dict = {
             'Stock Evaluation Ratios': ['eps', 'eps_diluted', 'PE_high', 'PE_low', 'PE_avg_close', \
-                                'bookValuePerShare', 'dividendPayoutRatio', 'dividendYield_avg_close'],
+                                'bookValuePerShare', 'dividendPayoutRatio', 'dividendYield_avg_close',
+                                'cashPositionPerShare', 'ebitdaratio'],
 
             'Profitability Ratios': ['grossProfitMargin', 'operatingProfitMargin', 'pretaxProfitMargin', 'netProfitMargin',\
                                      'ROIC', 'ROE', 'ROA'],
