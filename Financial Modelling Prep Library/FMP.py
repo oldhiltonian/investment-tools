@@ -559,22 +559,26 @@ class Plots:
             nrows = -(-nplots//2)
             fig, ax = plt.subplots(nrows, 2, figsize=(11.7, 8.3))
             for counter, ratio in enumerate(self.ratio_dict[ratio_type]):
+                # targetting the right subplot
+                i, j = counter//2, counter%2
+                axis = ax[i][j]
+
                 # plotting the actual metric values
                 y = self.data[ratio][-self.n:]
                 x = y.index
                 x_dummy = range(len(y))
-                i, j = counter//2, counter%2
-                ax[i][j].plot(y, label='data')
-                ax[i][j].set_title(ratio)
-                ax[i][j].set_xticks(x)
-                ax[i][j].set_xticklabels([x_labels[i] if i%2==0 else ' ' for i in range(len(x_labels))])
+                
+                axis.plot(y, label='data')
+                axis.set_title(ratio)
+                axis.set_xticks(x)
+                axis.set_xticklabels([x_labels[i] if i%2==0 else ' ' for i in range(len(x_labels))])
 
                 # plotting the linear trendline and R2
                 slope, intercept, r_value, _, _ = linregress(x_dummy, y)
                 y_linear = slope*x_dummy + intercept
-                ax[i][j].plot(x_dummy, y_linear, alpha=0.5, linestyle='--', label='linear trend')
-                ax[i][j].plot([], [], ' ', label=f'R2: {r_value**2:.2f}')
-                ax[i][j].legend(loc='upper right', frameon=False, fontsize=8)
+                axis.plot(x_dummy, y_linear, alpha=0.5, linestyle='--', label='linear trend')
+                axis.plot([], [], ' ', label=f'R2: {r_value**2:.2f}') # Adding R2 value to legend
+                axis.legend(loc='upper right', frameon=False, fontsize=8)
 
             # formatting and append
             fig.suptitle(ratio_type)
