@@ -5,6 +5,8 @@ import datetime as dt
 from pandas_datareader import data as pdr
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+from reportlab.pdfgen import canvas
+from PyPDF2 import PdfMerger
 from scipy.stats import linregress
 import requests
 import pandas as pd
@@ -528,10 +530,10 @@ class Plots:
                                          'eps_diluted': '$/share',
                                          'PE_high': 'x',
                                          'PE_low': 'x',
-                                         'PE_avg_close': 'x',
+                                         #'PE_avg_close': 'x',
                                          'bookValuePerShare': '$/share',
                                          'dividendPayoutRatio': 'x',
-                                         'dividendYield_avg_close': 'x',
+                                         #'dividendYield_avg_close': 'x',
                                          'cashPositionPerShare': '$/share',
                                          'ebitdaratio': 'x'
                                         },
@@ -656,19 +658,33 @@ class Company:
         Creates the financial trend charts as a pdf file.
         
         """
-        title_message = f"Financial Ratio Trends for {self.ticker}"
-        title_page, ax = plt.subplots(1,1, figsize=(11.7, 8.3))
-        title_page.suptitle(title_message)
-        self.figures = [title_page] + self.trends
         end_date = self._financial_data.filing_date_objects[-1]
-        start_date = self._financial_data.filing_date_objects[0]
+        start_date = self._financial_data.filing_date_objects[-self._plots.n]
         file_name = f"{self.ticker}_{self.period}__{str(start_date)}_to_{str(end_date)}.pdf"
-        file_path = Path.cwd()/'Company Analysis'/self.ticker/self.period
+        file_path = Path('Company Analysis')/self.ticker/self.period
+
         try:
             os.makedirs(file_path)
         except FileExistsError:
             pass
+        
+        # Making title page
+        title_message = f"Financial Ratio Trends for {self.ticker}"
+        title_page = canvas.Canvas('title.pdf')
+        title_page.drawString(150, 360, title_message)
+        title_page.save()
+
 
         with PdfPages(filename=file_path/file_name) as pdf:
-            for figure in self.figures:
+            for figure in self.trends:
                 pdf.savefig(figure)
+        
+        pdf_merger = PdfMerger()
+        paths = ['title.pdf', file_path/file_name]
+        for path in paths:
+            pdf_merger.append(str(path))
+
+        # with open(file_path) as output_file:
+        #     pdf_merger.write(output_file)
+
+        
