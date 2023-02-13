@@ -6,7 +6,7 @@ from pandas_datareader import data as pdr
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from reportlab.pdfgen import canvas
-from PyPDF2 import PdfMerger
+from PyPDF2 import PdfReader, PdfWriter
 from scipy.stats import linregress
 import requests
 import pandas as pd
@@ -668,23 +668,39 @@ class Company:
         except FileExistsError:
             pass
         
+        try:
+            os.mkdir('bin')
+        except FileExistsError:
+            pass
+
         # Making title page
+        title_path = 'bin/title.pdf'
+        charts_path = 'bin/charts.pdf'
         title_message = f"Financial Ratio Trends for {self.ticker}"
-        title_page = canvas.Canvas('title.pdf')
-        title_page.drawString(150, 360, title_message)
+        title_page = canvas.Canvas(title_path)
+        title_page.drawString(210, 520, title_message)
         title_page.save()
 
 
-        with PdfPages(filename=file_path/file_name) as pdf:
+
+        with PdfPages(charts_path) as pdf:
             for figure in self.trends:
                 pdf.savefig(figure)
+       
+       
+        pdf1 = PdfReader(open(title_path, 'rb'))
+        pdf2 = PdfReader(open(charts_path, 'rb'))
+        pdf_output = PdfWriter()
+        for page_num in range(len(pdf1.pages)):
+            pdf_output.add_page(pdf1.pages[page_num])
+        for page_num in range(len(pdf2.pages)):
+            pdf_output.add_page(pdf2.pages[page_num])
         
-        pdf_merger = PdfMerger()
-        paths = ['title.pdf', file_path/file_name]
-        for path in paths:
-            pdf_merger.append(str(path))
+        with open(file_path/file_name, 'wb') as output_file:
+            pdf_output.write(output_file)
 
-        # with open(file_path) as output_file:
-        #     pdf_merger.write(output_file)
+        
+
+        
 
         
