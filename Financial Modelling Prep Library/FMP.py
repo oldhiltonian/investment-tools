@@ -522,9 +522,9 @@ class Plots:
     '''
     
     '''
-    def __init__(self, data, n):
+    def __init__(self, data, limit):
         self.data = data
-        self.n = n
+        self.limit = limit
         self.metric_units_dict = {
             'Stock Evaluation Ratios':  {'eps' : '$/share',
                                          'eps_diluted': '$/share',
@@ -577,7 +577,13 @@ class Plots:
         ticker-Q2-2021 or FY
         """
 
-        x_labels = ['-'.join(str(i).split('-')[1:]) for i in self.data.index[-self.n:]]
+        x_labels = ['-'.join(str(i).split('-')[1:]) for i in self.data.index[-self.limit:]]
+        if self.limit < 10:
+            spacing = 2
+        elif self.limit < 20:
+            spacing = 4
+        else:
+            spacing = 6
         
         for metric_type in self.metric_units_dict.keys():
             metrics_dict = self.metric_units_dict[metric_type]
@@ -592,14 +598,14 @@ class Plots:
                 axis = ax[i][j]
 
                 # plotting the actual metric values
-                y = self.data[metric][-self.n:]
+                y = self.data[metric][-self.limit:]
                 x = y.index
                 x_dummy = range(len(y))
                 
                 axis.plot(y, label='data')
                 axis.set_title(metric)
                 axis.set_xticks(x)
-                axis.set_xticklabels([x_labels[i] if i%2==0 else ' ' for i in range(len(x_labels))])
+                axis.set_xticklabels([x_labels[i] if i%spacing==0 else ' ' for i in range(len(x_labels))])
                 y_label = self.metric_units_dict[metric_type][metric]
                 axis.set_ylabel(y_label)
 
@@ -636,13 +642,13 @@ class Company:
     trends (list of plot objects): List of plots showing the trend of the financial metrics over time
 
     """
-    def __init__(self, ticker, api_key, data='online', period='annual', limit=120):
+    def __init__(self, ticker, api_key, data='online', period='annual', limit=20):
         self.ticker = ticker
         self.period = period
         self._financial_data = FinancialData(ticker, api_key, data, period, limit)
         self._analysis = Analysis(self._financial_data)
         self.metrics = self._analysis.metrics
-        self._plots = Plots(self.metrics, 10)
+        self._plots = Plots(self.metrics, limit)
         self.trends = self._plots.plots
 
     def export(self):
@@ -659,7 +665,7 @@ class Company:
         
         """
         end_date = self._financial_data.filing_date_objects[-1]
-        start_date = self._financial_data.filing_date_objects[-self._plots.n]
+        start_date = self._financial_data.filing_date_objects[-self._plots.limit]
         file_name = f"{self.ticker}_{self.period}__{str(start_date)}_to_{str(end_date)}.pdf"
         file_path = Path('Company Analysis')/self.ticker/self.period
 
