@@ -12,6 +12,7 @@ import requests
 import pandas as pd
 from pathlib import Path
 import os
+import time
 
 yf.pdr_override()
 
@@ -313,27 +314,33 @@ class FinancialData:
         self.reported_key_metrics.to_excel(save_path/'reported_key_metrics.xlsx')
 
 
-    def fetch_local_data(self):
+    def fetch_local_data(self, ticker, period):
         """
         This function loads financial statements from disk according to the company 
         and period information in the class instance.
         """
-        load_path = Path.cwd()/'Company Financial Data'/self.ticker/self.period
+        load_path = Path.cwd()/'Company Financial Data'/ticker/period
         self.income_statements = pd.read_parquet(load_path/'income_statements.parquet')
         self.balance_sheets = pd.read_parquet(load_path/'balance_sheets.parquet')
         self.cash_flow_statements = pd.read_parquet(load_path/'cash_flow_statements.parquet')
         self.stock_price_data = pd.read_parquet(load_path/'stock_price_data.parquet')
+        self.reported_key_metrics = pd.read_parquet(load_path/'reported_key_metrics.parquet')
+        self.frame_indecies = self.balance_sheets.index
 
 class ErrorReporter:
+    def __init__(self):
+        self.error_dict = dict()
+    
     def print_metric_errors(self, metric_errors, tolerance=0.05):
-        error_messages  = []
         line_count = len(metric_errors)
         for metric in metric_errors:
             if metric is not None:
                 count = sum(metric_errors[metric] >= tolerance)
-                error_messages.append(f"There were {count}/{line_count} values in {metric} that exceed the {tolerance} error tolerance.")
-        for message in error_messages:
-            print(message)
+                message = f"There were {count}/{line_count} values in {metric} that exceed the {tolerance} error tolerance."
+                self.error_dict[metric] = (count, message)
+        for tup in self.error_dict.values():
+            print(tup[1])
+
 
 class ManualAnalysis(ErrorReporter):
     """Financial Data Analysis class
@@ -361,6 +368,7 @@ class ManualAnalysis(ErrorReporter):
         Dictionary of financial metrics and ratios
     """
     def __init__(self, financial_data):
+        super().__init__()
         self.data = financial_data
         clc, rep, met_err, rat_err = self.cross_check_statement_calculations()
         self.calculated_statement_metrics = clc
@@ -430,16 +438,6 @@ class ManualAnalysis(ErrorReporter):
         ratio_errors = metric_errors.drop(['ebitda','grossProfit', 'operatingIncome', 'incomeBeforeTax', 'netIncome'], inplace=False, axis=1)
         self.print_metric_errors(ratio_errors)
         return calculated, reported, metric_errors, ratio_errors
-
-    # def print_metric_errors(self, metric_errors, tolerance=0.05):
-    #     error_messages  = []
-    #     line_count = len(metric_errors)
-    #     for metric in metric_errors:
-    #         if metric is not None:
-    #             count = sum(metric_errors[metric] >= tolerance)
-    #             error_messages.append(f"There were {count}/{line_count} values in {metric} that exceed the {tolerance} error tolerance.")
-    #     for message in error_messages:
-    #         print(message)
 
     def analyse(self):
         """Calculates and returns important financial metrics and ratios as a 
@@ -523,11 +521,27 @@ class ManualAnalysis(ErrorReporter):
         df['accountsReceivableToSalesRatio'] = accounts_receivable_to_sales_ratio
         df['receivablesTurnover'] = revenue/net_receivables
         df['receivablesTurnoverInDays'] = days/df['receivablesTurnover']
+
+
+        '''Metric Growth'''
+        metrics = ['eps', 'returnOnEquity', 'cashPerShare', 'PE_avg_close', 'ebitdaratio',
+                   'returnOnAssets', 'debtToTotalCap', 'totalDebtRatio']
+        span, init_idx = (1,1) if self.data.period == 'annual' else (4,3)
+        for metric in metrics:
+            series = df[metric]
+            col_header = metric+'_growth'
+            col_data = []
+            for i in range(len(series)):
+                if i < init_idx:
+                    col_data.append(np.nan)
+                else:
+                    col_data.append((series[i]/series[i-span])-1)
+            df[col_header] = pd.Series(col_data, index=self.data.frame_indecies)
         return df
 
     def cross_check_metric_calculations(self):
         df = pd.DataFrame()
-        metrics = ['grossProfitMargin', 'operatingProfitMargin', 'currentRatio', 'quickRatio', 
+        metrics = ['grossProfitMargin', 'operatingProfitMargin', 'currentRatio', 
                     'returnOnEquity', 'returnOnAssets', 'cashPerShare', 'interestCoverage',
                     'dividendPayoutRatio']
         
