@@ -59,10 +59,15 @@ class FinancialData:
         assert self.data in ['online', 'local'], "data must be 'online' or 'local'"
         assert self.period in ['annual', 'quarter'], "period must be 'annual' or 'quarter"
 
-
-
         if data == 'online':
-            bs, is_, cfs = self.fetch_financial_statements(ticker, api_key, period, limit)
+            self.fetch_online_data(ticker, api_key, period, limit)
+        elif data == 'local':
+            self.load_financial_statements(ticker, period)
+
+        
+
+    def fetch_online_data(self, ticker, api_key, period, limit):
+            bs, is_, cfs = self.fetch_financial_statements_fmp(ticker, api_key, period, limit)
             self.balance_sheets = self.build_dataframe(bs)
             self.income_statements = self.build_dataframe(is_)
             self.cash_flow_statements = self.build_dataframe(cfs)
@@ -75,14 +80,9 @@ class FinancialData:
             self.frame_indecies = self.balance_sheets.index
             self.filing_date_objects = self.balance_sheets['date']
             self.stock_price_data = self.fetch_stock_price_data_yf()
-            self.save_financial_attributes()
+            self.save_financial_attributes() 
 
-        elif data == 'local':
-            self.load_financial_statements(ticker, period)
-
-        
-
-    def fetch_financial_statements(self, company, api_key, period, limit):
+    def fetch_financial_statements_fmp(self, company, api_key, period, limit):
         # test that a tuple of json objects is returned
         """
         This function fetches the balance sheet, income statement, and cash flow statement
@@ -706,16 +706,6 @@ class Company:
                     pdf_output.write(output_file)
 
 
-        # pdf1 = PdfReader(open(title_path, 'rb'))
-        # pdf2 = PdfReader(open(charts_path, 'rb'))
-        # pdf_output = PdfWriter()
-        # for page_num in range(len(pdf1.pages)):
-        #     pdf_output.add_page(pdf1.pages[page_num])
-        # for page_num in range(len(pdf2.pages)):
-        #     pdf_output.add_page(pdf2.pages[page_num])
-        
-        # with open(file_path/file_name, 'wb') as output_file:
-        #     pdf_output.write(output_file)
 
         
 
