@@ -55,14 +55,12 @@ class FinancialData:
         self.period = period.lower().strip()
         self.limit = int(limit)
         self.days_in_period = 365 if period == 'annual' else 90
-
         assert self.data in ['online', 'local'], "data must be 'online' or 'local'"
         assert self.period in ['annual', 'quarter'], "period must be 'annual' or 'quarter"
-
         if data == 'online':
             self.fetch_online_data(ticker, api_key, period, limit)
         elif data == 'local':
-            self.load_financial_statements(ticker, period)
+            self.fetch_local_data(ticker, period)
 
         
 
@@ -71,11 +69,13 @@ class FinancialData:
             self.balance_sheets = self.build_dataframe(bs)
             self.income_statements = self.build_dataframe(is_)
             self.cash_flow_statements = self.build_dataframe(cfs)
-            
+            self.reported_key_metrics = self.build_dataframe(self.fetch_financial_metrics_fmp(ticker, api_key, period, limit))
+
             matching_index_1 =  self.balance_sheets['date'].equals(self.income_statements['date'])
             matching_index_2 = self.balance_sheets['date'].equals(self.cash_flow_statements['date'])
-            matching_indecies = matching_index_1 and matching_index_2
-            if not matching_indecies:
+            matching_index_3 = self.balance_sheets['date'].equals(self.reported_key_metrics['date'])
+            matching_indecies = matching_index_1 and matching_index_2 and matching_index_3
+            if not matching_indecies: 
                 self.filter_for_common_indecies()
             self.frame_indecies = self.balance_sheets.index
             self.filing_date_objects = self.balance_sheets['date']
@@ -111,8 +111,14 @@ class FinancialData:
         assert cash_flow_statements.status_code == 200, f"API call failed. Code <{cash_flow_statements.status_code}>"
         return balance_sheets.json(), income_statements.json(), cash_flow_statements.json()
 
+    def fetch_financial_metrics_fmp(self, ticker, api_key, period, limit):
+        url = f'https://financialmodelingprep.com/api/v3/ratios/{ticker}?period={period}&limit={limit}&apikey={api_key}'
+        data = requests.get(url)
+        assert data.status_code == 200, f"API call failed. Code <{data.status_code}>"
+        return data.json()
 
-    def build_dataframe(self, statements):
+
+    def build_dataframe(self, data):
         # throw an exception if statemetns != List(dict)
         """
         This function builds a pandas dataframe from a list of financial statement dictionaries.
@@ -129,15 +135,15 @@ class FinancialData:
             there is a mismatch in the columns across the financial statements.
         """
         err_msg = "Empty statement. Perhaps check the .json() conversion off of the API response"
-        assert len(statements) > 0, err_msg
+        assert len(data) > 0, err_msg
 
-        keys = set(statements[0].keys())
-        for statement in statements:
+        keys = set(data[0].keys())
+        for statement in data:
             assert set(statement.keys()) == keys, 'column mismatch across financial statement'
-        data = []
-        for statement in reversed(statements):
-            data.append(list(statement.values()))
-        df = pd.DataFrame(data, columns = statements[0].keys())
+        working_array = []
+        for statement in reversed(data):
+            working_array.append(list(statement.values()))
+        df = pd.DataFrame(working_array, columns = data[0].keys())
         df['index'] = df['date'].apply(lambda x: self.generate_index(x))
         df['date'] = df['date'].apply(lambda x: self.generate_date(x))
         df = df.set_index('index')
@@ -216,16 +222,19 @@ class FinancialData:
             None
         """
         print('Financial statements had different lengths...')
-        print(f"Financial statement lengths are BS: {len(self.balance_sheets)}, IS:{len(self.income_statements)}, CFS:{len(self.cash_flow_statements)}")
+        print(f"Financial statement lengths are BS: {len(self.balance_sheets)}, IS:{len(self.income_statements)}, CFS:{len(self.cash_flow_statements)}, Ratios:{len(self.reported_key_metrics)}")
         idx1 = self.balance_sheets.index
         idx2 = self.income_statements.index
         idx3 = self.cash_flow_statements.index
-        common_elements = idx1.intersection(idx2).intersection(idx3)
+        idx4 = self.reported_key_metrics.index
+        common_elements = idx1.intersection(idx2).intersection(idx3).intersection(idx4)
         self.balance_sheets = self.balance_sheets.loc[common_elements]
         self.income_statements = self.income_statements.loc[common_elements]
         self.cash_flow_statements = self.cash_flow_statements.loc[common_elements]
+        self.reported_key_metrics = self.reported_key_metrics.loc[common_elements]
         assert len(self.cash_flow_statements) == len(self.balance_sheets), 'Indecies could not be filtered for common elements'
         assert len(self.income_statements) == len(self.balance_sheets), 'Indecies could not be filtered for common elements'
+        assert len(self.reported_key_metrics) == len(self.balance_sheets), 'Indecies could not be filtered for common elements'
         print(f"Financial statement lengths are now each: {len(self.balance_sheets)}")
 
 
@@ -300,9 +309,11 @@ class FinancialData:
         self.cash_flow_statements.to_excel(save_path/'cash_flow_statements.xlsx')
         self.stock_price_data.to_parquet(save_path/'stock_price_data.parquet')
         self.stock_price_data.to_excel(save_path/'stock_price_data.xlsx')
+        self.reported_key_metrics.to_parquet(save_path/'reported_key_metrics.parquet')
+        self.reported_key_metrics.to_excel(save_path/'reported_key_metrics.xlsx')
 
 
-    def load_financial_statements(self):
+    def fetch_local_data(self):
         """
         This function loads financial statements from disk according to the company 
         and period information in the class instance.
@@ -342,16 +353,17 @@ class Analysis:
     """
     def __init__(self, financial_data):
         self.data = financial_data
-        clc, rep, met_err, rat_err = self.cross_check()
-        self.calculated_metrics = clc
-        self.reported_metrics= rep
-        self.metric_errors = met_err
-        self.ratio_errors = rat_err
-        self.metrics = self.analyse()
+        clc, rep, met_err, rat_err = self.cross_check_statement_calculations()
+        self.calculated_statement_metrics = clc
+        self.reported_statement_metrics= rep
+        self.statement_metric_errors = met_err
+        self.statement_ratio_errors = rat_err
+        self.statement_metrics = self.analyse()
+        self.cross_check_metric_calculations()
 
 
 
-    def cross_check(self):
+    def cross_check_statement_calculations(self):
         """
         Calculates financial metrics and and compares them to the reported values.
         
@@ -408,18 +420,18 @@ class Analysis:
         # Error between calculated and reported values
         metric_errors = calculated - reported
         ratio_errors = metric_errors.drop(['ebitda','grossProfit', 'operatingIncome', 'incomeBeforeTax', 'netIncome'], inplace=False, axis=1)
-        
-        error_tolerance = 0.05
+        self.print_metric_errors(ratio_errors)
+        return calculated, reported, metric_errors, ratio_errors
+
+    def print_metric_errors(self, metric_errors, tolerance=0.05):
         error_messages  = []
-        line_count = len(ratio_errors)
-        for ratio in ratios:
-            if ratio is not None:
-                count = sum(ratio_errors[ratio] >= error_tolerance)
-                error_messages.append(f"There were {count}/{line_count} values in {ratio} that exceed the {error_tolerance} error tolerance.")
+        line_count = len(metric_errors)
+        for metric in metric_errors:
+            if metric is not None:
+                count = sum(metric_errors[metric] >= tolerance)
+                error_messages.append(f"There were {count}/{line_count} values in {metric} that exceed the {tolerance} error tolerance.")
         for message in error_messages:
             print(message)
-
-        return calculated, reported, metric_errors, ratio_errors
 
     def analyse(self):
         """Calculates and returns important financial metrics and ratios as a 
@@ -448,7 +460,7 @@ class Analysis:
         df['dividendYield_high'] = (-dividends_paid/outstanding_shares)/stock_price_low 
         df['dividendYield_avg_close'] = (-dividends_paid/outstanding_shares)/stock_price_avg
         df['ebitdaratio'] = self.data.income_statements['ebitdaratio']
-        df['cashPositionPerShare'] = (1e6*(cash_and_equivalents-long_term_debt))/outstanding_shares
+        df['cashPerShare'] = (1e6*(cash_and_equivalents-long_term_debt))/outstanding_shares
 
 
         '''Profitability Ratios'''
@@ -467,8 +479,8 @@ class Analysis:
         df['pretaxProfitMargin'] = income_before_tax/revenue
         df['netProfitMargin'] = net_income/revenue
         df['ROIC'] = net_income/total_capitalization
-        df['ROE'] = net_income/total_shareholder_equity
-        df['ROA'] = net_income/total_assets
+        df['returnOnEquity'] = net_income/total_shareholder_equity
+        df['returnOnAssets'] = net_income/total_assets
 
         '''Debt and Interest Ratios'''
         interest_expense = self.data.income_statements['interestExpense']
@@ -505,6 +517,15 @@ class Analysis:
         df['receivablesTurnoverInDays'] = days/df['receivablesTurnover']
         return df
 
+    def cross_check_metric_calculations(self):
+        df = pd.DataFrame()
+        metrics = ['grossProfitMargin', 'operatingProfitMargin', 'currentRatio', 'quickRatio', 
+                    'returnOnEquity', 'returnOnAssets', 'cashPerShare', 'interestCoverage',
+                    'dividendPayoutRatio']
+        
+        for metric in metrics:
+            df[metric] = self.statement_metrics[metric] - self.data.reported_key_metrics[metric]
+        self.print_metric_errors(df, 0.05)
 
 class Plots:
     #self.n needs to be handled properly in the plot() function 
@@ -534,7 +555,7 @@ class Plots:
                                          'bookValuePerShare': '$/share',
                                          'dividendPayoutRatio': 'x',
                                          #'dividendYield_avg_close': 'x',
-                                         'cashPositionPerShare': '$/share',
+                                         'cashPerShare': '$/share',
                                          'ebitdaratio': 'x'
                                         },
             'Profitability Ratios':     {'grossProfitMargin': 'x',
@@ -647,7 +668,7 @@ class Company:
         self.period = period
         self._financial_data = FinancialData(ticker, api_key, data, period, limit)
         self._analysis = Analysis(self._financial_data)
-        self.metrics = self._analysis.metrics
+        self.metrics = self._analysis.statement_metrics
         self._plots = Plots(self.metrics, limit)
         self.trends = self._plots.plots
 

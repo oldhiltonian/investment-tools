@@ -118,7 +118,7 @@ class TestAnalysis(unittest.TestCase):
         self.analysis = Analysis(self.data)
 
     def test_cross_check(self):
-        return_dfs = self.analysis.cross_check()
+        return_dfs = self.analysis.cross_check_statement_calculations()
         calculated, reported, metric_errors, ratio_errors = return_dfs
         len_calculated = len(calculated)
         self.assertGreater(len_calculated, 0)
