@@ -324,9 +324,18 @@ class FinancialData:
         self.cash_flow_statements = pd.read_parquet(load_path/'cash_flow_statements.parquet')
         self.stock_price_data = pd.read_parquet(load_path/'stock_price_data.parquet')
 
+class ErrorReporter:
+    def print_metric_errors(self, metric_errors, tolerance=0.05):
+        error_messages  = []
+        line_count = len(metric_errors)
+        for metric in metric_errors:
+            if metric is not None:
+                count = sum(metric_errors[metric] >= tolerance)
+                error_messages.append(f"There were {count}/{line_count} values in {metric} that exceed the {tolerance} error tolerance.")
+        for message in error_messages:
+            print(message)
 
-
-class Analysis:
+class ManualAnalysis(ErrorReporter):
     """Financial Data Analysis class
 
     Analyzes financial data and returns important metrics and ratios.
@@ -389,7 +398,6 @@ class Analysis:
 
         metrics = ['ebitda', 'ebitdaratio', 'grossProfit', 'grossProfitRatio', 'operatingIncome', 'operatingIncomeRatio', \
                     'incomeBeforeTax', 'incomeBeforeTaxRatio', 'netIncome', 'netIncomeRatio', 'eps']
-        ratios = [i if 'ratio' in i.lower() else None for i in metrics] + ['eps']
 
         # Calculated ratios from reported values on the financial statements
         calculated['ebitda'] = revenue - cost_of_revenue- RND_expenses - SGA_expenses - other_expenses + depreciation_amortization
@@ -423,15 +431,15 @@ class Analysis:
         self.print_metric_errors(ratio_errors)
         return calculated, reported, metric_errors, ratio_errors
 
-    def print_metric_errors(self, metric_errors, tolerance=0.05):
-        error_messages  = []
-        line_count = len(metric_errors)
-        for metric in metric_errors:
-            if metric is not None:
-                count = sum(metric_errors[metric] >= tolerance)
-                error_messages.append(f"There were {count}/{line_count} values in {metric} that exceed the {tolerance} error tolerance.")
-        for message in error_messages:
-            print(message)
+    # def print_metric_errors(self, metric_errors, tolerance=0.05):
+    #     error_messages  = []
+    #     line_count = len(metric_errors)
+    #     for metric in metric_errors:
+    #         if metric is not None:
+    #             count = sum(metric_errors[metric] >= tolerance)
+    #             error_messages.append(f"There were {count}/{line_count} values in {metric} that exceed the {tolerance} error tolerance.")
+    #     for message in error_messages:
+    #         print(message)
 
     def analyse(self):
         """Calculates and returns important financial metrics and ratios as a 
@@ -460,7 +468,7 @@ class Analysis:
         df['dividendYield_high'] = (-dividends_paid/outstanding_shares)/stock_price_low 
         df['dividendYield_avg_close'] = (-dividends_paid/outstanding_shares)/stock_price_avg
         df['ebitdaratio'] = self.data.income_statements['ebitdaratio']
-        df['cashPerShare'] = (1e6*(cash_and_equivalents-long_term_debt))/outstanding_shares
+        df['cashPerShare'] = (1*(cash_and_equivalents-long_term_debt))/outstanding_shares
 
 
         '''Profitability Ratios'''
@@ -543,8 +551,8 @@ class Plots:
     '''
     
     '''
-    def __init__(self, data, limit):
-        self.data = data
+    def __init__(self, metrics, limit):
+        self.data = metrics
         self.limit = limit
         self.metric_units_dict = {
             'Stock Evaluation Ratios':  {'eps' : '$/share',
@@ -667,7 +675,7 @@ class Company:
         self.ticker = ticker
         self.period = period
         self._financial_data = FinancialData(ticker, api_key, data, period, limit)
-        self._analysis = Analysis(self._financial_data)
+        self._analysis = ManualAnalysis(self._financial_data)
         self.metrics = self._analysis.statement_metrics
         self._plots = Plots(self.metrics, limit)
         self.trends = self._plots.plots
@@ -678,9 +686,10 @@ class Company:
         Exports the financial trend charts to disk as a pdf file.
         
         """
-        self.print_charts()
+        self._export_charts_pdf()
+        # also export key findings based on the analyis
 
-    def print_charts(self):
+    def _export_charts_pdf(self):
         """
         Creates the financial trend charts as a pdf file.
         

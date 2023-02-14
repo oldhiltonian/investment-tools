@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 import numpy as np
 import datetime as dt
-from FMP import FinancialData, Analysis, Plots, Company
+from FMP import FinancialData, ManualAnalysis, Plots, Company
 from pathlib import Path
 
 key_path = Path().home()/'desktop'/'FinancialModellingPrep_API.txt'
@@ -115,7 +115,7 @@ class TestAnalysis(unittest.TestCase):
         self.period = 'annual'
         self.limit = 120
         self.data = FinancialData(self.ticker, self.api_key, self.data, self.period, self.limit)
-        self.analysis = Analysis(self.data)
+        self.analysis = ManualAnalysis(self.data)
 
     def test_cross_check(self):
         return_dfs = self.analysis.cross_check_statement_calculations()
