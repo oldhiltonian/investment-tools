@@ -541,9 +541,9 @@ class ManualAnalysis:
 
 
         '''Metric Growth'''
-        metrics = ['eps', 'returnOnEquity', 'cashPerShare', 'PE_avg_close', 'ebitdaratio',
-                   'returnOnAssets', 'debtToTotalCap', 'totalDebtRatio']
-        span, init_idx = (1,1) if self.data.period == 'annual' else (4,3)
+        metrics = ['eps', 'returnOnEquity', 'cashPerShare', 'PE_avg_close', 'ebitdaratio', 'ROIC',
+                   'netProfitMargin', 'returnOnAssets', 'debtToTotalCap', 'totalDebtRatio']
+        span, init_idx = (1,1) if self.data.period == 'annual' else (4,4)
         for metric in metrics:
             series = df[metric]
             col_header = metric+'_growth'
@@ -552,7 +552,7 @@ class ManualAnalysis:
                 if i < init_idx:
                     col_data.append(np.nan)
                 else:
-                    col_data.append((series[i]/series[i-span])-1)
+                    col_data.append((series[i]-series[i-span])/abs(series[i-span]))
             df[col_header] = pd.Series(col_data, index=self.data.frame_indecies)
         return df
 
@@ -582,9 +582,12 @@ class Plots:
     '''
     
     '''
-    def __init__(self, metrics, limit):
+    def __init__(self, ticker, period, metrics, limit, filing_dates):
+        self.ticker = ticker
+        self.period = period
         self.data = metrics
         self.limit = limit
+        self.filing_dates = filing_dates
         self.metric_units_dict = {
             'Stock Evaluation Ratios':  {'eps' : '$/share',
                                          'eps_diluted': '$/share',
@@ -624,9 +627,9 @@ class Plots:
  }
 
         self.plots = []
-        self.plot()
+        self.plot_metrics()
 
-    def plot(self):
+    def plot_metrics(self):
         """
         Plots the financial ratios using matplotlib.
 
@@ -680,6 +683,52 @@ class Plots:
             fig.suptitle(metric_type)
             fig.tight_layout()
             self.plots.append(fig)
+        
+    def _export_charts_pdf(self):
+        """
+        Creates the financial trend charts as a pdf file.
+        
+        """
+        end_date = self.filing_dates[-1]
+        start_date = self.filing_dates[-self.limit]
+        file_name = f"{self.ticker}_{self.period}__{str(start_date)}_to_{str(end_date)}.pdf"
+        file_path = Path('Company Analysis')/self.ticker/self.period
+
+        try:
+            os.makedirs(file_path)
+        except FileExistsError:
+            pass
+        
+        try:
+            os.mkdir('bin')
+        except FileExistsError:
+            pass
+
+        # Making title page
+        title_path = 'bin/title.pdf'
+        charts_path = 'bin/charts.pdf'
+        title_message = f"Financial Ratio Trends for {self.ticker}"
+        title_page = canvas.Canvas(title_path)
+        title_page.drawString(210, 520, title_message)
+        title_page.save()
+
+
+
+        with PdfPages(charts_path) as pdf:
+            for figure in self.plots:
+                pdf.savefig(figure)
+    
+        with open(title_path, 'rb') as f1:
+            with open(charts_path, 'rb') as f2:
+                pdf1 = PdfReader(f1, 'rb')
+                pdf2 = PdfReader(f2, 'rb')
+                pdf_output = PdfWriter()
+                for page_num in range(len(pdf1.pages)):
+                    pdf_output.add_page(pdf1.pages[page_num])
+                for page_num in range(len(pdf2.pages)):
+                    pdf_output.add_page(pdf2.pages[page_num])
+                with open(file_path/file_name, 'wb') as output_file:
+                    pdf_output.write(output_file)
 
 
 
@@ -706,65 +755,81 @@ class Company:
         self.ticker = ticker
         self.period = period
         self._financial_data = FinancialData(ticker, api_key, data, period, limit)
+        self.filing_dates = self._financial_data.filing_date_objects
         self._analysis = ManualAnalysis(self._financial_data)
         self.metrics = self._analysis.statement_metrics
-        self._plots = Plots(self.metrics, limit)
+        self._plots = Plots(self.ticker, self.period, self.metrics, limit, self.filing_dates)
         self.trends = self._plots.plots
+        self.scores = self.recommendation()
+
+    def recommendation(self):
+        key_metrics = ['eps_growth', 'returnOnEquity_growth', 'cashPerShare_growth', 'ebitdaratio_growth',
+                        'ROIC_growth', 'returnOnAssets_growth', 'debtToTotalCap_growth', 'totalDebtRatio_growth']
+        scores = dict()
+        for metric in key_metrics:
+            score, strength = self.score(metric)
+            scores[metric] = {'score': score,
+                              'strength': strength}
+        return scores
+        
+
+    def score(self, metric):
+        if 'debt' in metric.lower():
+            modifier = -1
+        else:
+            modifier = 1
+        
+        metrics = self.metrics[metric].copy()
+        metrics = metrics.dropna()
+        mean = metrics.mean()
+        slope, intercept, r_val, _, _= linregress(range(len(metrics)), metrics)
+        r_val = r_val**2
+
+        growth_score = self.score_mean_growth(modifier * mean)
+        stability_score = self.score_trend_strength(r_val)
+
+        return (growth_score, stability_score)
+
+
+    def score_mean_growth(self, mean_growth):
+        growth = float(mean_growth)
+        if growth <= 0.05:
+            indicator = 0
+        elif growth <= 0.10:
+            indicator = 1
+        elif growth <= 0.15:
+            indicator = 2
+        elif growth <= 0.2:
+            indicator = 3
+        else:
+            indicator = 4
+
+        return indicator
+    
+    def score_trend_strength(self, R2):
+        R2_ = float(R2)
+        if R2_ <= 0.2:
+            strength = 0
+        elif R2_ <= 0.3:
+            strength = 1
+        elif R2_ <= 0.5:
+            strength = 2
+        elif R2_  <= 0.75:
+            strength = 3
+        else:
+            strength = 4
+        
+        return strength
+
 
     def export(self):
-        # why did I make this method again??
         """
         Exports the financial trend charts to disk as a pdf file.
         
         """
-        self._export_charts_pdf()
+        self._plots._export_charts_pdf()
         # also export key findings based on the analyis
 
-    def _export_charts_pdf(self):
-        """
-        Creates the financial trend charts as a pdf file.
-        
-        """
-        end_date = self._financial_data.filing_date_objects[-1]
-        start_date = self._financial_data.filing_date_objects[-self._plots.limit]
-        file_name = f"{self.ticker}_{self.period}__{str(start_date)}_to_{str(end_date)}.pdf"
-        file_path = Path('Company Analysis')/self.ticker/self.period
-
-        try:
-            os.makedirs(file_path)
-        except FileExistsError:
-            pass
-        
-        try:
-            os.mkdir('bin')
-        except FileExistsError:
-            pass
-
-        # Making title page
-        title_path = 'bin/title.pdf'
-        charts_path = 'bin/charts.pdf'
-        title_message = f"Financial Ratio Trends for {self.ticker}"
-        title_page = canvas.Canvas(title_path)
-        title_page.drawString(210, 520, title_message)
-        title_page.save()
-
-
-
-        with PdfPages(charts_path) as pdf:
-            for figure in self.trends:
-                pdf.savefig(figure)
-       
-        with open(title_path, 'rb') as f1:
-            with open(charts_path, 'rb') as f2:
-                pdf1 = PdfReader(f1, 'rb')
-                pdf2 = PdfReader(f2, 'rb')
-                pdf_output = PdfWriter()
-                for page_num in range(len(pdf1.pages)):
-                    pdf_output.add_page(pdf1.pages[page_num])
-                for page_num in range(len(pdf2.pages)):
-                    pdf_output.add_page(pdf2.pages[page_num])
-                with open(file_path/file_name, 'wb') as output_file:
-                    pdf_output.write(output_file)
 
 
 
