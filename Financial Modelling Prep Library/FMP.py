@@ -585,8 +585,8 @@ class Plots:
                                          'pretaxProfitMargin': 'x',
                                          'netProfitMargin': 'x',
                                          'ROIC': 'x',
-                                         'ROE': 'x',
-                                         'ROA': 'x'
+                                         'returnOnEquity': 'x',
+                                         'returnOnAssets': 'x'
                                         },
             'Debt & Interest Ratios':   {'interestCoverage': 'x',
                                          'fixedChargeCoverage': 'x',
@@ -596,7 +596,7 @@ class Plots:
             'Liquidity Ratios':         {'currentRatio': 'x',
                                          'quickRatio': 'x',
                                          'cashRatio': 'x'},
-            'Profitability Ratios':     {'totalAssetTurnover': 'YYY',
+            'Efficiency Ratios':     {'totalAssetTurnover': 'YYY',
                                          'inventoryToSalesRatio': 'x',
                                          'inventoryTurnoverRatio': 'YYY',
                                          'inventoryTurnoverInDays': 'YYY',
