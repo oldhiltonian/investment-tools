@@ -280,7 +280,7 @@ class FinancialData:
                 filter_date_end = self.filing_date_objects.iloc[i]
 
             period_data = df[(df['date'] >= filter_date_start) & (df['date'] < filter_date_end)]
-            
+
             try:
                 max_price = max(period_data['High'])
                 min_price = min(period_data['Low'])
@@ -334,22 +334,22 @@ class FinancialData:
         self.reported_key_metrics = pd.read_parquet(load_path/'reported_key_metrics.parquet')
         self.frame_indecies = self.balance_sheets.index
 
-class ErrorReporter:
-    def __init__(self):
-        self.error_dict = dict()
+# class ErrorReporter:
+#     def __init__(self):
+#         self.error_dict = dict()
     
-    def print_metric_errors(self, metric_errors, tolerance=0.05):
-        line_count = len(metric_errors)
-        for metric in metric_errors:
-            if metric is not None:
-                count = sum(metric_errors[metric] >= tolerance)
-                message = f"There were {count}/{line_count} values in {metric} that exceed the {tolerance} error tolerance."
-                self.error_dict[metric] = (count, message)
-        for tup in self.error_dict.values():
-            print(tup[1])
+#     def print_metric_errors(self, metric_errors, tolerance=0.05):
+#         line_count = len(metric_errors)
+#         for metric in metric_errors:
+#             if metric is not None:
+#                 count = sum(metric_errors[metric] >= tolerance)
+#                 message = f"There were {count}/{line_count} values in {metric} that exceed the {tolerance} error tolerance."
+#                 self.error_dict[metric] = (count, message)
+#         for tup in self.error_dict.values():
+#             print(tup[1])
 
 
-class ManualAnalysis(ErrorReporter):
+class ManualAnalysis:
     """Financial Data Analysis class
 
     Analyzes financial data and returns important metrics and ratios.
@@ -385,7 +385,17 @@ class ManualAnalysis(ErrorReporter):
         self.statement_metrics = self.analyse()
         self.cross_check_metric_calculations()
 
-
+    
+    def print_metric_errors(self, metric_errors, tolerance=0.05):
+        self.error_dict = dict()
+        line_count = len(metric_errors)
+        for metric in metric_errors:
+            if metric is not None:
+                count = sum(metric_errors[metric] >= tolerance)
+                message = f"There were {count}/{line_count} values in {metric} that exceed the {tolerance} error tolerance."
+                self.error_dict[metric] = (count, message)
+        for tup in self.error_dict.values():
+            print(tup[1])
 
     def cross_check_statement_calculations(self):
         """
