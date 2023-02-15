@@ -54,10 +54,11 @@ class FinancialData:
         self.api_key = str(api_key)
         self.data = data.lower().strip()
         self.period = period.lower().strip()
-        self.limit = int(limit)
-        self.days_in_period = 365 if period == 'annual' else 90
         assert self.data in ['online', 'local'], "data must be 'online' or 'local'"
         assert self.period in ['annual', 'quarter'], "period must be 'annual' or 'quarter"
+        self.limit = int(limit)
+        self.days_in_period = 365 if period == 'annual' else 90
+
         if data == 'online':
             self.fetch_online_data(ticker, api_key, period, limit)
         elif data == 'local':
@@ -269,11 +270,17 @@ class FinancialData:
         A pandas DataFrame containing the aggregated time series.
         """
         working_array = []
+        days = self.days_in_period
         for i in range(len(self.filing_date_objects)):
             if i == 0 or i == len(self.filing_date_objects):
-                working_array.append([np.nan]*3)
-                continue
-            period_data = df[(df['date'] >= self.filing_date_objects.iloc[i-1]) & (df['date'] < self.filing_date_objects.iloc[i])]
+                filter_date_end = self.filing_date_objects[i]
+                filter_date_start = filter_date_end - dt.timedelta(days=days)
+            else:
+                filter_date_start = self.filing_date_objects.iloc[i-1]
+                filter_date_end = self.filing_date_objects.iloc[i]
+
+            period_data = df[(df['date'] >= filter_date_start) & (df['date'] < filter_date_end)]
+            
             try:
                 max_price = max(period_data['High'])
                 min_price = min(period_data['Low'])
