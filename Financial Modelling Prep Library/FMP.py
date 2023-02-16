@@ -1,4 +1,4 @@
-
+import datetime as dt
 import yfinance as yf
 import numpy as np
 import datetime as dt
@@ -692,10 +692,11 @@ class Plots:
         Creates the financial trend charts as a pdf file.
         
         """
+        date = str(dt.datetime.now()).split()[0]
         end_date = self.filing_dates[-1]
         start_date = self.filing_dates[-self.limit]
         file_name = f"{self.ticker}_{self.period}__{str(start_date)}_to_{str(end_date)}.pdf"
-        file_path = Path('Company Analysis')/self.ticker/self.period
+        file_path = Path('Company Analysis')/date/self.ticker/self.period
 
         try:
             os.makedirs(file_path)
@@ -763,6 +764,7 @@ class Company:
         self.filing_dates = self._financial_data.filing_date_objects
         self._analysis = ManualAnalysis(self._financial_data, self.verbose)
         self.metrics = self._analysis.statement_metrics
+        self._charts_printed = False
         if self.verbose:
             self.print_charts()
             # self._plots = Plots(self.ticker, self.period, self.metrics, limit, self.filing_dates)
@@ -846,8 +848,11 @@ class Company:
         return False if vote < 1.5*len(scores) else True 
 
     def print_charts(self):
+        if self._charts_printed:
+            return
         self._plots = Plots(self.ticker, self.period, self.metrics, self.limit, self.filing_dates)
         self.trends = self._plots.plots
+        self._charts_printed = True
     
     def export(self):
         """
