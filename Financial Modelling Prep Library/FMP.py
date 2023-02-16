@@ -79,6 +79,12 @@ class FinancialData:
             matching_indecies = matching_index_1 and matching_index_2 and matching_index_3
             if not matching_indecies: 
                 self.filter_for_common_indecies()
+            if self.period == 'annual':
+                required_length = 2
+            else:
+                required_length = 4
+            err_msg = f"Financial statements are shorter than the required length of {required_length}"
+            assert len(self.balance_sheets) >= required_length, err_msg
             self.frame_indecies = self.balance_sheets.index
             self.filing_date_objects = self.balance_sheets['date']
             self.stock_price_data = self.fetch_stock_price_data_yf()
@@ -136,7 +142,7 @@ class FinancialData:
             AssertionError: If the statements passed in as argument is not a list of dictionaries or if
             there is a mismatch in the columns across the financial statements.
         """
-        err_msg = "Empty statement. Perhaps check the .json() conversion off of the API response"
+        err_msg = f"Empty statement for {self.ticker}. Perhaps check the .json() conversion off of the API response"
         assert len(data) > 0, err_msg
 
         keys = set(data[0].keys())
@@ -591,6 +597,10 @@ class Plots:
         self.data = metrics
         self.limit = limit
         self.filing_dates = filing_dates
+        if limit > len(metrics):
+            self.limit = len(metrics)
+        else:
+            self.limit = limit
         self.metric_units_dict = {
             'Stock Evaluation Ratios':  {'eps' : '$/share',
                                          'eps_diluted': '$/share',
@@ -801,8 +811,11 @@ class Company:
         metrics = self.metrics[metric].copy()
         metrics = metrics.dropna()
         mean = metrics.mean()
-        slope, intercept, r_val, _, _= linregress(range(len(metrics)), metrics)
-        r_val = r_val**2
+        try:
+            slope, intercept, r_val, _, _= linregress(range(len(metrics)), metrics)
+            r_val = r_val**2
+        except ValueError:
+            r_val = 0
 
         growth_score = self.score_mean_growth(modifier * mean)
         stability_score = self.score_trend_strength(r_val)
