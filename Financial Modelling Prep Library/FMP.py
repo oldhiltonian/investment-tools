@@ -374,9 +374,10 @@ class ManualAnalysis:
     metrics : dict
         Dictionary of financial metrics and ratios
     """
-    def __init__(self, financial_data):
+    def __init__(self, financial_data, verbose=False):
         super().__init__()
         self.data = financial_data
+        self.verbose = verbose
         clc, rep, met_err, rat_err = self.cross_check_statement_calculations()
         self.calculated_statement_metrics = clc
         self.reported_statement_metrics= rep
@@ -387,6 +388,8 @@ class ManualAnalysis:
 
     
     def print_metric_errors(self, metric_errors, tolerance=0.05):
+        if not self.verbose:
+            return
         self.error_dict = dict()
         line_count = len(metric_errors)
         for metric in metric_errors:
@@ -751,20 +754,34 @@ class Company:
     trends (list of plot objects): List of plots showing the trend of the financial metrics over time
 
     """
-    def __init__(self, ticker, api_key, data='online', period='annual', limit=20):
+    def __init__(self, ticker, api_key, data='online', period='annual', limit=20, verbose=False):
         self.ticker = ticker
         self.period = period
+        self.limit = limit
+        self.verbose = verbose
         self._financial_data = FinancialData(ticker, api_key, data, period, limit)
         self.filing_dates = self._financial_data.filing_date_objects
-        self._analysis = ManualAnalysis(self._financial_data)
+        self._analysis = ManualAnalysis(self._financial_data, self.verbose)
         self.metrics = self._analysis.statement_metrics
-        self._plots = Plots(self.ticker, self.period, self.metrics, limit, self.filing_dates)
-        self.trends = self._plots.plots
+        if self.verbose:
+            self.print_charts()
+            # self._plots = Plots(self.ticker, self.period, self.metrics, limit, self.filing_dates)
+            # self.trends = self._plots.plots
         self.scores = self.recommendation()
+        self.outcome = self.eval_(self.scores)
+        if self.outcome:
+            self.print_charts()
+            self.export()
+        
 
     def recommendation(self):
-        key_metrics = ['eps_growth', 'returnOnEquity_growth', 'cashPerShare_growth', 'ebitdaratio_growth',
-                        'ROIC_growth', 'returnOnAssets_growth', 'debtToTotalCap_growth', 'totalDebtRatio_growth']
+        '''Built to look at the main metrics that indicate value to shareholders. Debt is also included but is handled differently
+            than the equity metrics in the self.score() function
+            Why these metrics: The equity ones are the main metrics regarding value to shareholders
+            Debt is also important, as a company that is paying down debt is putting itself in a good position
+            Tradeoff tough, as if there is no debt then there will be no decrease in debt, which will score badly.'''
+        key_metrics = ['eps_growth', 'returnOnEquity_growth', 'ROIC_growth', 'returnOnAssets_growth', 
+                       'debtToTotalCap_growth', 'totalDebtRatio_growth']
         scores = dict()
         for metric in key_metrics:
             score, strength = self.score(metric)
@@ -821,7 +838,17 @@ class Company:
         
         return strength
 
+    def eval_(self, scores):
+        vote = 0
+        for key in scores.keys():
+            vote += scores[key]['score']
+        # Require an average score of 1.5 for each metric
+        return False if vote < 1.5*len(scores) else True 
 
+    def print_charts(self):
+        self._plots = Plots(self.ticker, self.period, self.metrics, self.limit, self.filing_dates)
+        self.trends = self._plots.plots
+    
     def export(self):
         """
         Exports the financial trend charts to disk as a pdf file.
