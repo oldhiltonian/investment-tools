@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 import numpy as np
 import datetime as dt
-from FMP import FinancialData, ManualAnalysis, Plots, Company
+from fmp_layer_1 import FinancialData, ManualAnalysis, Plots, Company
 from pathlib import Path
 
 key_path = Path().home()/'desktop'/'FinancialModellingPrep_API.txt'
