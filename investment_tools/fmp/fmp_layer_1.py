@@ -306,7 +306,7 @@ class FinancialData:
         """
         This function saves the financial attributes of the object to disk as a parquet file.        
         """
-        save_path = Path.cwd()/'Company Financial Data'/self.ticker/self.period
+        save_path = Path.cwd()/'investment_tools'/'data'/'Company Financial Data'/self.ticker/self.period
         try:
             os.makedirs(save_path)
         except FileExistsError:
@@ -706,7 +706,7 @@ class Plots:
         end_date = self.filing_dates[-1]
         start_date = self.filing_dates[-self.limit]
         file_name = f"{self.ticker}_{self.period}__{str(start_date)}_to_{str(end_date)}.pdf"
-        file_path = Path('Company Analysis')/date/self.ticker/self.period
+        file_path = Path.cwd()/'investment_tools'/'data'/'Company Analysis'/date/self.ticker/self.period
 
         try:
             os.makedirs(file_path)
