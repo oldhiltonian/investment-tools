@@ -18,39 +18,31 @@ yf.pdr_override()
 
 class FinancialData:
     """
-    A class for pulling and organising financial data
-
-    The FinancialData class is used for fetching and processing financial data for
-    a given company. The data can be fetched from either a local source or from the 
-    Financial Modeling Prep API (https://financialmodelingprep.com/developer/docs/). 
-    
-    Args:
-    - ticker (str): Ticker symbol for the company to fetch financial data for
-    - api_key (str, optional): API key for accessing the Financial Modeling Prep API. 
-        Default is an empty string.
-    - data (str, optional): Data source. Valid options are 'local' and 'online'. 
-        Default is 'local'.
-    - period (str, optional): Period of the financial data to retrieve. Valid options 
-        are 'annual' and 'quarter'. Default is 'annual'.
-    - limit (int, optional): Maximum number of financial records to retrieve. 
-        Default is 120.
+    A class for fetching and processing financial data for a given stock.
 
     Attributes:
-    - ticker (str): Ticker symbol for the company to fetch financial data for
-    - api_key (str): API key for accessing the Financial Modeling Prep API.
-    - data (str): Data source. Can be 'local' or 'online'.
-    - period (str): Period of the financial data to retrieve. Can be 'annual' or 'quarterly'.
-    - limit (int): Maximum number of financial records to retrieve.
-    - days_in_period (int): The number of days in a period (90 for quarter, 365 for annual)
-    - balance_sheets (pandas.DataFrame): Balance sheets for the company
-    - income_statements (pandas.DataFrame): Income statements for the company
-    - cash_flow_statements (pandas.DataFrame): Cash flow statements for the company
-    - filing_date_objects (pandas.Series): A series of date objects, one for each 
-        financial statement.
-    - stock_price_data (pandas.DataFrame): Stock price data for the company
+        ticker (str): The ticker symbol for the stock.
+        api_key (str): The user's API key for accessing financial data (optional).
+        data (str): Whether to fetch data from online or local source.
+        period (str): The period of the data, either 'annual' or 'quarter'.
+        limit (int): The maximum number of data points to fetch from the API.
+
+    Raises:
+        AssertionError: If invalid input is provided for data or period.
+
     """
     def __init__(self, ticker, api_key='', data='local', period='annual', limit=120):
-        # try remove side effects from these functon calls
+        """
+        Initializes a new instance of the FinancialData class.
+
+        Args:
+            ticker (str): The ticker symbol for the stock.
+            api_key (str): The user's API key for accessing financial data (optional).
+            data (str): Whether to fetch data from online or local source.
+            period (str): The period of the data, either 'annual' or 'quarter'.
+            limit (int): The maximum number of data points to fetch from the API.
+
+        """
         self.ticker = ticker.upper().strip()
         self.api_key = str(api_key)
         self.data = data.lower().strip()
@@ -66,19 +58,39 @@ class FinancialData:
 
         if not self.check_for_matching_indecies():
             self.filter_for_common_indecies(self.get_common_df_indicies())
-            
+        
+        self.assert_required_length(self.balance_sheets)
         self.frame_indecies = self.get_frame_indecies()
         self.filing_date_objects = self.balance_sheets['date']
         self.stock_price_data = self.fetch_stock_price_data_yf()
+        self.assert_required_length(self.stock_price_data)
         self.save_financial_attributes()
         
 
     def assert_valid_user_inputs(self):
+        """
+        Ensures that valid user inputs are provided for data and period.
+        
+        Raises:
+            AssertionError: If invalid input is provided for data or period.
+        """
         assert self.data in ['online', 'local'], "data must be 'online' or 'local'"
         assert self.period in ['annual', 'quarter'], "period must be 'annual' or 'quarter"
 
 
-    def generate_url(self, data_type):
+    def generate_request_url(self, data_type):
+        """
+        Generates a URL to fetch data from the Financial Modeling Prep API.
+        
+        Args:
+            data_type (str): The type of data to fetch.
+        
+        Returns:
+            str: The URL for the requested data.
+        
+        Raises:
+            ValueError: If an invalid data type is provided.
+        """
         fmp_template = 'https://financialmodelingprep.com/api/v3/{}/{}?period={}&limit={}&apikey={}'
         ticker = self.ticker
         period = self.period
@@ -101,8 +113,17 @@ class FinancialData:
     
 
     def fetch_raw_data(self, data_type):
+        """
+        Fetches raw financial data from either the Financial Modeling Prep API or a local file.
+        
+        Args:
+            data_type (str): The type of data to fetch.
+        
+        Returns:
+            pandas.DataFrame: The fetched financial data.
+        """
         if self.data == 'online':
-            url = self.generate_url(data_type)
+            url = self.generate_request_url(data_type)
             raw_data = requests.get(url)
             self.assert_valid_server_response(raw_data)
         elif self.data == 'local':
@@ -112,41 +133,40 @@ class FinancialData:
             
 
     def get_load_path(self, data_type, ticker, period):
+        """
+        Gets the file path to load a local financial data file.
+        
+        Args:
+            data_type (str): The type of financial data to fetch.
+            ticker (str): The ticker symbol for the stock.
+            period (str): The period of the data, either 'annual' or 'quarter'.
+        
+        Returns:
+            pathlib.Path: The file path for the requested data.
+        """
         return Path.cwd()/'Company Financial Data'/ticker/period/data_type/'.parquet'
 
 
     def get_frame_indecies(self):
+        """
+        Gets the index for the financial data.
+        
+        Returns:
+            pandas.Index: The index for the financial data.
+        """
         self.frame_indecies = self.balance_sheets.index
 
 
-    def fetch_financial_metrics_fmp(self):
-        data = requests.get(self.generate_url('ratios'))
-        self.assert_valid_server_response(data)
-        return data.json()
-
-
     def build_dataframe(self, data):
-        # throw an exception if statemetns != List(dict)
         """
-        This function builds a pandas dataframe from a list of financial statement dictionaries.
+        Builds a pandas.DataFrame from provided raw data.
         
         Args:
-            statements (List[Dict[str, Any]]): A list of dictionaries, where each dictionary represents
-            a financial statement.
-            
+            data (dict): The raw data to build the DataFrame from.
+        
         Returns:
-            pandas.DataFrame: A dataframe with the financial statement data, indexed by a generated date.
-            
-        Raises:
-            AssertionError: If the statements passed in as argument is not a list of dictionaries or if
-            there is a mismatch in the columns across the financial statements.
+            pandas.DataFrame: The built DataFrame.
         """
-        err_msg = f"Empty statement for {self.ticker}. Perhaps check the .json() conversion off of the API response"
-        assert len(data) > 0, err_msg
-
-        keys = set(data[0].keys())
-        for statement in data:
-            assert set(statement.keys()) == keys, 'column mismatch across financial statement'
         working_array = []
         for statement in reversed(data):
             working_array.append(list(statement.values()))
@@ -161,21 +181,13 @@ class FinancialData:
 
     def generate_index(self, date):
         """
-        Generate an index string from the date string
+        Generates an index for the financial data.
         
-        Parameters:
-        -----------
-        date : str
-            Date string in format "YYYY-MM-DD".
+        Args:
+            date (str): The date in 'YYYY-MM-DD' format.
         
         Returns:
-        -------
-        str
-            Index string in the format "ticker-FY/QX-YYYY".
-        
-        Example:
-        -------
-        generate_index("2021-06-15") returns "ticker-Q2-2021"
+            str: The generated index string.
         """
         year, month, _ = [int(i) for i in date.split('-')]
         
@@ -196,27 +208,25 @@ class FinancialData:
 
     def generate_date(self, date_str):
         """
-        Generate a date object from the date string
+        Generates a datetime.date object from a date string.
         
-        Parameters:
-        -----------
-        date_str : str
-            Date string in format "YYYY-MM-DD".
+        Args:
+            date_str (str): The date in 'YYYY-MM-DD' format.
         
         Returns:
-        -------
-        date
-            Date object.
-        
-        Example:
-        -------
-        generate_date("2021-06-15") returns date object "2021-06-15"
+            datetime.date: The generated date object.
         """
         year, month, day = [int(i) for i in date_str.split()[0].split('-')]
         return dt.date(year, month, day)
 
 
     def check_for_matching_indecies(self):
+        """
+        Checks whether the financial data has matching indices.
+        
+        Returns:
+            bool: True if the financial data has matching indices, False otherwise.
+        """
         print('Checking matching frame indecies')
         len_bs = len(self.balance_sheets)
         len_is = len(self.income_statements)
@@ -232,6 +242,12 @@ class FinancialData:
 
 
     def get_common_df_indicies(self):
+        """
+        Gets the common indices for the financial data.
+        
+        Returns:
+            pandas.Index: The common indices for the financial data.
+        """
         idx1 = self.balance_sheets.index
         idx2 = self.income_statements.index
         idx3 = self.cash_flow_statements.index
@@ -242,15 +258,10 @@ class FinancialData:
 
     def filter_for_common_indecies(self, common_elements):
         """
-        Filter for common indices between balance sheets, 
-            income statements, and cash flow statements.
-
-        This method is used to ensure that all financial statement dataframes have the
-            same set of indices. If the length of the dataframes is different, the 
-            method will drop any missing indices from the dataframes to ensure consistency.
-
-        Returns:
-            None
+        Filters the financial data to only include common indices.
+        
+        Args:
+            common_elements (pandas.Index): The common indices for the financial data.
         """
         self.balance_sheets = self.balance_sheets.loc[common_elements]
         self.income_statements = self.income_statements.loc[common_elements]
@@ -261,31 +272,44 @@ class FinancialData:
 
 
     def assert_identical_indecies(self):
+        """
+        Asserts that the financial data has identical indices for each of its statements.
+        """
         assert len(self.cash_flow_statements) == len(self.balance_sheets), 'Indecies could not be filtered for common elements'
         assert len(self.income_statements) == len(self.balance_sheets), 'Indecies could not be filtered for common elements'
         assert len(self.reported_key_metrics) == len(self.balance_sheets), 'Indecies could not be filtered for common elements'
 
 
-    def assert_required_length(self):
-            if self.period == 'annual':
-                required_length = 2
-            else:
-                required_length = 4
-            err_msg = f"Financial statements are shorter than the required length of {required_length}"
-            assert len(self.balance_sheets) >= required_length, err_msg
+    def assert_required_length(self, item):
+        """
+        Asserts that a given item has the required length based on the period.
+        
+        Args:
+            item (pandas.DataFrame): The item to check the length of.
+        """
+        if self.period == 'annual':
+            required_length = 2
+        else:
+            required_length = 4
+        err_msg = f"Financial statements are shorter than the required length of {required_length}"
+        assert len(item) >= required_length, err_msg
 
     def assert_valid_server_response(Self, response):
-            assert response.status_code == 200, f"API call failed. Code <{response.status_code}>"
+        """
+        Asserts that the server response is valid (status code 200).
+        
+        Args:
+            response (requests.Response): The server response.
+        """
+        assert response.status_code == 200, f"API call failed. Code <{response.status_code}>"
 
 
     def fetch_stock_price_data_yf(self):
-        # '''Need to catch if the request fails or returns a null frame'''
         """
-        This function fetches Yahoo! finance stock price data for the company using the provided data source.
-
-        Returns:
-        - pandas.DataFrame: Stock price data for the company in the form of a pandas dataframe.
+        Fetches stock price data from Yahoo Finance.
         
+        Returns:
+            pandas.DataFrame: The fetched stock price data.
         """
         start_date = dt.date(*[int(i) for i in str(self.filing_date_objects.iloc[0]).split()[0].split('-')]) - dt.timedelta(days=370)
         end_date = dt.date.today()
@@ -297,14 +321,13 @@ class FinancialData:
 
     def periodise(self, df):
         """
-        This function takes a DataFrame calculates values for certain date periods within the data. The
-        period start and end dates are found in FinancialData.filing_date_objects.
-
-        Parameters:
-        pandas DataFrame: The input time series data.
-
+        Periodises the stock price data for each filing period.
+        
+        Args:
+            df (pandas.DataFrame): The stock price data.
+        
         Returns:
-        A pandas DataFrame containing the aggregated time series.
+            pandas.DataFrame: The periodised stock price data.
         """
         working_array = []
         days = self.days_in_period
@@ -335,7 +358,7 @@ class FinancialData:
 
     def save_financial_attributes(self):
         """
-        This function saves the financial attributes of the object to disk as a parquet file.        
+        Saves the financial data to local parquet files.
         """
         save_path = Path.cwd()/'investment_tools'/'data'/'Company Financial Data'/self.ticker/self.period
         try:
@@ -347,15 +370,10 @@ class FinancialData:
             raise Exception(msg)
         
         self.balance_sheets.to_parquet(save_path/'balance_sheets.parquet')
-        self.balance_sheets.to_excel(save_path/'balance_sheets.xlsx')
         self.income_statements.to_parquet(save_path/'income_statements.parquet')
-        self.income_statements.to_excel(save_path/'income_statements.xlsx')
         self.cash_flow_statements.to_parquet(save_path/'cash_flow_statements.parquet')
-        self.cash_flow_statements.to_excel(save_path/'cash_flow_statements.xlsx')
         self.stock_price_data.to_parquet(save_path/'stock_price_data.parquet')
-        self.stock_price_data.to_excel(save_path/'stock_price_data.xlsx')
         self.reported_key_metrics.to_parquet(save_path/'reported_key_metrics.parquet')
-        self.reported_key_metrics.to_excel(save_path/'reported_key_metrics.xlsx')
 
 
 
