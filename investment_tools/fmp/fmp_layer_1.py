@@ -58,7 +58,12 @@ class FinancialData:
         self.assert_valid_user_inputs()
         self.limit = int(limit)
         self.days_in_period = 365 if period == 'annual' else 90
+        # have the financials returned to here and explicitly set them as self.bs, self. is, self....
+        # also split the data pulling into getting the raw data versus processing the raw data, with adding frame indecies in the middle
+        # the frame indecies are based off of the normalized financial statements, thereafter the stock price data is pulled and nomalised
+        # so perhaps get_raw_statement_data, set_frame_indecies, get_stock_price_data
         self.fetch_raw_financial_data(ticker, api_key, data, period, limit)
+        # self.frame_indecies = self.get_frame_indecies()
 
 
 
@@ -66,6 +71,24 @@ class FinancialData:
         assert self.data in ['online', 'local'], "data must be 'online' or 'local'"
         assert self.period in ['annual', 'quarter'], "period must be 'annual' or 'quarter"
 
+    def generate_url(self, data_type):
+        fmp_template = 'https://financialmodelingprep.com/api/v3/{}/{}?period={}&limit={}&apikey={}'
+        ticker = self.ticker
+        period = self.period
+        limit = self.limit
+        api_key = self.api_key
+
+        if data_type == 'bs':
+            data_str = 'balance-sheet-statement'
+        elif data_type == 'is':
+            data_str = 'income-statement'
+        elif data_type == 'cfs':
+            data_str = 'cash-flow-statement'
+        elif data_type == 'ratios':
+            data_str = 'ratios'
+        
+        return fmp_template.format(data_str, ticker, period, limit, api_key)
+            
 
     def fetch_raw_financial_data(self, ticker, api_key, data, period, limit):
         if data == 'online':
@@ -75,21 +98,22 @@ class FinancialData:
 
 
     def fetch_online_data(self, ticker, api_key, period, limit):
-            # create bs, is, cfs, reported metrics, and strock price data
-            # then return them to the constructor
-            bs, is_, cfs = self.fetch_financial_statements_fmp(ticker, api_key, period, limit)
-            self.balance_sheets = self.build_dataframe(bs)
-            self.income_statements = self.build_dataframe(is_)
-            self.cash_flow_statements = self.build_dataframe(cfs)
-            self.reported_key_metrics = self.build_dataframe(self.fetch_financial_metrics_fmp(ticker, api_key, period, limit))
+        # create bs, is, cfs, reported metrics, and strock price data
+        # then return them to the constructor
+        bs, is_, cfs = self.fetch_financial_statements_fmp(ticker, api_key, period, limit)
+        self.balance_sheets = self.build_dataframe(bs)
+        self.income_statements = self.build_dataframe(is_)
+        self.cash_flow_statements = self.build_dataframe(cfs)
+        self.reported_key_metrics = self.build_dataframe(self.fetch_financial_metrics_fmp(ticker, api_key, period, limit))
+        self.filter_for_common_indecies() if not self.check_for_matching_indecies() else None # is this the right way to write this?
+        self.assert_required_length()
+        self.frame_indecies = self.get_frame_indecies()
+        self.filing_date_objects = self.balance_sheets['date']
+        self.stock_price_data = self.fetch_stock_price_data_yf()
+        self.save_financial_attributes() 
 
-            self.filter_for_common_indecies()
-            self.assert_required_length()
-            self.frame_indecies = self.balance_sheets.index
-            self.filing_date_objects = self.balance_sheets['date']
-            self.stock_price_data = self.fetch_stock_price_data_yf()
-            self.save_financial_attributes() 
-
+    def get_frame_indecies(self):
+        self.frame_indecies = self.balance_sheets.index
 
     def fetch_financial_statements_fmp(self, company, api_key, period, limit):
         # test that a tuple of json objects is returned
@@ -112,20 +136,17 @@ class FinancialData:
             
         Example:
         """
-        # create a function called assert_valid_server_response to do the assertions
-        balance_sheets = requests.get(f'https://financialmodelingprep.com/api/v3/balance-sheet-statement/{company}?period={period}&limit={limit}&apikey={api_key}')
-        assert balance_sheets.status_code == 200, f"API call failed. Code <{balance_sheets.status_code}>"
-        income_statements = requests.get(f'https://financialmodelingprep.com/api/v3/income-statement/{company}?period={period}&limit={limit}&apikey={api_key}')
-        assert income_statements.status_code == 200, f"API call failed. Code <{income_statements.status_code}>"
-        cash_flow_statements = requests.get(f'https://financialmodelingprep.com/api/v3/cash-flow-statement/{company}?period={period}&limit={limit}&apikey={api_key}')
-        assert cash_flow_statements.status_code == 200, f"API call failed. Code <{cash_flow_statements.status_code}>"
+        balance_sheets = requests.get(self.generate_url('bs'))
+        self.assert_valid_server_response(balance_sheets)
+        income_statements = requests.get(self.generate_url('is'))
+        self.assert_valid_server_response(income_statements)
+        cash_flow_statements = requests.get(self.generate_url('cfs'))
+        self.assert_valid_server_response(cash_flow_statements)
         return balance_sheets.json(), income_statements.json(), cash_flow_statements.json()
 
     def fetch_financial_metrics_fmp(self, ticker, api_key, period, limit):
-        # call assert_valid_server_response
-        url = f'https://financialmodelingprep.com/api/v3/ratios/{ticker}?period={period}&limit={limit}&apikey={api_key}'
-        data = requests.get(url)
-        assert data.status_code == 200, f"API call failed. Code <{data.status_code}>"
+        data = requests.get(self.generate_url('ratios'))
+        self.assert_valid_server_response(data)
         return data.json()
 
 
@@ -219,10 +240,21 @@ class FinancialData:
         year, month, day = [int(i) for i in date_str.split()[0].split('-')]
         return dt.date(year, month, day)
 
+    def check_for_matching_indecies(self):
+        print('Checking matching frame indecies')
+        len_bs = len(self.balance_sheets)
+        len_is = len(self.income_statements)
+        len_cfs = len(self.cash_flow_statements)
+        len_ratios = len(self.reported_key_metrics)
+        print(f"Financial statement lengths are BS: {len_bs}, IS:{len_is}, CFS:{len_cfs}, Ratios:{len_ratios}")
+        # Logical checks for matching indecies
+        matching_index_1 =  self.balance_sheets['date'].equals(self.income_statements['date'])
+        matching_index_2 = self.balance_sheets['date'].equals(self.cash_flow_statements['date'])
+        matching_index_3 = self.balance_sheets['date'].equals(self.reported_key_metrics['date'])
+        matching_indecies = matching_index_1 and matching_index_2 and matching_index_3
+        return True if matching_indecies else False
 
     def filter_for_common_indecies(self):
-        # split into chheck_for_matching_indecies
-        # and filter_for_common_indecies
         """
         Filter for common indices between balance sheets, 
             income statements, and cash flow statements.
@@ -234,30 +266,27 @@ class FinancialData:
         Returns:
             None
         """
-        print('Financial statements had different lengths...')
-        print(f"Financial statement lengths are BS: {len(self.balance_sheets)}, IS:{len(self.income_statements)}, CFS:{len(self.cash_flow_statements)}, Ratios:{len(self.reported_key_metrics)}")
-        # Logical checks for matching indecies
-        matching_index_1 =  self.balance_sheets['date'].equals(self.income_statements['date'])
-        matching_index_2 = self.balance_sheets['date'].equals(self.cash_flow_statements['date'])
-        matching_index_3 = self.balance_sheets['date'].equals(self.reported_key_metrics['date'])
-        matching_indecies = matching_index_1 and matching_index_2 and matching_index_3
+        common_elements = self.get_common_df_indicies()
+        self.balance_sheets = self.balance_sheets.loc[common_elements]
+        self.income_statements = self.income_statements.loc[common_elements]
+        self.cash_flow_statements = self.cash_flow_statements.loc[common_elements]
+        self.reported_key_metrics = self.reported_key_metrics.loc[common_elements]
 
-        if matching_indecies:
-            return
-    
+        self.assert_identical_indecies()
+        print(f"Financial statement lengths are now each: {len(self.balance_sheets)}")
+
+    def get_common_df_indicies(self):
         idx1 = self.balance_sheets.index
         idx2 = self.income_statements.index
         idx3 = self.cash_flow_statements.index
         idx4 = self.reported_key_metrics.index
         common_elements = idx1.intersection(idx2).intersection(idx3).intersection(idx4)
-        self.balance_sheets = self.balance_sheets.loc[common_elements]
-        self.income_statements = self.income_statements.loc[common_elements]
-        self.cash_flow_statements = self.cash_flow_statements.loc[common_elements]
-        self.reported_key_metrics = self.reported_key_metrics.loc[common_elements]
+        return common_elements
+
+    def assert_identical_indecies(self):
         assert len(self.cash_flow_statements) == len(self.balance_sheets), 'Indecies could not be filtered for common elements'
         assert len(self.income_statements) == len(self.balance_sheets), 'Indecies could not be filtered for common elements'
         assert len(self.reported_key_metrics) == len(self.balance_sheets), 'Indecies could not be filtered for common elements'
-        print(f"Financial statement lengths are now each: {len(self.balance_sheets)}")
 
     def assert_required_length(self):
             if self.period == 'annual':
@@ -266,6 +295,10 @@ class FinancialData:
                 required_length = 4
             err_msg = f"Financial statements are shorter than the required length of {required_length}"
             assert len(self.balance_sheets) >= required_length, err_msg
+
+    def assert_valid_server_response(Self, response):
+            assert response.status_code == 200, f"API call failed. Code <{response.status_code}>"
+
 
 
     def fetch_stock_price_data_yf(self):
@@ -278,7 +311,6 @@ class FinancialData:
         
         """
         start_date = dt.date(*[int(i) for i in str(self.filing_date_objects.iloc[0]).split()[0].split('-')]) - dt.timedelta(days=370)
-        # end_date = dt.date(*[int(i) for i in str(self.filing_date_objects.iloc[-1]).split()[0].split('-')])
         end_date = dt.date.today()
         price_interval = '1d'
         raw_data = pdr.get_data_yahoo(self.ticker, start_date, end_date, interval=price_interval)
