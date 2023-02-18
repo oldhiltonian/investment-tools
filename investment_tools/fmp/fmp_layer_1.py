@@ -58,20 +58,25 @@ class FinancialData:
         self.assert_valid_user_inputs()
         self.limit = int(limit)
         self.days_in_period = 365 if period == 'annual' else 90
-        self.fetch_raw_financial_data(ticker, data, period)
-        # self.frame_indecies = self.get_frame_indecies()
-        # have the financials returned to here and explicitly set them as self.bs, self. is, self....
-        # also split the data pulling into getting the raw data versus processing the raw data, with adding frame indecies in the middle
-        # the frame indecies are based off of the normalized financial statements, thereafter the stock price data is pulled and nomalised
-        # so perhaps get_raw_statement_data, set_frame_indecies, get_stock_price_data
 
-        # self.balance_sheets, self.income_statements, self.cash_flow_statements \
-        #         = self.fetch_raw_financial_data(ticker, api_key, data, period)
+        self.balance_sheets       = self.build_dataframe(self.fetch_raw_data('bs').json())
+        self.income_statements    = self.build_dataframe(self.fetch_raw_data('is').json())
+        self.cash_flow_statements = self.build_dataframe(self.fetch_raw_data('cfs').json())
+        self.reported_key_metrics = self.build_dataframe(self.fetch_raw_data('metrics').json())
+
+        if not self.check_for_matching_indecies():
+            self.filter_for_common_indecies(self.get_common_df_indicies())
+            
+        self.frame_indecies = self.get_frame_indecies()
+        self.filing_date_objects = self.balance_sheets['date']
+        self.stock_price_data = self.fetch_stock_price_data_yf()
+        self.save_financial_attributes()
         
-        
+
     def assert_valid_user_inputs(self):
         assert self.data in ['online', 'local'], "data must be 'online' or 'local'"
         assert self.period in ['annual', 'quarter'], "period must be 'annual' or 'quarter"
+
 
     def generate_url(self, data_type):
         fmp_template = 'https://financialmodelingprep.com/api/v3/{}/{}?period={}&limit={}&apikey={}'
@@ -86,68 +91,33 @@ class FinancialData:
             data_str = 'income-statement'
         elif data_type == 'cfs':
             data_str = 'cash-flow-statement'
-        elif data_type == 'ratios':
+        elif data_type == 'metrics':
             data_str = 'ratios'
+        else:
+            err_msg = f"{data_type} is not a valid API call"
+            raise ValueError(err_msg)
         
         return fmp_template.format(data_str, ticker, period, limit, api_key)
+    
+
+    def fetch_raw_data(self, data_type):
+        if self.data == 'online':
+            url = self.generate_url(data_type)
+            raw_data = requests.get(url)
+            self.assert_valid_server_response(raw_data)
+        elif self.data == 'local':
+            path = self.get_load_path(data_type, self.ticker, self.period)
+            raw_data = pd.read_parquet(path)
+        return raw_data
             
 
-    def fetch_raw_financial_data(self, ticker, data, period):
-        if data == 'online':
-            self.fetch_online_data()
-        elif data == 'local':
-            self.fetch_local_data(ticker, period)
+    def get_load_path(self, data_type, ticker, period):
+        return Path.cwd()/'Company Financial Data'/ticker/period/data_type/'.parquet'
 
-
-    def fetch_online_data(self):
-        # create bs, is, cfs, reported metrics, and strock price data
-        # then return them to the constructor
-        bs, is_, cfs = self.fetch_financial_statements_fmp()
-        metrics = self.fetch_financial_metrics_fmp()
-        # return here
-        self.balance_sheets = self.build_dataframe(bs)
-        self.income_statements = self.build_dataframe(is_)
-        self.cash_flow_statements = self.build_dataframe(cfs)
-        self.reported_key_metrics = self.build_dataframe(metrics)
-
-        self.filter_for_common_indecies(self.get_common_df_indicies()) if not self.check_for_matching_indecies() else None # is this the right way to write this?
-        self.assert_required_length()
-        self.frame_indecies = self.get_frame_indecies()
-        self.filing_date_objects = self.balance_sheets['date']
-        self.stock_price_data = self.fetch_stock_price_data_yf()
-        self.save_financial_attributes() 
 
     def get_frame_indecies(self):
         self.frame_indecies = self.balance_sheets.index
 
-    def fetch_financial_statements_fmp(self):
-        # test that a tuple of json objects is returned
-        """
-        This function fetches the balance sheet, income statement, and cash flow statement
-        for a given company, using the provided api_key, period, and limit.
-        
-        Args:
-            company (str): The company's ticker symbol or name.
-            api_key (str): The API key to be used to access financial data.
-            period (str): The reporting period to retrieve data for. Must be 'quarter' or 'annual'.
-            limit (int): The number of reporting periods to retrieve.
-            
-        Returns:
-            Tuple[Dict, Dict, Dict]: The balance sheet, income statement, and cash flow statement
-            as a tuple of dictionaries in JSON format.
-            
-        Raises:
-            AssertionError: If the API returns an error.
-            
-        Example:
-        """
-        balance_sheets = requests.get(self.generate_url('bs'))
-        self.assert_valid_server_response(balance_sheets)
-        income_statements = requests.get(self.generate_url('is'))
-        self.assert_valid_server_response(income_statements)
-        cash_flow_statements = requests.get(self.generate_url('cfs'))
-        self.assert_valid_server_response(cash_flow_statements)
-        return balance_sheets.json(), income_statements.json(), cash_flow_statements.json()
 
     def fetch_financial_metrics_fmp(self):
         data = requests.get(self.generate_url('ratios'))
@@ -245,6 +215,7 @@ class FinancialData:
         year, month, day = [int(i) for i in date_str.split()[0].split('-')]
         return dt.date(year, month, day)
 
+
     def check_for_matching_indecies(self):
         print('Checking matching frame indecies')
         len_bs = len(self.balance_sheets)
@@ -259,6 +230,7 @@ class FinancialData:
         matching_indecies = matching_index_1 and matching_index_2 and matching_index_3
         return True if matching_indecies else False
 
+
     def get_common_df_indicies(self):
         idx1 = self.balance_sheets.index
         idx2 = self.income_statements.index
@@ -266,6 +238,7 @@ class FinancialData:
         idx4 = self.reported_key_metrics.index
         common_elements = idx1.intersection(idx2).intersection(idx3).intersection(idx4)
         return common_elements
+
 
     def filter_for_common_indecies(self, common_elements):
         """
@@ -287,11 +260,11 @@ class FinancialData:
         print(f"Financial statement lengths are now each: {len(self.balance_sheets)}")
 
 
-
     def assert_identical_indecies(self):
         assert len(self.cash_flow_statements) == len(self.balance_sheets), 'Indecies could not be filtered for common elements'
         assert len(self.income_statements) == len(self.balance_sheets), 'Indecies could not be filtered for common elements'
         assert len(self.reported_key_metrics) == len(self.balance_sheets), 'Indecies could not be filtered for common elements'
+
 
     def assert_required_length(self):
             if self.period == 'annual':
@@ -303,7 +276,6 @@ class FinancialData:
 
     def assert_valid_server_response(Self, response):
             assert response.status_code == 200, f"API call failed. Code <{response.status_code}>"
-
 
 
     def fetch_stock_price_data_yf(self):
@@ -321,6 +293,7 @@ class FinancialData:
         raw_data = pdr.get_data_yahoo(self.ticker, start_date, end_date, interval=price_interval)
         raw_data['date'] = raw_data.index.date
         return self.periodise(raw_data)
+
 
     def periodise(self, df):
         """
@@ -385,18 +358,6 @@ class FinancialData:
         self.reported_key_metrics.to_excel(save_path/'reported_key_metrics.xlsx')
 
 
-    def fetch_local_data(self, ticker, period):
-        """
-        This function loads financial statements from disk according to the company 
-        and period information in the class instance.
-        """
-        load_path = Path.cwd()/'Company Financial Data'/ticker/period
-        self.income_statements = pd.read_parquet(load_path/'income_statements.parquet')
-        self.balance_sheets = pd.read_parquet(load_path/'balance_sheets.parquet')
-        self.cash_flow_statements = pd.read_parquet(load_path/'cash_flow_statements.parquet')
-        self.stock_price_data = pd.read_parquet(load_path/'stock_price_data.parquet')
-        self.reported_key_metrics = pd.read_parquet(load_path/'reported_key_metrics.parquet')
-        self.frame_indecies = self.get_frame_indecies()
 
 
 
