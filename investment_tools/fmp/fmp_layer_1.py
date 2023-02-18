@@ -58,15 +58,17 @@ class FinancialData:
         self.assert_valid_user_inputs()
         self.limit = int(limit)
         self.days_in_period = 365 if period == 'annual' else 90
+        self.fetch_raw_financial_data(ticker, data, period)
+        # self.frame_indecies = self.get_frame_indecies()
         # have the financials returned to here and explicitly set them as self.bs, self. is, self....
         # also split the data pulling into getting the raw data versus processing the raw data, with adding frame indecies in the middle
         # the frame indecies are based off of the normalized financial statements, thereafter the stock price data is pulled and nomalised
         # so perhaps get_raw_statement_data, set_frame_indecies, get_stock_price_data
-        self.fetch_raw_financial_data(ticker, api_key, data, period, limit)
-        # self.frame_indecies = self.get_frame_indecies()
 
-
-
+        # self.balance_sheets, self.income_statements, self.cash_flow_statements \
+        #         = self.fetch_raw_financial_data(ticker, api_key, data, period)
+        
+        
     def assert_valid_user_inputs(self):
         assert self.data in ['online', 'local'], "data must be 'online' or 'local'"
         assert self.period in ['annual', 'quarter'], "period must be 'annual' or 'quarter"
@@ -90,22 +92,25 @@ class FinancialData:
         return fmp_template.format(data_str, ticker, period, limit, api_key)
             
 
-    def fetch_raw_financial_data(self, ticker, api_key, data, period, limit):
+    def fetch_raw_financial_data(self, ticker, data, period):
         if data == 'online':
-            self.fetch_online_data(ticker, api_key, period, limit)
+            self.fetch_online_data()
         elif data == 'local':
             self.fetch_local_data(ticker, period)
 
 
-    def fetch_online_data(self, ticker, api_key, period, limit):
+    def fetch_online_data(self):
         # create bs, is, cfs, reported metrics, and strock price data
         # then return them to the constructor
-        bs, is_, cfs = self.fetch_financial_statements_fmp(ticker, api_key, period, limit)
+        bs, is_, cfs = self.fetch_financial_statements_fmp()
+        metrics = self.fetch_financial_metrics_fmp()
+        # return here
         self.balance_sheets = self.build_dataframe(bs)
         self.income_statements = self.build_dataframe(is_)
         self.cash_flow_statements = self.build_dataframe(cfs)
-        self.reported_key_metrics = self.build_dataframe(self.fetch_financial_metrics_fmp(ticker, api_key, period, limit))
-        self.filter_for_common_indecies() if not self.check_for_matching_indecies() else None # is this the right way to write this?
+        self.reported_key_metrics = self.build_dataframe(metrics)
+
+        self.filter_for_common_indecies(self.get_common_df_indicies()) if not self.check_for_matching_indecies() else None # is this the right way to write this?
         self.assert_required_length()
         self.frame_indecies = self.get_frame_indecies()
         self.filing_date_objects = self.balance_sheets['date']
@@ -115,7 +120,7 @@ class FinancialData:
     def get_frame_indecies(self):
         self.frame_indecies = self.balance_sheets.index
 
-    def fetch_financial_statements_fmp(self, company, api_key, period, limit):
+    def fetch_financial_statements_fmp(self):
         # test that a tuple of json objects is returned
         """
         This function fetches the balance sheet, income statement, and cash flow statement
@@ -144,7 +149,7 @@ class FinancialData:
         self.assert_valid_server_response(cash_flow_statements)
         return balance_sheets.json(), income_statements.json(), cash_flow_statements.json()
 
-    def fetch_financial_metrics_fmp(self, ticker, api_key, period, limit):
+    def fetch_financial_metrics_fmp(self):
         data = requests.get(self.generate_url('ratios'))
         self.assert_valid_server_response(data)
         return data.json()
@@ -254,7 +259,15 @@ class FinancialData:
         matching_indecies = matching_index_1 and matching_index_2 and matching_index_3
         return True if matching_indecies else False
 
-    def filter_for_common_indecies(self):
+    def get_common_df_indicies(self):
+        idx1 = self.balance_sheets.index
+        idx2 = self.income_statements.index
+        idx3 = self.cash_flow_statements.index
+        idx4 = self.reported_key_metrics.index
+        common_elements = idx1.intersection(idx2).intersection(idx3).intersection(idx4)
+        return common_elements
+
+    def filter_for_common_indecies(self, common_elements):
         """
         Filter for common indices between balance sheets, 
             income statements, and cash flow statements.
@@ -266,22 +279,14 @@ class FinancialData:
         Returns:
             None
         """
-        common_elements = self.get_common_df_indicies()
         self.balance_sheets = self.balance_sheets.loc[common_elements]
         self.income_statements = self.income_statements.loc[common_elements]
         self.cash_flow_statements = self.cash_flow_statements.loc[common_elements]
         self.reported_key_metrics = self.reported_key_metrics.loc[common_elements]
-
         self.assert_identical_indecies()
         print(f"Financial statement lengths are now each: {len(self.balance_sheets)}")
 
-    def get_common_df_indicies(self):
-        idx1 = self.balance_sheets.index
-        idx2 = self.income_statements.index
-        idx3 = self.cash_flow_statements.index
-        idx4 = self.reported_key_metrics.index
-        common_elements = idx1.intersection(idx2).intersection(idx3).intersection(idx4)
-        return common_elements
+
 
     def assert_identical_indecies(self):
         assert len(self.cash_flow_statements) == len(self.balance_sheets), 'Indecies could not be filtered for common elements'
@@ -391,7 +396,7 @@ class FinancialData:
         self.cash_flow_statements = pd.read_parquet(load_path/'cash_flow_statements.parquet')
         self.stock_price_data = pd.read_parquet(load_path/'stock_price_data.parquet')
         self.reported_key_metrics = pd.read_parquet(load_path/'reported_key_metrics.parquet')
-        self.frame_indecies = self.balance_sheets.index
+        self.frame_indecies = self.get_frame_indecies()
 
 
 
