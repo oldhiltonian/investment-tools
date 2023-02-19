@@ -23,14 +23,17 @@ class FinancialData:
     Attributes:
         ticker (str): The ticker symbol for the stock.
         api_key (str): The user's API key for accessing financial data (optional).
-        data (str): Whether to fetch data from online or local source.
+        data (str): Whether to fetch data from online or local source. Either 'online'
+            or 'local'.
         period (str): The period of the data, either 'annual' or 'quarter'.
         limit (int): The maximum number of data points to fetch from the API.
+            Default = 120
 
     Raises:
-        AssertionError: If invalid input is provided for data or period.
+        AssertionError: If invalid input is provided for data or period attributes.
 
     """
+
     def __init__(self, ticker, api_key='', data='local', period='annual', limit=120):
         """
         Initializes a new instance of the FinancialData class.
@@ -38,9 +41,11 @@ class FinancialData:
         Args:
             ticker (str): The ticker symbol for the stock.
             api_key (str): The user's API key for accessing financial data (optional).
-            data (str): Whether to fetch data from online or local source.
+            data (str): Whether to fetch data from online or local source. Either 'online'
+                or 'local'.
             period (str): The period of the data, either 'annual' or 'quarter'.
             limit (int): The maximum number of data points to fetch from the API.
+                Default = 120
 
         """
         self.ticker = ticker.upper().strip()
@@ -51,10 +56,10 @@ class FinancialData:
         self.limit = int(limit)
         self.days_in_period = 365 if period == 'annual' else 90
 
-        self.balance_sheets       = self.build_dataframe(self.fetch_raw_data('bs').json())
-        self.income_statements    = self.build_dataframe(self.fetch_raw_data('is').json())
-        self.cash_flow_statements = self.build_dataframe(self.fetch_raw_data('cfs').json())
-        self.reported_key_metrics = self.build_dataframe(self.fetch_raw_data('metrics').json())
+        self.balance_sheets       = self.build_dataframe(self.fetch_raw_data('bs'))
+        self.income_statements    = self.build_dataframe(self.fetch_raw_data('is'))
+        self.cash_flow_statements = self.build_dataframe(self.fetch_raw_data('cfs'))
+        self.reported_key_metrics = self.build_dataframe(self.fetch_raw_data('metrics'))
 
         if not self.check_for_matching_indecies():
             self.filter_for_common_indecies(self.get_common_df_indicies())
@@ -65,8 +70,8 @@ class FinancialData:
         self.stock_price_data = self.fetch_stock_price_data_yf()
         self.assert_required_length(self.stock_price_data)
         self.save_financial_attributes()
-        
 
+        
     def assert_valid_user_inputs(self):
         """
         Ensures that valid user inputs are provided for data and period.
@@ -77,13 +82,13 @@ class FinancialData:
         assert self.data in ['online', 'local'], "data must be 'online' or 'local'"
         assert self.period in ['annual', 'quarter'], "period must be 'annual' or 'quarter"
 
-
     def generate_request_url(self, data_type):
         """
         Generates a URL to fetch data from the Financial Modeling Prep API.
         
         Args:
-            data_type (str): The type of data to fetch.
+            data_type (str): The type of financial statement data to fetch. Valid 
+                inputs are 'bs', 'is, 'cfs', and 'ratios'.
         
         Returns:
             str: The URL for the requested data.
@@ -111,10 +116,10 @@ class FinancialData:
         
         return fmp_template.format(data_str, ticker, period, limit, api_key)
     
-
     def fetch_raw_data(self, data_type):
         """
-        Fetches raw financial data from either the Financial Modeling Prep API or a local file.
+        Fetches raw financial data from either the Financial Modeling Prep API
+          or a local file, based on the self.data attribute. 
         
         Args:
             data_type (str): The type of data to fetch.
@@ -126,26 +131,37 @@ class FinancialData:
             url = self.generate_request_url(data_type)
             raw_data = requests.get(url)
             self.assert_valid_server_response(raw_data)
+            self.assert_server_response_not_empty(raw_data)
         elif self.data == 'local':
             path = self.get_load_path(data_type, self.ticker, self.period)
             raw_data = pd.read_parquet(path)
         return raw_data
             
-
     def get_load_path(self, data_type, ticker, period):
         """
         Gets the file path to load a local financial data file.
         
         Args:
-            data_type (str): The type of financial data to fetch.
+            data_type (str): The type of financial data to fetch. Acceptable 
+                values are 'bs', 'is', 'cfs', and 'ratios'.
             ticker (str): The ticker symbol for the stock.
             period (str): The period of the data, either 'annual' or 'quarter'.
         
         Returns:
             pathlib.Path: The file path for the requested data.
         """
-        return Path.cwd()/'Company Financial Data'/ticker/period/data_type/'.parquet'
-
+        if data_type == 'bs':
+            file = 'balance_sheets.parquet'
+        elif data_type == 'is':
+            file = 'income_statements.parquet'
+        elif data_type == 'cfs':
+            file = 'cash_flow_statements.parquet'
+        elif data_type == 'metrics':
+            file= 'reported_key_metrics.parquet'
+        else:
+            err_msg = f"{data_type} is not a valid API call"
+            raise ValueError(err_msg)
+        return Path.cwd()/'investment_tools'/'data'/'Company Financial Data'/ticker/period/file
 
     def get_frame_indecies(self):
         """
@@ -154,12 +170,22 @@ class FinancialData:
         Returns:
             pandas.Index: The index for the financial data.
         """
-        self.frame_indecies = self.balance_sheets.index
+        return self.balance_sheets.index
+
+    def set_frame_indecies(self, other):
+        """
+        Sets the index for the provided DataFrame.
+        
+        Returns:
+            pandas.DataFrame: Updated with the global frame index
+        """
+        return other.set_index(self.frame_indecies)
 
 
     def build_dataframe(self, data):
         """
-        Builds a pandas.DataFrame from provided raw data.
+        Builds a pandas.DataFrame from provided raw data. If the raw data
+            is already a DataFrame then it is returned immediately. 
         
         Args:
             data (dict): The raw data to build the DataFrame from.
@@ -167,6 +193,9 @@ class FinancialData:
         Returns:
             pandas.DataFrame: The built DataFrame.
         """
+        if self.data == 'local':
+            return data
+        data = data.json()
         working_array = []
         for statement in reversed(data):
             working_array.append(list(statement.values()))
@@ -177,7 +206,6 @@ class FinancialData:
         if 'netIncome' and 'eps' in df.keys():
             df['outstandingShares_calc'] = df['netIncome']/df['eps']
         return df
-
 
     def generate_index(self, date):
         """
@@ -258,7 +286,7 @@ class FinancialData:
 
     def filter_for_common_indecies(self, common_elements):
         """
-        Filters the financial data to only include common indices.
+        Filters the financial data attributes to only include common indices.
         
         Args:
             common_elements (pandas.Index): The common indices for the financial data.
@@ -273,11 +301,16 @@ class FinancialData:
 
     def assert_identical_indecies(self):
         """
-        Asserts that the financial data has identical indices for each of its statements.
+        Asserts that the financial data has identical indices 
+            for each of its statements.
         """
-        assert len(self.cash_flow_statements) == len(self.balance_sheets), 'Indecies could not be filtered for common elements'
-        assert len(self.income_statements) == len(self.balance_sheets), 'Indecies could not be filtered for common elements'
-        assert len(self.reported_key_metrics) == len(self.balance_sheets), 'Indecies could not be filtered for common elements'
+        err_msg = 'Indecies could not be filtered for common elements'
+        assert (self.cash_flow_statements.index.to_list() == 
+                self.balance_sheets.index.to_list(), err_msg)
+        assert (self.income_statements.index.to_list() ==    
+                self.balance_sheets.index.to_list(), err_msg)
+        assert (self.reported_key_metrics.index.to_list() == 
+                self.balance_sheets.index.to_list(), err_msg)
 
 
     def assert_required_length(self, item):
@@ -303,6 +336,15 @@ class FinancialData:
         """
         assert response.status_code == 200, f"API call failed. Code <{response.status_code}>"
 
+    def assert_server_response_not_empty(self, response):
+        """
+        Asserts that the server response not empty.
+        
+        Args:
+            response (requests.Response): The server response.
+        """
+        assert len(response.json()) != 0, 'Server response successful but empty'
+        
 
     def fetch_stock_price_data_yf(self):
         """
@@ -495,16 +537,16 @@ class ManualAnalysis:
         df = pd.DataFrame(index=self.data.frame_indecies)
 
         '''Stock Evaluation Ratios'''
-        total_assets = self.data.balance_sheets['totalAssets']
-        total_liabilities = self.data.balance_sheets['totalLiabilities']
-        long_term_debt = self.data.balance_sheets['longTermDebt']
-        dividends_paid = self.data.cash_flow_statements['dividendsPaid']
-        outstanding_shares = self.data.income_statements['outstandingShares_calc']
-        cash_and_equivalents = self.data.balance_sheets['cashAndCashEquivalents']
-        eps = self.data.income_statements['eps']
-        stock_price_high = self.data.stock_price_data['high']
-        stock_price_avg = self.data.stock_price_data['avg_close']
-        stock_price_low = self.data.stock_price_data['low']
+        total_assets = self.data.balance_sheets['totalAssets'].copy()
+        total_liabilities = self.data.balance_sheets['totalLiabilities'].copy()
+        long_term_debt = self.data.balance_sheets['longTermDebt'].copy()
+        dividends_paid = self.data.cash_flow_statements['dividendsPaid'].copy()
+        outstanding_shares = self.data.income_statements['outstandingShares_calc'].copy()
+        cash_and_equivalents = self.data.balance_sheets['cashAndCashEquivalents'].copy()
+        eps = self.data.income_statements['eps'].copy()
+        stock_price_high = self.data.stock_price_data['high'].copy()
+        stock_price_avg = self.data.stock_price_data['avg_close'].copy()
+        stock_price_low = self.data.stock_price_data['low'].copy()
         df['eps'] = eps #authorized stock!!!
         df['eps_diluted'] = self.data.income_statements['epsdiluted']
         df['PE_high'] = stock_price_high/eps
@@ -520,16 +562,16 @@ class ManualAnalysis:
 
 
         '''Profitability Ratios'''
-        revenue = self.data.income_statements['revenue']
-        gross_profit = self.data.income_statements['grossProfit']
-        COGS = self.data.income_statements['costOfRevenue']
-        SGA = self.data.income_statements['sellingGeneralAndAdministrativeExpenses']
-        RND_expense = self.data.income_statements['researchAndDevelopmentExpenses']
-        operating_income = self.data.income_statements['operatingIncome']
-        income_before_tax = self.data.income_statements['incomeBeforeTax']
-        total_capitalization = self.data.balance_sheets['totalEquity'] + self.data.balance_sheets['longTermDebt']
-        net_income = self.data.income_statements['netIncome']
-        total_shareholder_equity = self.data.balance_sheets['totalStockholdersEquity']
+        revenue = self.data.income_statements['revenue'].copy()
+        gross_profit = self.data.income_statements['grossProfit'].copy()
+        COGS = self.data.income_statements['costOfRevenue'].copy()
+        SGA = self.data.income_statements['sellingGeneralAndAdministrativeExpenses'].copy()
+        RND_expense = self.data.income_statements['researchAndDevelopmentExpenses'].copy()
+        operating_income = self.data.income_statements['operatingIncome'].copy()
+        income_before_tax = self.data.income_statements['incomeBeforeTax'].copy()
+        total_capitalization = self.data.balance_sheets['totalEquity'].copy() + self.data.balance_sheets['longTermDebt'].copy()
+        net_income = self.data.income_statements['netIncome'].copy()
+        total_shareholder_equity = self.data.balance_sheets['totalStockholdersEquity'].copy()
         df['grossProfitMargin'] = gross_profit/revenue
         df['operatingProfitMargin'] = operating_income/revenue
         df['pretaxProfitMargin'] = income_before_tax/revenue
@@ -539,11 +581,11 @@ class ManualAnalysis:
         df['returnOnAssets'] = net_income/total_assets
 
         '''Debt and Interest Ratios'''
-        interest_expense = self.data.income_statements['interestExpense']
+        interest_expense = self.data.income_statements['interestExpense'].copy()
         # The fixed_charges calculation below is likely incomplete
-        fixed_charges = self.data.income_statements['interestExpense'] + self.data.balance_sheets['capitalLeaseObligations']
-        ebitda = self.data.income_statements['ebitda']
-        total_equity = self.data.balance_sheets['totalEquity']
+        fixed_charges = self.data.income_statements['interestExpense'].copy() + self.data.balance_sheets['capitalLeaseObligations'].copy()
+        ebitda = self.data.income_statements['ebitda'].copy()
+        total_equity = self.data.balance_sheets['totalEquity'].copy()
         total_debt = total_assets - total_equity
         df['interestCoverage'] = operating_income/interest_expense
         df['fixedChargeCoverage'] = ebitda/fixed_charges
@@ -551,9 +593,9 @@ class ManualAnalysis:
         df['totalDebtRatio'] = total_debt/total_assets
 
         '''Liquidity & FinancialCondition Ratios'''
-        current_assets = self.data.balance_sheets['totalCurrentAssets']
-        current_liabilities = self.data.balance_sheets['totalCurrentLiabilities']
-        inventory = self.data.balance_sheets['inventory']
+        current_assets = self.data.balance_sheets['totalCurrentAssets'].copy()
+        current_liabilities = self.data.balance_sheets['totalCurrentLiabilities'].copy()
+        inventory = self.data.balance_sheets['inventory'].copy()
         quick_assets = current_assets - inventory
         df['currentRatio'] = current_assets/current_liabilities
         df['quickRatio'] = quick_assets/current_liabilities
@@ -561,16 +603,16 @@ class ManualAnalysis:
 
 
         '''Efficiency Ratios'''
-        net_receivables = self.data.balance_sheets['netReceivables']
+        net_receivables = self.data.balance_sheets['netReceivables'].copy()
         df['totalAssetTurnover'] = revenue/total_assets
         df['inventoryToSalesRatio'] = inventory/revenue
         df['inventoryTurnoverRatio'] = 1/df['inventoryToSalesRatio']
         days = 365 if self.data.period == 'annual' else 90
-        df['inventoryTurnoverInDays'] = days/df['inventoryTurnoverRatio']
-        accounts_receivable_to_sales_ratio = self.data.balance_sheets['netReceivables']/revenue
+        df['inventoryTurnoverInDays'] = days/df['inventoryTurnoverRatio'].copy()
+        accounts_receivable_to_sales_ratio = self.data.balance_sheets['netReceivables'].copy()/revenue
         df['accountsReceivableToSalesRatio'] = accounts_receivable_to_sales_ratio
         df['receivablesTurnover'] = revenue/net_receivables
-        df['receivablesTurnoverInDays'] = days/df['receivablesTurnover']
+        df['receivablesTurnoverInDays'] = days/df['receivablesTurnover'].copy()
 
 
         '''Metric Growth'''
