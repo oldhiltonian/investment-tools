@@ -448,9 +448,9 @@ class ManualAnalysis:
         Dictionary of financial metrics and ratios
     """
     def __init__(self, financial_data, verbose=False):
-        super().__init__()
         self.data = financial_data
         self.verbose = verbose
+        self.metrics_to_calculate = self.assign_metric_dict()
         clc, rep, met_err, rat_err = self.cross_check_statement_calculations()
         self.calculated_statement_metrics = clc
         self.reported_statement_metrics= rep
@@ -460,6 +460,41 @@ class ManualAnalysis:
         self.cross_check_metric_calculations()
 
     
+    def assign_metric_dict(self):
+        stock_eval_ratios = ['eps', 'eps_diluted', 'PE_high', 'PE_low', 'PE_avg_close',
+                            'bookValuePerShare', 'dividendPayoutRatio', 'dividendYield_low',
+                            'dividendYield_high', 'dividendYield_avg_close', 'ebitdaratio',
+                            'cashPerShare']
+
+        profitability_ratios = [ 'grossProfitMargin', 'operatingProfitMargin', 
+                                    'pretaxProfitMargin', 'netProfitMargin', 
+                                    'ROIC''returnOnEquity''returnOnAssets'] 
+
+        debt_interest_ratios = ['interestCoverage', 'fixedChargeCoverage',
+                                'debtToTotalCap', 'totalDebtRatio']
+
+        liquidity_ratios = ['currentRatio', 'quickRatio', 'cashRatio']
+
+        efficiency_ratios = ['totalAssetTurnover', 'inventoryToSalesRatio',
+                            'inventoryTurnoverRatio', 'inventoryTurnoverInDays',
+                            'accountsReceivableToSalesRatio', 'receivablesTurnover',
+                            'receivablesTurnoverInDays']
+
+        ratio_growth = ['eps', 'returnOnEquity', 'cashPerShare', 'PE_avg_close',
+                        'ebitdaratio', 'ROIC', 'netProfitMargin', 'returnOnAssets',
+                        'debtToTotalCap', 'totalDebtRatio']
+        
+        metric_dict = {
+                'stock_evaluation_ratios': stock_eval_ratios,
+                'profitability_ratios': profitability_ratios,
+                'debt_interest_ratios': debt_interest_ratios,
+                'liquidity_ratios': liquidity_ratios,
+                'efficiency_ratios': efficiency_ratios,
+                'ratio_growth': ratio_growth
+                }
+        return metric_dict  
+
+
     def print_metric_errors(self, metric_errors, tolerance=0.05):
         if not self.verbose:
             return
@@ -480,7 +515,8 @@ class ManualAnalysis:
         Returns pandas DataFrames representing the calculated values, reported values,
         the error between the calculated and reported values, and the error of just
         the financial ratios"""
-    
+        if not self.verbose:
+            return
         reported = pd.DataFrame(index=self.data.frame_indecies)
         calculated = pd.DataFrame(index=self.data.frame_indecies)
         RND_expenses = self.data.income_statements['researchAndDevelopmentExpenses']
@@ -633,12 +669,14 @@ class ManualAnalysis:
         return df
 
     def cross_check_metric_calculations(self):
+        if not self.verbose:
+            return
         df = pd.DataFrame()
-        metrics = ['grossProfitMargin', 'operatingProfitMargin', 'currentRatio', 
+        metrics_to_check = ['grossProfitMargin', 'operatingProfitMargin', 'currentRatio', 
                     'returnOnEquity', 'returnOnAssets', 'cashPerShare', 'interestCoverage',
                     'dividendPayoutRatio']
         
-        for metric in metrics:
+        for metric in metrics_to_check:
             df[metric] = self.statement_metrics[metric] - self.data.reported_key_metrics[metric]
         self.print_metric_errors(df, 0.05)
 
