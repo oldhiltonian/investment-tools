@@ -812,22 +812,16 @@ class Plots:
     def __init__(self, ticker, period, metrics, limit, filing_dates):
         self.ticker = ticker
         self.period = period
-        self.data = metrics
-        self.limit = limit
+        self.metrics = metrics
         self.filing_dates = filing_dates
-        if limit > len(metrics):
-            self.limit = len(metrics)
-        else:
-            self.limit = limit
+        self.limit = self.set_limit(limit)
         self.metric_units_dict = {
             'Stock Evaluation Ratios':  {'eps' : '$/share',
                                          'eps_diluted': '$/share',
                                          'PE_high': 'x',
                                          'PE_low': 'x',
-                                         #'PE_avg_close': 'x',
                                          'bookValuePerShare': '$/share',
                                          'dividendPayoutRatio': 'x',
-                                         #'dividendYield_avg_close': 'x',
                                          'cashPerShare': '$/share',
                                          'ebitdaratio': 'x'
                                         },
@@ -860,6 +854,24 @@ class Plots:
         self.plots = []
         self.plot_metrics()
 
+    def set_limit(self, limit: int) -> int:
+        if limit > len(self.metrics):
+            return len(self.metrics)
+        else:
+            return limit
+
+    def get_spacing(self) -> int:
+        if self.limit < 10:
+            return 2
+        elif self.limit < 20:
+            return 4
+        else:
+            return 6
+    
+    def generate_xlabels(self):
+        return ['-'.join(str(i).split('-')[1:]) for i in self.metrics.index[-self.limit:]]
+
+
     def plot_metrics(self):
         """
         Plots the financial ratios using matplotlib.
@@ -870,14 +882,9 @@ class Plots:
         ###delete
         ticker-Q2-2021 or FY
         """
+        x_labels = self.generate_xlabels()
+        spacing = self.get_spacing()
 
-        x_labels = ['-'.join(str(i).split('-')[1:]) for i in self.data.index[-self.limit:]]
-        if self.limit < 10:
-            spacing = 2
-        elif self.limit < 20:
-            spacing = 4
-        else:
-            spacing = 6
         
         for metric_type in self.metric_units_dict.keys():
             metrics_dict = self.metric_units_dict[metric_type]
@@ -892,7 +899,7 @@ class Plots:
                 axis = ax[i][j]
 
                 # plotting the actual metric values
-                y = self.data[metric][-self.limit:]
+                y = self.metrics[metric][-self.limit:]
                 x = y.index
                 x_dummy = range(len(y))
                 
@@ -915,43 +922,43 @@ class Plots:
             fig.tight_layout()
             self.plots.append(fig)
         
-    def _export_charts_pdf(self):
-        """
-        Creates the financial trend charts as a pdf file.
-        
-        """
+    def generate_save_path_object(self):
         date = str(dt.datetime.now()).split()[0]
         end_date = self.filing_dates[-1]
         start_date = self.filing_dates[-self.limit]
         file_name = f"{self.ticker}_{self.period}__{str(start_date)}_to_{str(end_date)}.pdf"
         file_path = Path.cwd()/'investment_tools'/'data'/'Company Analysis'/date/self.ticker/self.period
+        return file_path
 
+    def create_path_from_object(self, path_object):
         try:
-            os.makedirs(file_path)
+            os.makedirs(path_object)
         except FileExistsError:
             pass
-        
+    
+    def make_bin_folder(self):
         try:
             os.mkdir('bin')
         except FileExistsError:
             pass
-
-        # Making title page
-        title_path = 'bin/title.pdf'
-        charts_path = 'bin/charts.pdf'
+    
+    def make_pdf_title_page(self):
+        self.title_path = 'bin/title.pdf'
+        self.charts_path = 'bin/charts.pdf'
         title_message = f"Financial Ratio Trends for {self.ticker}"
-        title_page = canvas.Canvas(title_path)
+        title_page = canvas.Canvas(self.title_path)
         title_page.drawString(210, 520, title_message)
         title_page.save()
 
-
-
-        with PdfPages(charts_path) as pdf:
+    def make_pdf_charts(self):
+        self.charts_path = 'bin/charts.pdf'
+        with PdfPages(self.charts_path) as pdf:
             for figure in self.plots:
                 pdf.savefig(figure)
-    
-        with open(title_path, 'rb') as f1:
-            with open(charts_path, 'rb') as f2:
+
+    def combine_and_export_pdfs(self, export_path):
+        with open(self.title_path, 'rb') as f1:
+            with open(self.charts_path, 'rb') as f2:
                 pdf1 = PdfReader(f1, 'rb')
                 pdf2 = PdfReader(f2, 'rb')
                 pdf_output = PdfWriter()
@@ -959,8 +966,24 @@ class Plots:
                     pdf_output.add_page(pdf1.pages[page_num])
                 for page_num in range(len(pdf2.pages)):
                     pdf_output.add_page(pdf2.pages[page_num])
-                with open(file_path/file_name, 'wb') as output_file:
+                with open(export_path, 'wb') as output_file:
                     pdf_output.write(output_file)
+
+    def _export_charts_pdf(self):
+        """
+        Creates the financial trend charts as a pdf file.
+        
+        """
+        path_object = self.generate_save_path_object()
+        self.create_path_from_object(path_object)
+        self.make_bin_folder()
+        self.make_pdf_title_page()
+        self.make_pdf_charts()
+        self.combine_and_export_pdfs(path_object)
+
+
+    
+        
 
 
 
