@@ -306,11 +306,11 @@ class FinancialData:
             for each of its statements.
         """
         err_msg = 'Indecies could not be filtered for common elements'
-        assert (self.cash_flow_statements.index.to_list() == 
+        assert (self.cash_flow_statements.index.to_list() ==
                 self.balance_sheets.index.to_list(), err_msg)
-        assert (self.income_statements.index.to_list() ==    
+        assert  (self.income_statements.index.to_list() ==
                 self.balance_sheets.index.to_list(), err_msg)
-        assert (self.reported_key_metrics.index.to_list() == 
+        assert (self.reported_key_metrics.index.to_list() ==
                 self.balance_sheets.index.to_list(), err_msg)
 
 
@@ -450,65 +450,29 @@ class ManualAnalysis:
     def __init__(self, financial_data, verbose=False):
         self.data = financial_data
         self.verbose = verbose
-        self.metrics_to_calculate = self.assign_metric_dict()
         self.calculated_metrics = self.analyse()
+        self.assert_non_null_frame(self.calculated_metrics)
         self.calculation_error_dict = {}
-        self.cross_check_metric_calculations()
-
-    
-    def assign_metric_dict(self):
-        # PErhaps this isnt even needed?
-        stock_eval_ratios = ['eps', 'eps_diluted', 'PE_high', 'PE_low', 'PE_avg_close',
-                            'bookValuePerShare', 'dividendPayoutRatio', 'dividendYield_low',
-                            'dividendYield_high', 'dividendYield_avg_close', 'ebitdaratio',
-                            'cashPerShare']
-
-        profitability_ratios = [ 'grossProfitMargin', 'operatingProfitMargin', 
-                                    'pretaxProfitMargin', 'netProfitMargin', 
-                                    'ROIC''returnOnEquity''returnOnAssets'] 
-
-        debt_interest_ratios = ['interestCoverage', 'fixedChargeCoverage',
-                                'debtToTotalCap', 'totalDebtRatio']
-
-        liquidity_ratios = ['currentRatio', 'quickRatio', 'cashRatio']
-
-        efficiency_ratios = ['totalAssetTurnover', 'inventoryToSalesRatio',
-                            'inventoryTurnoverRatio', 'inventoryTurnoverInDays',
-                            'accountsReceivableToSalesRatio', 'receivablesTurnover',
-                            'receivablesTurnoverInDays']
-
-        ratio_growth = ['eps', 'returnOnEquity', 'cashPerShare', 'PE_avg_close',
-                        'ebitdaratio', 'ROIC', 'netProfitMargin', 'returnOnAssets',
-                        'debtToTotalCap', 'totalDebtRatio']
-        
-        metric_dict = {
-                'stock_evaluation_ratios': stock_eval_ratios,
-                'profitability_ratios': profitability_ratios,
-                'debt_interest_ratios': debt_interest_ratios,
-                'liquidity_ratios': liquidity_ratios,
-                'efficiency_ratios': efficiency_ratios,
-                'ratio_growth': ratio_growth
-                }
-        return metric_dict  
-
+        if self.verbose:
+            self.fractional_metric_errors = self.cross_check_metric_calculations()
+            self.assert_non_null_frame(self.fractional_metric_errors)
+            self.print_metric_errors(self.fractional_metric_errors, 0.05)
 
     def print_metric_errors(self, metric_errors, tolerance=0.05):
         if not self.verbose:
             return
         line_count = len(metric_errors)
-        for metric in metric_errors:
-            if metric is not None:
-                count = sum(metric_errors[metric] >= tolerance)
-                message = f"There were {count}/{line_count} values in {metric} that exceed the {tolerance} error tolerance."
-                self.calculation_error_dict[metric] = (count, message)
-        for tup in self.calculation_error_dict.values():
-            print(tup[1])
+        for header in metric_errors:
+            count = sum(metric_errors[header] >= tolerance)
+            message = f"There were {count}/{line_count} values in {header} that exceed the {tolerance} error tolerance."
+            self.calculation_error_dict[header] = (count, message)
+            print(message)
 
     def assert_non_null_frame(self, df: pd.DataFrame):
+        err_msg = 'Metric error calculations returned a null dataframe. Unreliable calculations.'
         for header in df.columns:
-            assert not df[header].isnull().all()
+            assert not df[header].isnull().all(), err_msg
                 
-
     def concat_stock_eval_ratios(self, df):
         total_assets = self.data.balance_sheets['totalAssets'].copy()
         total_liabilities = self.data.balance_sheets['totalLiabilities'].copy()
@@ -597,23 +561,21 @@ class ManualAnalysis:
         return df
     
     def concat_metric_growth(self, df):
-        metrics = ['eps', 'returnOnEquity', 'cashPerShare', 'PE_avg_close', 'ebitdaratio', 'ROIC',
+        growth_metrics = ['eps', 'returnOnEquity', 'cashPerShare', 'PE_avg_close', 'ebitdaratio', 'ROIC',
                    'netProfitMargin', 'returnOnAssets', 'debtToTotalCap', 'totalDebtRatio']
         span, init_idx = (1,1) if self.data.period == 'annual' else (4,4)
-        for metric in metrics:
+        for metric in growth_metrics:
             series = df[metric]
             col_header = metric+'_growth'
             col_data = []
-            for i in range(len(series)):
-                if i < init_idx:
+            for idx, value in enumerate(series):
+                if idx < init_idx:
                     col_data.append(np.nan)
                 else:
-                    col_data.append((series[i]-series[i-span])/abs(series[i-span]))
+                    col_data.append((value-series[idx-span])/abs(series[idx-span]))
             df[col_header] = pd.Series(col_data, index=self.data.frame_indecies)
         return df
-
     
-
     def analyse(self): 
         """Calculates and returns important financial metrics and ratios as a 
             pandas DataFrame."""
@@ -626,8 +588,6 @@ class ManualAnalysis:
         df = self.concat_metric_growth(df)
         return df
 
-
-
     def cross_check_metric_calculations(self):
         ## add ROE, ROIC, ebitda ratio
         if not self.verbose:
@@ -639,9 +599,9 @@ class ManualAnalysis:
         for metric in metrics_to_check:
             reported = self.data.reported_key_metrics[metric]
             calculated = self.calculated_metrics[metric]
-            fractional_errors[metric] = (calculated-reported)/calculated
-        self.assert_non_null_frame(fractional_errors)
-        self.print_metric_errors(fractional_errors, 0.05)
+            fractional_errors[metric] = ((calculated-reported)/calculated).abs()
+        return fractional_errors
+
 
 class Plots:
     #self.n needs to be handled properly in the plot() function 
