@@ -553,7 +553,7 @@ class ManualAnalysis:
         for metric in metrics:
             if metric in self.data.income_statements.keys():
                 reported[metric] = self.data.income_statements[metric]
-            elif metric in self.balance_sheets.keys():
+            elif metric in self.data.balance_sheets.keys():
                 reported[metric] = self.data.balance_sheets[metric]
             elif metric in self.data.cash_flow_statements.keys():
                 reported[metric] = self.data.cash_flow_statements[metric]
