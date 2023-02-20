@@ -678,6 +678,7 @@ class ManualAnalysis:
         # to all the computation and then cross check after if verbost = true
         # Also check the calculation below as it is not correct for coverage ratios
         # It also needs to return the df containing the % error in the metrics
+        # how to handle ebitdaratio???
         '''
         calculated['ebitda'] = revenue - cost_of_revenue- RND_expenses - SGA_expenses - other_expenses + depreciation_amortization
         calculated['ebitdaratio'] = calculated['ebitda']/revenue
@@ -694,7 +695,7 @@ class ManualAnalysis:
             return
         df = pd.DataFrame()
         metrics_to_check = ['grossProfitMargin', 'operatingProfitMargin', 'netProfitMargin',
-                            'currentRatio', 'returnOnEquity', 'returnOnAssets', 'ebitdaratio',
+                            'currentRatio', 'returnOnEquity', 'returnOnAssets',
                             'cashPerShare', 'interestCoverage', 'dividendPayoutRatio']
         
         for metric in metrics_to_check:
