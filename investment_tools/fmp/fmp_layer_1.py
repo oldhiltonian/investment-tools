@@ -447,7 +447,7 @@ class ManualAnalysis:
     metrics : dict
         Dictionary of financial metrics and ratios
     """
-    def __init__(self, financial_data, verbose=False):
+    def __init__(self, financial_data:FinancialData, verbose: bool=False) -> None:
         self.data = financial_data
         self.verbose = verbose
         self.calculated_metrics = self.analyse()
@@ -458,7 +458,7 @@ class ManualAnalysis:
             self.assert_non_null_frame(self.fractional_metric_errors)
             self.print_metric_errors(self.fractional_metric_errors, 0.05)
 
-    def print_metric_errors(self, metric_errors, tolerance=0.05):
+    def print_metric_errors(self, metric_errors: pd.DataFrame, tolerance: float=0.05):
         if not self.verbose:
             return
         line_count = len(metric_errors)
@@ -473,7 +473,7 @@ class ManualAnalysis:
         for header in df.columns:
             assert not df[header].isnull().all(), err_msg
                 
-    def concat_stock_eval_ratios(self, df):
+    def concat_stock_eval_ratios(self, df: pd.DataFrame):
         total_assets = self.data.balance_sheets['totalAssets'].copy()
         total_liabilities = self.data.balance_sheets['totalLiabilities'].copy()
         long_term_debt = self.data.balance_sheets['longTermDebt'].copy()
@@ -498,7 +498,7 @@ class ManualAnalysis:
         df['cashPerShare'] = (1*(cash_and_equivalents-long_term_debt))/outstanding_shares
         return df
     
-    def concat_profitability_ratios(self, df):
+    def concat_profitability_ratios(self, df: pd.DataFrame):
         revenue = self.data.income_statements['revenue'].copy()
         total_assets = self.data.balance_sheets['totalAssets'].copy()
         gross_profit = self.data.income_statements['grossProfit'].copy()
@@ -516,7 +516,7 @@ class ManualAnalysis:
         df['returnOnAssets'] = net_income/total_assets
         return df
     
-    def concat_debt_interest_ratios(self, df):
+    def concat_debt_interest_ratios(self, df: pd.DataFrame):
         operating_income = self.data.income_statements['operatingIncome'].copy()
         total_assets = self.data.balance_sheets['totalAssets'].copy()
         long_term_debt = self.data.balance_sheets['longTermDebt'].copy()
@@ -533,7 +533,7 @@ class ManualAnalysis:
         df['totalDebtRatio'] = total_debt/total_assets
         return df
 
-    def concat_liquidity_ratios(self, df):
+    def concat_liquidity_ratios(self, df: pd.DataFrame):
         current_assets = self.data.balance_sheets['totalCurrentAssets'].copy()
         current_liabilities = self.data.balance_sheets['totalCurrentLiabilities'].copy()
         inventory = self.data.balance_sheets['inventory'].copy()
@@ -544,7 +544,7 @@ class ManualAnalysis:
         df['cashRatio'] = cash_and_equivalents/current_liabilities
         return df
     
-    def concat_efficiency_ratios(self, df):
+    def concat_efficiency_ratios(self, df: pd.DataFrame):
         inventory = self.data.balance_sheets['inventory'].copy()
         revenue = self.data.income_statements['revenue'].copy()
         total_assets = self.data.balance_sheets['totalAssets'].copy()
@@ -560,7 +560,7 @@ class ManualAnalysis:
         df['receivablesTurnoverInDays'] = days/df['receivablesTurnover'].copy()
         return df
     
-    def concat_metric_growth(self, df):
+    def concat_metric_growth(self, df: pd.DataFrame):
         growth_metrics = ['eps', 'returnOnEquity', 'cashPerShare', 'PE_avg_close', 'ebitdaratio', 'ROIC',
                    'netProfitMargin', 'returnOnAssets', 'debtToTotalCap', 'totalDebtRatio']
         span, init_idx = (1,1) if self.data.period == 'annual' else (4,4)
@@ -576,7 +576,7 @@ class ManualAnalysis:
             df[col_header] = pd.Series(col_data, index=self.data.frame_indecies)
         return df
     
-    def analyse(self): 
+    def analyse(self) -> pd.DataFrame: 
         """Calculates and returns important financial metrics and ratios as a 
             pandas DataFrame."""
         df = pd.DataFrame(index=self.data.frame_indecies)
@@ -588,7 +588,7 @@ class ManualAnalysis:
         df = self.concat_metric_growth(df)
         return df
 
-    def cross_check_metric_calculations(self):
+    def cross_check_metric_calculations(self) -> pd.DataFrame:
         ## add ROE, ROIC, ebitda ratio
         if not self.verbose:
             return
