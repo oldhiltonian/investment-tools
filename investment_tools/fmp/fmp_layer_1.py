@@ -451,16 +451,18 @@ class ManualAnalysis:
         self.data = financial_data
         self.verbose = verbose
         self.metrics_to_calculate = self.assign_metric_dict()
+        self.calculation_error_dict = {}
         clc, rep, met_err, rat_err = self.cross_check_statement_calculations()
-        self.calculated_statement_metrics = clc
-        self.reported_statement_metrics= rep
-        self.statement_metric_errors = met_err
-        self.statement_ratio_errors = rat_err
+        self.cross_checked_metrics_calculated = clc
+        self.cross_checked_metrics_reported= rep
+        self.cross_checked_metrics_errors = met_err
+        self.cross_checked_ratios_errors = rat_err
         self.statement_metrics = self.analyse()
         self.cross_check_metric_calculations()
 
     
     def assign_metric_dict(self):
+        # PErhaps this isnt even needed?
         stock_eval_ratios = ['eps', 'eps_diluted', 'PE_high', 'PE_low', 'PE_avg_close',
                             'bookValuePerShare', 'dividendPayoutRatio', 'dividendYield_low',
                             'dividendYield_high', 'dividendYield_avg_close', 'ebitdaratio',
@@ -498,14 +500,13 @@ class ManualAnalysis:
     def print_metric_errors(self, metric_errors, tolerance=0.05):
         if not self.verbose:
             return
-        self.error_dict = dict()
         line_count = len(metric_errors)
         for metric in metric_errors:
             if metric is not None:
                 count = sum(metric_errors[metric] >= tolerance)
                 message = f"There were {count}/{line_count} values in {metric} that exceed the {tolerance} error tolerance."
-                self.error_dict[metric] = (count, message)
-        for tup in self.error_dict.values():
+                self.calculation_error_dict[metric] = (count, message)
+        for tup in self.calculation_error_dict.values():
             print(tup[1])
 
     def cross_check_statement_calculations(self):
@@ -569,6 +570,8 @@ class ManualAnalysis:
         return calculated, reported, metric_errors, ratio_errors
 
     def analyse(self):
+        # consider splitting this into separate methods for each type of ratio
+        # and use a helper function to concatenate the dataframes. 
         """Calculates and returns important financial metrics and ratios as a 
             pandas DataFrame."""
         df = pd.DataFrame(index=self.data.frame_indecies)
@@ -669,12 +672,30 @@ class ManualAnalysis:
         return df
 
     def cross_check_metric_calculations(self):
+        # Make this the only cross check calculation
+        # The other metrics cross checked first are pasted below. Take what you need
+        # and then delete the first cross check method. It makes sense to just
+        # to all the computation and then cross check after if verbost = true
+        # Also check the calculation below as it is not correct for coverage ratios
+        # It also needs to return the df containing the % error in the metrics
+        '''
+        calculated['ebitda'] = revenue - cost_of_revenue- RND_expenses - SGA_expenses - other_expenses + depreciation_amortization
+        calculated['ebitdaratio'] = calculated['ebitda']/revenue
+        calculated['grossProfit'] = revenue - cost_of_revenue
+        calculated['grossProfitRatio'] = (calculated['grossProfit']/revenue)
+        calculated['operatingIncome'] = revenue - cost_of_revenue - SGA_expenses - RND_expenses
+        calculated['operatingIncomeRatio'] = (calculated['operatingIncome']/revenue)
+        calculated['incomeBeforeTax'] = calculated['operatingIncome'] - interest_expense + interest_income
+        calculated['incomeBeforeTaxRatio'] = (calculated['incomeBeforeTax']/revenue)
+        calculated['netIncome'] = 0.79*calculated['incomeBeforeTax']
+        calculated['netIncomeRatio'] = (calculated['netIncome']/revenue)
+        calculated['eps'] = net_income_reported/outstanding_shares'''
         if not self.verbose:
             return
         df = pd.DataFrame()
-        metrics_to_check = ['grossProfitMargin', 'operatingProfitMargin', 'currentRatio', 
-                    'returnOnEquity', 'returnOnAssets', 'cashPerShare', 'interestCoverage',
-                    'dividendPayoutRatio']
+        metrics_to_check = ['grossProfitMargin', 'operatingProfitMargin', 'netProfitMargin',
+                            'currentRatio', 'returnOnEquity', 'returnOnAssets', 'ebitdaratio',
+                            'cashPerShare', 'interestCoverage', 'dividendPayoutRatio']
         
         for metric in metrics_to_check:
             df[metric] = self.statement_metrics[metric] - self.data.reported_key_metrics[metric]
