@@ -34,7 +34,8 @@ class FinancialData:
 
     """
 
-    def __init__(self, ticker, api_key='', data='local', period='annual', limit=120):
+    def __init__(self, ticker: str, api_key: str='', data: str='local', 
+                    period: str='annual', limit: int=120):
         """
         Initializes a new instance of the FinancialData class.
 
@@ -82,7 +83,7 @@ class FinancialData:
         assert self.data in ['online', 'local'], "data must be 'online' or 'local'"
         assert self.period in ['annual', 'quarter'], "period must be 'annual' or 'quarter"
 
-    def generate_request_url(self, data_type):
+    def generate_request_url(self, data_type: str) -> str:
         """
         Generates a URL to fetch data from the Financial Modeling Prep API.
         
@@ -116,7 +117,7 @@ class FinancialData:
         
         return fmp_template.format(data_str, ticker, period, limit, api_key)
     
-    def fetch_raw_data(self, data_type):
+    def fetch_raw_data(self, data_type: str) -> pd.DataFrame:
         """
         Fetches raw financial data from either the Financial Modeling Prep API
           or a local file, based on the self.data attribute. 
@@ -137,7 +138,7 @@ class FinancialData:
             raw_data = pd.read_parquet(path)
         return raw_data
             
-    def get_load_path(self, data_type, ticker, period):
+    def get_load_path(self, data_type: str, ticker: str, period: str) -> Path:
         """
         Gets the file path to load a local financial data file.
         
@@ -163,7 +164,7 @@ class FinancialData:
             raise ValueError(err_msg)
         return Path.cwd()/'investment_tools'/'data'/'Company Financial Data'/ticker/period/file
 
-    def get_frame_indecies(self):
+    def get_frame_indecies(self) -> pd.Index:
         """
         Gets the index for the financial data.
         
@@ -172,7 +173,7 @@ class FinancialData:
         """
         return self.balance_sheets.index
 
-    def set_frame_indecies(self, other):
+    def set_frame_indecies(self, other: pd.DataFrame) -> pd.DataFrame:
         """
         Sets the index for the provided DataFrame.
         
@@ -182,7 +183,7 @@ class FinancialData:
         return other.set_index(self.frame_indecies)
 
 
-    def build_dataframe(self, data):
+    def build_dataframe(self, data: dict) -> pd.DataFrame:
         """
         Builds a pandas.DataFrame from provided raw data. If the raw data
             is already a DataFrame then it is returned immediately. 
@@ -207,7 +208,7 @@ class FinancialData:
             df['outstandingShares_calc'] = df['netIncome']/df['eps']
         return df
 
-    def generate_index(self, date):
+    def generate_index(self, date: str) -> str:
         """
         Generates an index for the financial data.
         
@@ -234,7 +235,7 @@ class FinancialData:
         return f"{self.ticker}-Q{quarter}-{year}"
 
 
-    def generate_date(self, date_str):
+    def generate_date(self, date_str: str) -> dt.date:
         """
         Generates a datetime.date object from a date string.
         
@@ -248,7 +249,7 @@ class FinancialData:
         return dt.date(year, month, day)
 
 
-    def check_for_matching_indecies(self):
+    def check_for_matching_indecies(self) -> bool:
         """
         Checks whether the financial data has matching indices.
         
@@ -269,7 +270,7 @@ class FinancialData:
         return True if matching_indecies else False
 
 
-    def get_common_df_indicies(self):
+    def get_common_df_indicies(self) -> pd.Index:
         """
         Gets the common indices for the financial data.
         
@@ -284,7 +285,7 @@ class FinancialData:
         return common_elements
 
 
-    def filter_for_common_indecies(self, common_elements):
+    def filter_for_common_indecies(self, common_elements: pd.Index):
         """
         Filters the financial data attributes to only include common indices.
         
@@ -313,7 +314,7 @@ class FinancialData:
                 self.balance_sheets.index.to_list(), err_msg)
 
 
-    def assert_required_length(self, item):
+    def assert_required_length(self, item: list):
         """
         Asserts that a given item has the required length based on the period.
         
@@ -327,7 +328,7 @@ class FinancialData:
         err_msg = f"Financial statements are shorter than the required length of {required_length}"
         assert len(item) >= required_length, err_msg
 
-    def assert_valid_server_response(Self, response):
+    def assert_valid_server_response(Self, response: requests.Response):
         """
         Asserts that the server response is valid (status code 200).
         
@@ -336,7 +337,7 @@ class FinancialData:
         """
         assert response.status_code == 200, f"API call failed. Code <{response.status_code}>"
 
-    def assert_server_response_not_empty(self, response):
+    def assert_server_response_not_empty(self, response: requests.Response):
         """
         Asserts that the server response not empty.
         
@@ -346,7 +347,7 @@ class FinancialData:
         assert len(response.json()) != 0, 'Server response successful but empty'
         
 
-    def fetch_stock_price_data_yf(self):
+    def fetch_stock_price_data_yf(self) -> pd.DataFrame:
         """
         Fetches stock price data from Yahoo Finance.
         
@@ -361,7 +362,7 @@ class FinancialData:
         return self.periodise(raw_data)
 
 
-    def periodise(self, df):
+    def periodise(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Periodises the stock price data for each filing period.
         
