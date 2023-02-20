@@ -451,13 +451,8 @@ class ManualAnalysis:
         self.data = financial_data
         self.verbose = verbose
         self.metrics_to_calculate = self.assign_metric_dict()
+        self.calculated_metrics = self.analyse()
         self.calculation_error_dict = {}
-        clc, rep, met_err, rat_err = self.cross_check_statement_calculations()
-        self.cross_checked_metrics_calculated = clc
-        self.cross_checked_metrics_reported= rep
-        self.cross_checked_metrics_errors = met_err
-        self.cross_checked_ratios_errors = rat_err
-        self.statement_metrics = self.analyse()
         self.cross_check_metric_calculations()
 
     
@@ -509,74 +504,12 @@ class ManualAnalysis:
         for tup in self.calculation_error_dict.values():
             print(tup[1])
 
-    def cross_check_statement_calculations(self):
-        """
-        Calculates financial metrics and and compares them to the reported values.
-        
-        Returns pandas DataFrames representing the calculated values, reported values,
-        the error between the calculated and reported values, and the error of just
-        the financial ratios"""
-        if not self.verbose:
-            return
-        reported = pd.DataFrame(index=self.data.frame_indecies)
-        calculated = pd.DataFrame(index=self.data.frame_indecies)
-        RND_expenses = self.data.income_statements['researchAndDevelopmentExpenses']
-        SGA_expenses = self.data.income_statements['sellingGeneralAndAdministrativeExpenses']
-        other_expenses = self.data.income_statements['otherExpenses']
-        revenue = self.data.income_statements['revenue']
-        self.revenue = revenue
-        cost_of_revenue = self.data.income_statements['costOfRevenue']
-        depreciation_amortization = self.data.cash_flow_statements['depreciationAndAmortization']
-        interest_expense = self.data.income_statements['interestExpense']
-        interest_income = self.data.income_statements['interestIncome']
-        net_income_reported = self.data.income_statements['netIncome']
-        outstanding_shares = self.data.income_statements['outstandingShares_calc']
+    def assert_non_null_frame(self, df: pd.DataFrame):
+        for header in df.columns:
+            assert not df[header].isnull().all()
+                
 
-
-
-        metrics = ['ebitda', 'ebitdaratio', 'grossProfit', 'grossProfitRatio', 'operatingIncome', 'operatingIncomeRatio', \
-                    'incomeBeforeTax', 'incomeBeforeTaxRatio', 'netIncome', 'netIncomeRatio', 'eps']
-
-        # Calculated ratios from reported values on the financial statements
-        calculated['ebitda'] = revenue - cost_of_revenue- RND_expenses - SGA_expenses - other_expenses + depreciation_amortization
-        calculated['ebitdaratio'] = calculated['ebitda']/revenue
-        calculated['grossProfit'] = revenue - cost_of_revenue
-        calculated['grossProfitRatio'] = (calculated['grossProfit']/revenue)
-        calculated['operatingIncome'] = revenue - cost_of_revenue - SGA_expenses - RND_expenses
-        calculated['operatingIncomeRatio'] = (calculated['operatingIncome']/revenue)
-        calculated['incomeBeforeTax'] = calculated['operatingIncome'] - interest_expense + interest_income
-        calculated['incomeBeforeTaxRatio'] = (calculated['incomeBeforeTax']/revenue)
-        calculated['netIncome'] = 0.79*calculated['incomeBeforeTax']
-        calculated['netIncomeRatio'] = (calculated['netIncome']/revenue)
-        calculated['eps'] = net_income_reported/outstanding_shares
-        
-        # Pulling reported metric values
-        for metric in metrics:
-            if metric in self.data.income_statements.keys():
-                reported[metric] = self.data.income_statements[metric]
-            elif metric in self.data.balance_sheets.keys():
-                reported[metric] = self.data.balance_sheets[metric]
-            elif metric in self.data.cash_flow_statements.keys():
-                reported[metric] = self.data.cash_flow_statements[metric]
-
-        # Ensuring dimensionality of the two dataframes
-        if len(calculated.keys()) != len(reported.keys()):
-            msg = '''Key mismatch between the reported and calculated tables.\nCheck the calculations in the Company.cross_check() method'''
-            raise Exception(msg)
-        # Error between calculated and reported values
-        metric_errors = calculated - reported
-        ratio_errors = metric_errors.drop(['ebitda','grossProfit', 'operatingIncome', 'incomeBeforeTax', 'netIncome'], inplace=False, axis=1)
-        self.print_metric_errors(ratio_errors)
-        return calculated, reported, metric_errors, ratio_errors
-
-    def analyse(self):
-        # consider splitting this into separate methods for each type of ratio
-        # and use a helper function to concatenate the dataframes. 
-        """Calculates and returns important financial metrics and ratios as a 
-            pandas DataFrame."""
-        df = pd.DataFrame(index=self.data.frame_indecies)
-
-        '''Stock Evaluation Ratios'''
+    def concat_stock_eval_ratios(self, df):
         total_assets = self.data.balance_sheets['totalAssets'].copy()
         total_liabilities = self.data.balance_sheets['totalLiabilities'].copy()
         long_term_debt = self.data.balance_sheets['longTermDebt'].copy()
@@ -599,14 +532,12 @@ class ManualAnalysis:
         df['dividendYield_avg_close'] = (-dividends_paid/outstanding_shares)/stock_price_avg
         df['ebitdaratio'] = self.data.income_statements['ebitdaratio']
         df['cashPerShare'] = (1*(cash_and_equivalents-long_term_debt))/outstanding_shares
-
-
-        '''Profitability Ratios'''
+        return df
+    
+    def concat_profitability_ratios(self, df):
         revenue = self.data.income_statements['revenue'].copy()
+        total_assets = self.data.balance_sheets['totalAssets'].copy()
         gross_profit = self.data.income_statements['grossProfit'].copy()
-        COGS = self.data.income_statements['costOfRevenue'].copy()
-        SGA = self.data.income_statements['sellingGeneralAndAdministrativeExpenses'].copy()
-        RND_expense = self.data.income_statements['researchAndDevelopmentExpenses'].copy()
         operating_income = self.data.income_statements['operatingIncome'].copy()
         income_before_tax = self.data.income_statements['incomeBeforeTax'].copy()
         total_capitalization = self.data.balance_sheets['totalEquity'].copy() + self.data.balance_sheets['longTermDebt'].copy()
@@ -619,8 +550,13 @@ class ManualAnalysis:
         df['ROIC'] = net_income/total_capitalization
         df['returnOnEquity'] = net_income/total_shareholder_equity
         df['returnOnAssets'] = net_income/total_assets
-
-        '''Debt and Interest Ratios'''
+        return df
+    
+    def concat_debt_interest_ratios(self, df):
+        operating_income = self.data.income_statements['operatingIncome'].copy()
+        total_assets = self.data.balance_sheets['totalAssets'].copy()
+        long_term_debt = self.data.balance_sheets['longTermDebt'].copy()
+        total_capitalization = self.data.balance_sheets['totalEquity'].copy() + self.data.balance_sheets['longTermDebt'].copy()
         interest_expense = self.data.income_statements['interestExpense'].copy()
         # The fixed_charges calculation below is likely incomplete
         fixed_charges = self.data.income_statements['interestExpense'].copy() + self.data.balance_sheets['capitalLeaseObligations'].copy()
@@ -631,18 +567,23 @@ class ManualAnalysis:
         df['fixedChargeCoverage'] = ebitda/fixed_charges
         df['debtToTotalCap'] = long_term_debt/total_capitalization
         df['totalDebtRatio'] = total_debt/total_assets
+        return df
 
-        '''Liquidity & FinancialCondition Ratios'''
+    def concat_liquidity_ratios(self, df):
         current_assets = self.data.balance_sheets['totalCurrentAssets'].copy()
         current_liabilities = self.data.balance_sheets['totalCurrentLiabilities'].copy()
         inventory = self.data.balance_sheets['inventory'].copy()
+        cash_and_equivalents = self.data.balance_sheets['cashAndCashEquivalents'].copy()
         quick_assets = current_assets - inventory
         df['currentRatio'] = current_assets/current_liabilities
         df['quickRatio'] = quick_assets/current_liabilities
         df['cashRatio'] = cash_and_equivalents/current_liabilities
-
-
-        '''Efficiency Ratios'''
+        return df
+    
+    def concat_efficiency_ratios(self, df):
+        inventory = self.data.balance_sheets['inventory'].copy()
+        revenue = self.data.income_statements['revenue'].copy()
+        total_assets = self.data.balance_sheets['totalAssets'].copy()
         net_receivables = self.data.balance_sheets['netReceivables'].copy()
         df['totalAssetTurnover'] = revenue/total_assets
         df['inventoryToSalesRatio'] = inventory/revenue
@@ -653,9 +594,9 @@ class ManualAnalysis:
         df['accountsReceivableToSalesRatio'] = accounts_receivable_to_sales_ratio
         df['receivablesTurnover'] = revenue/net_receivables
         df['receivablesTurnoverInDays'] = days/df['receivablesTurnover'].copy()
-
-
-        '''Metric Growth'''
+        return df
+    
+    def concat_metric_growth(self, df):
         metrics = ['eps', 'returnOnEquity', 'cashPerShare', 'PE_avg_close', 'ebitdaratio', 'ROIC',
                    'netProfitMargin', 'returnOnAssets', 'debtToTotalCap', 'totalDebtRatio']
         span, init_idx = (1,1) if self.data.period == 'annual' else (4,4)
@@ -671,36 +612,36 @@ class ManualAnalysis:
             df[col_header] = pd.Series(col_data, index=self.data.frame_indecies)
         return df
 
+    
+
+    def analyse(self): 
+        """Calculates and returns important financial metrics and ratios as a 
+            pandas DataFrame."""
+        df = pd.DataFrame(index=self.data.frame_indecies)
+        df = self.concat_stock_eval_ratios(df)
+        df = self.concat_profitability_ratios(df)
+        df = self.concat_debt_interest_ratios(df)
+        df = self.concat_liquidity_ratios(df)
+        df = self.concat_efficiency_ratios(df)
+        df = self.concat_metric_growth(df)
+        return df
+
+
+
     def cross_check_metric_calculations(self):
-        # Make this the only cross check calculation
-        # The other metrics cross checked first are pasted below. Take what you need
-        # and then delete the first cross check method. It makes sense to just
-        # to all the computation and then cross check after if verbost = true
-        # Also check the calculation below as it is not correct for coverage ratios
-        # It also needs to return the df containing the % error in the metrics
-        # how to handle ebitdaratio???
-        '''
-        calculated['ebitda'] = revenue - cost_of_revenue- RND_expenses - SGA_expenses - other_expenses + depreciation_amortization
-        calculated['ebitdaratio'] = calculated['ebitda']/revenue
-        calculated['grossProfit'] = revenue - cost_of_revenue
-        calculated['grossProfitRatio'] = (calculated['grossProfit']/revenue)
-        calculated['operatingIncome'] = revenue - cost_of_revenue - SGA_expenses - RND_expenses
-        calculated['operatingIncomeRatio'] = (calculated['operatingIncome']/revenue)
-        calculated['incomeBeforeTax'] = calculated['operatingIncome'] - interest_expense + interest_income
-        calculated['incomeBeforeTaxRatio'] = (calculated['incomeBeforeTax']/revenue)
-        calculated['netIncome'] = 0.79*calculated['incomeBeforeTax']
-        calculated['netIncomeRatio'] = (calculated['netIncome']/revenue)
-        calculated['eps'] = net_income_reported/outstanding_shares'''
+        ## add ROE, ROIC, ebitda ratio
         if not self.verbose:
             return
-        df = pd.DataFrame()
+        fractional_errors = pd.DataFrame(index=self.data.frame_indecies)
         metrics_to_check = ['grossProfitMargin', 'operatingProfitMargin', 'netProfitMargin',
                             'currentRatio', 'returnOnEquity', 'returnOnAssets',
                             'cashPerShare', 'interestCoverage', 'dividendPayoutRatio']
-        
         for metric in metrics_to_check:
-            df[metric] = self.statement_metrics[metric] - self.data.reported_key_metrics[metric]
-        self.print_metric_errors(df, 0.05)
+            reported = self.data.reported_key_metrics[metric]
+            calculated = self.calculated_metrics[metric]
+            fractional_errors[metric] = (calculated-reported)/calculated
+        self.assert_non_null_frame(fractional_errors)
+        self.print_metric_errors(fractional_errors, 0.05)
 
 class Plots:
     #self.n needs to be handled properly in the plot() function 
@@ -900,7 +841,7 @@ class Company:
         self._financial_data = FinancialData(ticker, api_key, data, period, limit)
         self.filing_dates = self._financial_data.filing_date_objects
         self._analysis = ManualAnalysis(self._financial_data, self.verbose)
-        self.metrics = self._analysis.statement_metrics
+        self.metrics = self._analysis.calculated_metrics
         self._charts_printed = False
         if self.verbose:
             self.print_charts()
