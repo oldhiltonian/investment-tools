@@ -182,7 +182,7 @@ class FinancialData:
             data_type (str): The type of data to fetch.
         
         Returns:
-            pandas.DataFrame: The fetched financial data.
+            pandas.DataFrame if the data is fetched locally, otherwise requests.Response
         """
         if self.data == 'online':
             url = self.generate_request_url(data_type)
