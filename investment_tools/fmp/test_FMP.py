@@ -11,17 +11,18 @@ key_path = Path().home()/'desktop'/'FinancialModellingPrep_API.txt'
 with open(key_path) as file:
     api_key = file.read()
 
-
 class TestFinancialData(unittest.TestCase):
     @classmethod
-    def setUpClass(self):
+    def setUpClass(cls):
         # self.tickers = ['AAPL', 'MSFT', 'NVDA','VAC', 'WBA', 'ATVI', 'A', 'AMD']
-        self.tickers = ['AAPL']
-        self.data =    ['online', 'local']
-        self.period =  ['annual', 'quarter']
-        self.api_key = api_key
-        self.limit = 120
-        self.zipped_args_tdp = list(itertools.product(self.tickers, self.data, self.period))
+        cls.tickers = ['AAPL']
+        cls.api_key = api_key
+        cls.data =    ['online', 'local']
+        cls.period =  ['annual', 'quarter']
+        cls.limit = 120
+        cls.zipped_args_tdp = list(itertools.product(cls.tickers, cls.data, cls.period))
+
+
 
     def test_assert_valid_user_input(self):
         for ticker, data, period in self.zipped_args_tdp:
@@ -57,6 +58,85 @@ class TestFinancialData(unittest.TestCase):
                     instance.fetch_raw_data(4)
                     instance.fetch_raw_data(42)
         
+    def test_get_load_path(self):
+        for ticker, data, period in self.zipped_args_tdp:
+            instance = FinancialData(ticker, self.api_key, data, period, self.limit)
+            bs_str = (f'''C:\\Users\\John\\Desktop\\Git\\investment-tools\\investment_tools\\data\\
+                            Company_Financial_Data\\{ticker}\\{period}\\balance_sheets.parquet''')
+            is_str = f'''C:\\Users\\John\\Desktop\\Git\\investment-tools\\investment_tools\\data\\
+                            Company_Financial_Data\\{ticker}\\{period}\\income_statements.parquet'''
+            cfs_str = f'''C:\\Users\\John\\Desktop\\Git\\investment-tools\\investment_tools\\data\\
+                        Company_Financial_Data\\{ticker}\\{period}\\cash_flow_statements.parquet'''
+            metric_str = f'''C:\\Users\\John\\Desktop\\Git\\investment-tools\\investment_tools\\data\\
+                        Company_Financial_Data\\{ticker}\\{period}\\reported_key_metrics.parquet'''
+            price_str = f'''C:\\Users\\John\\Desktop\\Git\\investment-tools\\investment_tools\\data\\
+                        Company_Financial_Data\\{ticker}\\{period}\\stock_price_data.parquet'''
+            bs_str = bs_str.replace('\n', '').replace('\t', '').replace(' ', '')
+            is_str = is_str.replace('\n', '').replace('\t', '').replace(' ', '')
+            cfs_str = cfs_str.replace('\n', '').replace('\t', '').replace(' ', '')
+            metric_str = metric_str.replace('\n', '').replace('\t', '').replace(' ', '')
+            price_str = price_str.replace('\n', '').replace('\t', '').replace(' ', '')
+
+            self.assertEqual(str(Path(bs_str)), str(instance.get_load_path('bs', ticker, period)))
+            self.assertEqual(str(Path(is_str)), str(instance.get_load_path('is', ticker, period)))
+            self.assertEqual(str(Path(cfs_str)), str(instance.get_load_path('cfs', ticker, period)))
+            self.assertEqual(str(Path(metric_str)), str(instance.get_load_path('metrics', ticker, period)))
+            self.assertEqual(str(Path(price_str)), str(instance.get_load_path('price', ticker, period)))
+
+
+
+
+
+
+
+# class MyClass:
+#     def __init__(self, a, b):
+#         self.a = a
+#         self.b = b
+        
+#     def mult_(self):
+#         return self.a* self.b
+    
+#     def add_(self):
+#         return self.a + self.b
+
+#     def div_(self):
+#         return self.a/self.b
+
+#     def sub_(self):
+#         return self.a - self.b
+    
+# class TestMyClass(unittest.TestCase):
+#     @classmethod
+#     def setUp(self):
+#         self.a = [1,2,3]
+#         self.b = [4,5,6]
+#         self.zipped = list(itertools.product(self.a, self.b))
+
+#     # def loop_combinations(cls, *attributes):
+#     #     def decorator(func):
+#     #         def wrapper(*args, **kwargs):
+#     #             for attribute_values in zip(*attributes):
+#     #                 func(*attribute_values, *args, **kwargs)
+#     #         return wrapper
+#     #     return decorator
+        
+#     def test_add(self):
+#         for args in self.zipped:
+#             instance = MyClass(*args)
+#             self.assertEqual(instance.add_(), sum(args))
+
+#     # @loop_combinations([1,2,3], [2,3,4])
+#     # def test_mult(self, a, b):
+#     #     instance= MyClass(a,b)
+#     #     result = instance.mult_()
+#     #     self.assertEqual(result, a*b)
+
+
+
+
+
+
 
 
 if __name__ == '__main__':

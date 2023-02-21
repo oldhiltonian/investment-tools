@@ -215,10 +215,12 @@ class FinancialData:
             file = 'cash_flow_statements.parquet'
         elif data_type == 'metrics':
             file= 'reported_key_metrics.parquet'
+        elif data_type == 'price':
+            file = 'stock_price_data.parquet'
         else:
             err_msg = f"{data_type} is not a valid API call"
             raise ValueError(err_msg)
-        return Path.cwd().parent/'data'/'Company Financial Data'/ticker/period/file
+        return Path.cwd().parent/'data'/'Company_Financial_Data'/ticker/period/file
 
     def get_frame_indecies(self) -> pd.Index:
         """
@@ -459,7 +461,7 @@ class FinancialData:
         """
         Saves the financial data to local parquet files.
         """
-        save_path = Path.cwd().parent/'data'/'Company Financial Data'/self.ticker/self.period
+        save_path = Path.cwd().parent/'data'/'Company_Financial_Data'/self.ticker/self.period
         try:
             os.makedirs(save_path)
         except FileExistsError:
