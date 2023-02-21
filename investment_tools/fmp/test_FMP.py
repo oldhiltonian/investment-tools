@@ -12,8 +12,26 @@ with open(key_path) as file:
     api_key = file.read()
 
 class TestFinancialData(unittest.TestCase):
+    """
+    Test suite for the FinancialData class.
+
+    Attributes:
+        tickers (list): A list of stock tickers to test.
+        api_key (str): An API key for the Financial Modeling Prep API.
+        data (list): A list of data types to test.
+        period (list): A list of periods to test.
+        limit (int): A limit on the number of records to fetch.
+        zipped_args_tdp (list): A list of tuples representing all combinations
+            of tickers, data, and period.
+    """
+
     @classmethod
     def setUpClass(cls):
+        """
+        Set up the test suite.
+
+        This method is called before any test methods are run.
+        """
         # self.tickers = ['AAPL', 'MSFT', 'NVDA','VAC', 'WBA', 'ATVI', 'A', 'AMD']
         cls.tickers = ['AAPL']
         cls.api_key = api_key
@@ -25,11 +43,23 @@ class TestFinancialData(unittest.TestCase):
 
 
     def test_assert_valid_user_input(self):
+        """
+        Test the assert_valid_user_inputs method of the FinancialData class.
+
+        This method tests that the assert_valid_user_inputs method of the FinancialData
+        class raises a ValueError for invalid user inputs.
+        """
         for ticker, data, period in self.zipped_args_tdp:
             instance = FinancialData(ticker, self.api_key, data, period, self.limit)
             instance.assert_valid_user_inputs()
         
     def test_generate_request_url(self):
+        """
+        Test the generate_request_url method of the FinancialData class.
+
+        This method tests that the generate_request_url method of the FinancialData
+        class returns the correct URLs for each type of financial statement.
+        """
         for ticker, data, period in self.zipped_args_tdp:
             instance = FinancialData(ticker, self.api_key, data, period, self.limit)
             bs_str = f'https://financialmodelingprep.com/api/v3/balance-sheet-statement/{ticker}?period={period}&limit={self.limit}&apikey={api_key}'
@@ -47,6 +77,12 @@ class TestFinancialData(unittest.TestCase):
 
 
     def test_fetch_raw_data(self):
+        """
+        Test the fetch_raw_data method of the FinancialData class.
+
+        This method tests that the fetch_raw_data method of the FinancialData class
+        returns the correct data types for each type of financial statement.
+        """
         for ticker, data, period in self.zipped_args_tdp:
             instance = FinancialData(ticker, api_key, data, period)
             for string in ['bs', 'is', 'cfs', 'metrics']:
@@ -59,6 +95,12 @@ class TestFinancialData(unittest.TestCase):
                     instance.fetch_raw_data(42)
         
     def test_get_load_path(self):
+        """
+        Test the get_load_path method of the FinancialData class.
+
+        This method tests that the get_load_path method of the FinancialData class
+        returns the correct file paths for each type of financial statement.
+        """
         for ticker, data, period in self.zipped_args_tdp:
             instance = FinancialData(ticker, self.api_key, data, period, self.limit)
             bs_str = (f'''C:\\Users\\John\\Desktop\\Git\\investment-tools\\investment_tools\\data\\
