@@ -32,6 +32,61 @@ class FinancialData:
     Raises:
         AssertionError: If invalid input is provided for data or period attributes.
 
+    Methods:
+        __init__(self, ticker: str, api_key: str='', data: str='local',
+                 period: str='annual', limit: int=120)
+            Initializes a FinancialData object.
+
+        assert_valid_user_inputs(self)
+            Asserts that the user input for the data attribute is valid.
+
+        fetch_raw_data(self, data_type: str) -> pd.DataFrame
+            Fetches raw financial data from an online source or a local cache.
+
+        get_load_path(self, data_type: str, ticker: str, period: str) -> Path
+            Generates a file path for the specified data type.
+
+        get_frame_indecies(self) -> pd.Index
+            Retrieves a list of financial data statement indecies.
+
+        build_dataframe(self, data: dict) -> pd.DataFrame
+            Builds a pandas dataframe from financial statement data.
+
+        generate_index(self, date: str) -> str
+            Generates an index for the dataframe from the filing date.
+
+        generate_date(self, date_str: str) -> dt.date
+            Converts a date string to a datetime.date object.
+
+        check_for_matching_indecies(self) -> bool
+            Asserts that financial statements have matching indecies.
+
+        get_common_df_indicies(self) -> pd.Index
+            Retrieves the common financial statement dataframe indecies.
+
+        filter_for_common_indecies(self, common_elements: pd.Index)
+            Filters financial statement dataframes for common indecies.
+
+        assert_identical_indecies(self)
+            Asserts that financial statement dataframe indecies are identical.
+
+        assert_required_length(self, item: list)
+            Asserts that a given item has the required length based on the period.
+
+        assert_valid_server_response(Self, response: requests.Response)
+            Asserts that an API call to fetch financial data was successful.
+
+        assert_server_response_not_empty(self, response: requests.Response)
+            Asserts that an API call to fetch financial data returned non-empty results.
+
+        fetch_stock_price_data_yf(self) -> pd.DataFrame
+            Fetches stock price data from Yahoo Finance.
+
+        periodise(self, df: pd.DataFrame) -> pd.DataFrame
+            Periodises the stock price data for each filing period.
+
+        save_financial_attributes(self)
+            Saves the financial data to local parquet files.
     """
 
     def __init__(self, ticker: str, api_key: str='', data: str='local', 
