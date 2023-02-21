@@ -867,10 +867,48 @@ class Plots:
             return 4
         else:
             return 6
+        
+    def filter_x_labels(self, x_labels, spacing):
+        return [x_labels[i] if i%spacing==0 else ' ' for i in range(len(x_labels))]
     
-    def generate_xlabels(self):
+    def generate_x_labels(self):
         return ['-'.join(str(i).split('-')[1:]) for i in self.metrics.index[-self.limit:]]
 
+    def calculate_subplots_shape(self, metrics_container):
+            nplots = len(metrics_container)
+            nrows = -(-nplots//2)
+            ncols = 2
+            return nrows, ncols
+
+    def select_subplot(self, counter: int, subplots: plt.subplots) -> plt.subplot:
+        i, j = counter//2, counter%2
+        return subplots[i][j]
+
+    def get_y_data(self, metric):
+        return self.metrics[metric][-self.limit:]
+
+    def get_y_units(self, metric_type, metric):
+        return self.metric_units_dict[metric_type][metric]
+
+    def plot_data_on_axis(self, axis, data):
+        axis.plot(data['y'], label='data')
+        axis.set_title(data['metric'])
+        axis.set_xticks(data['x_true'])
+        axis.set_xticklabels(data['x_labels'])
+        axis.set_ylabel(['y_label'])
+        return axis
+
+    def get_linear_coeffs(self, x, y):
+        slope, intercept, r_value, _, _ = linregress(x, y)     
+        return slope, intercept, r_value**2
+    
+    def generate_linear_series(self, x, slope, intercept):
+        return slope*x + intercept
+  
+    def plot_linear_trend(self, axis, x, y, r2):
+        axis.plot(x, y, alpha=0.5, linestyle='--', label='linear trend')
+        axis.plot([], [], ' ', label=f'R2: {r2:.2f}') # Adding R2 value to legend
+        return axis
 
     def plot_metrics(self):
         """
@@ -882,53 +920,55 @@ class Plots:
         ###delete
         ticker-Q2-2021 or FY
         """
-        x_labels = self.generate_xlabels()
         spacing = self.get_spacing()
-
+        x_labels = self.filter_x_labels(self.generate_x_labels(), spacing)
         
         for metric_type in self.metric_units_dict.keys():
-            metrics_dict = self.metric_units_dict[metric_type]
-            metrics = metrics_dict.keys()
-            nplots = len(metrics_dict)
-            nrows = -(-nplots//2)
-            fig, ax = plt.subplots(nrows, 2, figsize=(11.7, 8.3))
+            # creating subplot axes to hold all metrics of each metric type
+            metrics = self.metric_units_dict[metric_type].keys()
+            nrows, ncols = self.calculate_subplots_shape(metrics)
+            fig, ax = plt.subplots(nrows, ncols, figsize=(11.7, 8.3))
 
+            # plotting each metric trend on an axis
             for counter, metric in enumerate(metrics):
-                # targetting the right subplot
-                i, j = counter//2, counter%2
-                axis = ax[i][j]
-
-                # plotting the actual metric values
-                y = self.metrics[metric][-self.limit:]
-                x = y.index
+                # axis selection
+                axis = self.select_subplot(counter, ax)
+                # gathering data trend for each metric
+                y = self.get_y_data(metric)
+                y_label = self.get_y_units(metric_type, metric)
+                x_true = y.index
                 x_dummy = range(len(y))
                 
-                axis.plot(y, label='data')
-                axis.set_title(metric)
-                axis.set_xticks(x)
-                axis.set_xticklabels([x_labels[i] if i%spacing==0 else ' ' for i in range(len(x_labels))])
-                y_label = self.metric_units_dict[metric_type][metric]
-                axis.set_ylabel(y_label)
+                #plotting the data
+                plotting_data = {
+                    'metric': metric,
+                    'y': y,
+                    'l_label': y_label,
+                    'x_true': x_true,
+                    'x_dummy': x_dummy,
+                    'x_labels': x_labels
+                }
+                self.plot_data_on_axis(axis, plotting_data)
+
 
                 # plotting the linear trendline and R2
-                slope, intercept, r_value, _, _ = linregress(x_dummy, y)
-                y_linear = slope*x_dummy + intercept
-                axis.plot(x_dummy, y_linear, alpha=0.5, linestyle='--', label='linear trend')
-                axis.plot([], [], ' ', label=f'R2: {r_value**2:.2f}') # Adding R2 value to legend
+                slope, intercept, r2_value = self.get_linear_coeffs(x_dummy, y)
+                y_linear = self.generate_linear_series(x_dummy, slope, intercept)
+                self.plot_linear_trend(axis, x_dummy, y_linear, r2_value)
                 axis.legend(loc='upper right', frameon=False, fontsize=8)
 
-            # formatting and append
+            # formatting and appending the figure
             fig.suptitle(metric_type)
             fig.tight_layout()
             self.plots.append(fig)
         
-    def generate_save_path_object(self):
+    def generate_save_path_object(self, file=False):
         date = str(dt.datetime.now()).split()[0]
         end_date = self.filing_dates[-1]
         start_date = self.filing_dates[-self.limit]
-        file_name = f"{self.ticker}_{self.period}__{str(start_date)}_to_{str(end_date)}.pdf"
+        file_name = f"{self.ticker}_{self.period}_{str(start_date)}_to_{str(end_date)}.pdf"
         file_path = Path.cwd()/'investment_tools'/'data'/'Company Analysis'/date/self.ticker/self.period
-        return file_path
+        return file_path/file_name if file else file_path
 
     def create_path_from_object(self, path_object):
         try:
@@ -974,11 +1014,12 @@ class Plots:
         Creates the financial trend charts as a pdf file.
         
         """
-        path_object = self.generate_save_path_object()
+        path_object = self.generate_save_path_object(file=False)
         self.create_path_from_object(path_object)
         self.make_bin_folder()
         self.make_pdf_title_page()
         self.make_pdf_charts()
+        path_object = self.generate_save_path_object(file=True)
         self.combine_and_export_pdfs(path_object)
 
 
