@@ -231,14 +231,15 @@ class FinancialData:
         """
         return self.balance_sheets.index
 
-    def set_frame_indecies(self, other: pd.DataFrame) -> pd.DataFrame:
+    def set_frame_index(self, other: pd.DataFrame) -> pd.DataFrame:
         """
         Sets the index for the provided DataFrame.
         
         Returns:
             pandas.DataFrame: Updated with the global frame index
         """
-        return other.set_index(self.frame_indecies)
+        other.index = self.frame_indecies
+        return other
 
 
     def build_dataframe(self, data: dict) -> pd.DataFrame:
