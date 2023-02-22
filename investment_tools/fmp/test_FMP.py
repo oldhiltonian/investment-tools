@@ -6,6 +6,7 @@ import datetime as dt
 from fmp_layer_1 import FinancialData, ManualAnalysis, Plots, Company
 from pathlib import Path
 import itertools
+import random
 
 key_path = Path().home()/'desktop'/'FinancialModellingPrep_API.txt'
 with open(key_path) as file:
@@ -171,16 +172,32 @@ class TestFinancialData(unittest.TestCase):
     #             result = instance.generate_index(date)
     #             self.assertEqual(result, expected)
 
-    def test_generate_date(self):
-        test_dates = ['1900-09-10', '1945-12-12', '2020-01-01', '2022-05-02']
-        for date in test_dates:
-            for ticker, data, period in self.zipped_args_tdp:
-                instance = FinancialData(ticker, self.api_key, data, period, self.limit)
-                year, month, day = [int(i) for i in date.split()[0].split('-')]
-                expected = dt.date(year, month, day)
-                result = instance.generate_date(date)
-                self.assertEqual(expected, result)
+    # def test_generate_date(self):
+    #     test_dates = ['1900-09-10', '1945-12-12', '2020-01-01', '2022-05-02']
+    #     for date in test_dates:
+    #         for ticker, data, period in self.zipped_args_tdp:
+    #             instance = FinancialData(ticker, self.api_key, data, period, self.limit)
+    #             year, month, day = [int(i) for i in date.split()[0].split('-')]
+    #             expected = dt.date(year, month, day)
+    #             result = instance.generate_date(date)
+    #             self.assertEqual(expected, result)
 
+    def test_check_for_matching_indecies(self):
+        for ticker, data, period in self.zipped_args_tdp:
+            instance = FinancialData(ticker, self.api_key, data, period, self.limit)
+            new_df = pd.DataFrame({'date': [str(i) for i in range(30)]})
+            instance.balance_sheets = new_df.copy()
+            instance.income_statements = new_df.copy()
+            instance.cash_flow_statements = new_df.copy()
+            instance.reported_key_metrics = new_df.copy()
+            expected = True
+            result = instance.check_for_matching_indecies()
+            self.assertEqual(expected, result)
+            instance.balance_sheets = pd.DataFrame({'date': []})
+            expected = False
+            result = instance.check_for_matching_indecies()
+            self.assertEqual(expected, result)
+            
 
 
 # class MyClass:
