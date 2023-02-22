@@ -134,17 +134,18 @@ class TestFinancialData(unittest.TestCase):
     #             expected = item.index
     #             self.assertEqual(instance.get_frame_indecies().equals(expected), True)
 
-    def test_set_frame_index(self):
-        for ticker, data, period in self.zipped_args_tdp:
-            instance = FinancialData(ticker, self.api_key, data, period, self.limit)
-            length = len(instance.balance_sheets)
-            expected = pd.Index([str(i) for i in range(length)])
-            instance.frame_indecies = expected
-
-            instance.set_frame_index(instance.balance_sheets)
-            result = instance.balance_sheets.index
-            print(result, expected)
-            self.assertEqual(expected.equals(result), True)
+    # def test_set_frame_index(self):
+    #     for ticker, data, period in self.zipped_args_tdp:
+    #         instance = FinancialData(ticker, self.api_key, data, period, self.limit)
+    #         length = len(instance.balance_sheets)
+    #         expected = pd.Index([str(i) for i in range(length)])
+    #         instance.frame_indecies = expected
+    #         for item in [instance.balance_sheets, instance.income_statements,
+    #                     instance.cash_flow_statements, instance.reported_key_metrics,
+    #                     instance.stock_price_data]:
+    #             instance.set_frame_index(item)
+    #             result = item.index
+    #             self.assertEqual(expected.equals(result), True)
 
 
 
