@@ -182,22 +182,33 @@ class TestFinancialData(unittest.TestCase):
     #             result = instance.generate_date(date)
     #             self.assertEqual(expected, result)
 
-    def test_check_for_matching_indecies(self):
+    # def test_check_for_matching_indecies(self):
+    #     for ticker, data, period in self.zipped_args_tdp:
+    #         instance = FinancialData(ticker, self.api_key, data, period, self.limit)
+    #         new_df = pd.DataFrame({'date': [str(i) for i in range(30)]})
+    #         instance.balance_sheets = new_df.copy()
+    #         instance.income_statements = new_df.copy()
+    #         instance.cash_flow_statements = new_df.copy()
+    #         instance.reported_key_metrics = new_df.copy()
+    #         expected = True
+    #         result = instance.check_for_matching_indecies()
+    #         self.assertEqual(expected, result)
+    #         instance.balance_sheets = pd.DataFrame({'date': []})
+    #         expected = False
+    #         result = instance.check_for_matching_indecies()
+    #         self.assertEqual(expected, result)
+            
+    def test_get_common_df_indecies(self):
         for ticker, data, period in self.zipped_args_tdp:
             instance = FinancialData(ticker, self.api_key, data, period, self.limit)
-            new_df = pd.DataFrame({'date': [str(i) for i in range(30)]})
-            instance.balance_sheets = new_df.copy()
-            instance.income_statements = new_df.copy()
-            instance.cash_flow_statements = new_df.copy()
-            instance.reported_key_metrics = new_df.copy()
-            expected = True
-            result = instance.check_for_matching_indecies()
+            instance.balance_sheets = pd.DataFrame({'A': [1, 2, 3]}, index=[0, 1, 2])
+            instance.income_statements = pd.DataFrame({'B': [4, 5, 6]}, index=[1, 2, 0])
+            instance.cash_flow_statements = pd.DataFrame({'C': [6, 7, 8]}, index=[2, 3, 0])
+            instance.reported_key_metrics = pd.DataFrame({'D': [8, 9, 0]}, index=[3, 2, 8])
+            expected = pd.Index([2])
+            result = instance.get_common_df_indicies()
             self.assertEqual(expected, result)
-            instance.balance_sheets = pd.DataFrame({'date': []})
-            expected = False
-            result = instance.check_for_matching_indecies()
-            self.assertEqual(expected, result)
-            
+        
 
 
 # class MyClass:
