@@ -39,6 +39,7 @@ class TestFinancialData(unittest.TestCase):
         cls.period =  ['annual', 'quarter']
         cls.limit = 120
         cls.zipped_args_tdp = list(itertools.product(cls.tickers, cls.data, cls.period))
+        cls.generic_instance = FinancialData('AAPL', cls.api_key, 'local', 'annual', 10)
 
 
 
@@ -147,6 +148,28 @@ class TestFinancialData(unittest.TestCase):
     #             result = item.index
     #             self.assertEqual(expected.equals(result), True)
 
+    '''Design a test for build_dataframe'''
+
+    def test_generate_index(self):
+        test_dates = ['1900-09-10', '1945-12-12', '2020-01-01', '2022-05-02']
+        for date in test_dates:
+            for ticker, data, period in self.zipped_args_tdp:
+                instance = FinancialData(ticker, self.api_key, data, period, self.limit)
+                year, month, _ = [int(i) for i in date.split('-')]
+                if instance.period == 'annual':
+                    expected = f"{instance.ticker}-FY-{year}"
+                else:
+                    if month in (1,2,3):
+                        quarter = 1
+                    elif month in (4,5,6):
+                        quarter = 2
+                    elif month in (7,8,9):
+                        quarter = 3
+                    elif month in (10, 11, 12):
+                        quarter = 4
+                    expected = f"{instance.ticker}-Q{quarter}-{year}"
+                result = instance.generate_index(date)
+                self.assertEqual(result, expected)
 
 
 
