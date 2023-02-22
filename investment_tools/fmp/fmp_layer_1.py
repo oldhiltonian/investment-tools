@@ -365,12 +365,9 @@ class FinancialData:
             for each of its statements.
         """
         err_msg = 'Indecies could not be filtered for common elements'
-        assert (self.cash_flow_statements.index.to_list() ==
-                self.balance_sheets.index.to_list(), err_msg)
-        assert  (self.income_statements.index.to_list() ==
-                self.balance_sheets.index.to_list(), err_msg)
-        assert (self.reported_key_metrics.index.to_list() ==
-                self.balance_sheets.index.to_list(), err_msg)
+        assert self.cash_flow_statements.index.equals(self.balance_sheets.index), err_msg
+        assert self.income_statements.index.equals(self.balance_sheets.index), err_msg
+        assert self.reported_key_metrics.index.equals(self.balance_sheets.index), err_msg
 
 
     def assert_required_length(self, item: list):
