@@ -46,10 +46,17 @@ class TestFinancialData(unittest.TestCase):
 
     def test_assert_valid_user_input(self):
         """
-        Test the assert_valid_user_inputs method of the FinancialData class.
+        Test that the assert_valid_user_inputs method raises a ValueError when an
+        invalid argument is passed to the FinancialData class constructor.
 
-        This method tests that the assert_valid_user_inputs method of the FinancialData
-        class raises a ValueError for invalid user inputs.
+        This method creates a new FinancialData instance for each given ticker and test period
+        and calls the assert_valid_user_inputs method for each instance.
+
+        Args:
+            self: An instance of the unittest.TestCase class.
+
+        Returns:
+            None.
         """
         for ticker, data, period in self.zipped_args_tdp:
             instance = FinancialData(ticker, self.api_key, data, period, self.limit)
@@ -57,10 +64,20 @@ class TestFinancialData(unittest.TestCase):
         
     def test_generate_request_url(self):
         """
-        Test the generate_request_url method of the FinancialData class.
+        Test that the generate_request_url method returns the expected URL strings for the
+        balance sheet, income statement, cash flow statement, and reported key metrics
+        endpoints, and raises a ValueError for any other input.
 
-        This method tests that the generate_request_url method of the FinancialData
-        class returns the correct URLs for each type of financial statement.
+        This method creates a new FinancialData instance for each given ticker and test period
+        and generates the expected URL strings for each endpoint. It then checks that the
+        generate_request_url method returns the expected URL string and that a ValueError
+        is raised for invalid input.
+
+        Args:
+            self: An instance of the unittest.TestCase class.
+
+        Returns:
+            None.
         """
         for ticker, data, period in self.zipped_args_tdp:
             instance = FinancialData(ticker, self.api_key, data, period, self.limit)
@@ -80,10 +97,19 @@ class TestFinancialData(unittest.TestCase):
 
     def test_fetch_raw_data(self):
         """
-        Test the fetch_raw_data method of the FinancialData class.
+        Test that the fetch_raw_data method returns a pd.DataFrame object when the 'local' argument
+        is passed to the FinancialData class constructor and a requests.Response object when the
+        'online' argument is passed, and raises a ValueError for any other input.
 
-        This method tests that the fetch_raw_data method of the FinancialData class
-        returns the correct data types for each type of financial statement.
+        This method creates a new FinancialData instance for each given ticker and test period and
+        calls the fetch_raw_data method for each endpoint. It checks that the returned object is of
+        the expected type and that a ValueError is raised for invalid input.
+
+        Args:
+            self: An instance of the unittest.TestCase class.
+
+        Returns:
+            None.
         """
         for ticker, data, period in self.zipped_args_tdp:
             instance = FinancialData(ticker, api_key, data, period)
@@ -98,10 +124,19 @@ class TestFinancialData(unittest.TestCase):
         
     def test_get_load_path(self):
         """
-        Test the get_load_path method of the FinancialData class.
+        Test that the get_load_path method returns the expected file path for the balance sheet,
+        income statement, cash flow statement, reported key metrics, and stock price data
+        for the given FinancialData instance.
 
-        This method tests that the get_load_path method of the FinancialData class
-        returns the correct file paths for each type of financial statement.
+        This method creates a new FinancialData instance for each given ticker and test period and
+        generates the expected file paths for each endpoint. It then checks that the get_load_path
+        method returns the expected file path.
+
+        Args:
+            self: An instance of the unittest.TestCase class.
+
+        Returns:
+            None.
         """
         for ticker, data, period in self.zipped_args_tdp:
             instance = FinancialData(ticker, self.api_key, data, period, self.limit)
