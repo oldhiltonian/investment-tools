@@ -384,7 +384,7 @@ class FinancialData:
         err_msg = f"Financial statements are shorter than the required length of {required_length}"
         assert len(item) >= required_length, err_msg
 
-    def assert_valid_server_response(Self, response: requests.Response):
+    def assert_valid_server_response(self, response: requests.Response):
         """
         Asserts that the server response is valid (status code 200).
         
