@@ -396,11 +396,22 @@ class TestFinancialData(unittest.TestCase):
     #             instance.assert_required_length(fail)
             
 
-    def assert_valid_server_response(self):
+    # def test_assert_valid_server_response(self):
+    #     for ticker, _, period in self.zipped_args_tdp:
+    #         instance = FinancialData(ticker, self.api_key, 'online', period, self.limit)
+    #         response = instance.fetch_raw_data('bs')
+    #         instance.assert_valid_server_response(response)
+
+    def test_assert_server_response_not_empty(self):
         for ticker, data, period in self.zipped_args_tdp:
             instance = FinancialData(ticker, self.api_key, data, period, self.limit)
-            response = instance.fetch_raw_data('bs')
-            instance.assert_valid_server_response(response)
+            response = requests.Response()
+            response._content = b'{"key": "value"}'
+            response.status_code = 200
+            result = instance.assert_server_response_not_empty(response)
+            self.assertIsNone(result)
+
+
 
 
 
