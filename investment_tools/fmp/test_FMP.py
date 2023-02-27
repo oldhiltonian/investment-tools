@@ -42,8 +42,6 @@ class TestFinancialData(unittest.TestCase):
         cls.zipped_args_tdp = list(itertools.product(cls.tickers, cls.data, cls.period))
         cls.generic_instance = FinancialData('AAPL', cls.api_key, 'local', 'annual', 10)
 
-
-
     def test_assert_valid_user_input(self):
         """
         Test that the assert_valid_user_inputs method raises a ValueError when an
@@ -96,7 +94,6 @@ class TestFinancialData(unittest.TestCase):
 #                 instance.generate_request_url('')
 #                 instance.generate_request_url(4)
 #                 instance.generate_request_url('42')
-
 
 #     def test_fetch_raw_data(self):
 #         """
@@ -388,53 +385,16 @@ class TestFinancialData(unittest.TestCase):
 #             with self.assertRaises(AssertionError):
 #                 instance.assert_identical_indecies()
 
-
-
-
-# class MyClass:
-#     def __init__(self, a, b):
-#         self.a = a
-#         self.b = b
-        
-#     def mult_(self):
-#         return self.a* self.b
-    
-#     def add_(self):
-#         return self.a + self.b
-
-#     def div_(self):
-#         return self.a/self.b
-
-#     def sub_(self):
-#         return self.a - self.b
-    
-# class TestMyClass(unittest.TestCase):
-#     @classmethod
-#     def setUp(self):
-#         self.a = [1,2,3]
-#         self.b = [4,5,6]
-#         self.zipped = list(itertools.product(self.a, self.b))
-
-#     # def loop_combinations(cls, *attributes):
-#     #     def decorator(func):
-#     #         def wrapper(*args, **kwargs):
-#     #             for attribute_values in zip(*attributes):
-#     #                 func(*attribute_values, *args, **kwargs)
-#     #         return wrapper
-#     #     return decorator
-        
-#     def test_add(self):
-#         for args in self.zipped:
-#             instance = MyClass(*args)
-#             self.assertEqual(instance.add_(), sum(args))
-
-#     # @loop_combinations([1,2,3], [2,3,4])
-#     # def test_mult(self, a, b):
-#     #     instance= MyClass(a,b)
-#     #     result = instance.mult_()
-#     #     self.assertEqual(result, a*b)
-
-
+    def test_assert_required_length(self):
+        for ticker, data, period in self.zipped_args_tdp:
+            instance = FinancialData(ticker, self.api_key, data, period, self.limit)
+            lengths = [4, 5, 6, 500, 1000] if period == 'quarter' else [2, 3, 7, 12, 1000]
+            for length in lengths:
+                instance.assert_required_length(range(length))
+            fail = range(3) if period == 'quarter' else range(1)
+            with self.assertRaises(AssertionError):
+                instance.assert_required_length(fail)
+            
 
 
 
