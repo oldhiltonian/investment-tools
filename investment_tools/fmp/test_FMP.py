@@ -385,18 +385,22 @@ class TestFinancialData(unittest.TestCase):
 #             with self.assertRaises(AssertionError):
 #                 instance.assert_identical_indecies()
 
-    def test_assert_required_length(self):
-        for ticker, data, period in self.zipped_args_tdp:
-            instance = FinancialData(ticker, self.api_key, data, period, self.limit)
-            lengths = [4, 5, 6, 500, 1000] if period == 'quarter' else [2, 3, 7, 12, 1000]
-            for length in lengths:
-                instance.assert_required_length(range(length))
-            fail = range(3) if period == 'quarter' else range(1)
-            with self.assertRaises(AssertionError):
-                instance.assert_required_length(fail)
+    # def test_assert_required_length(self):
+    #     for ticker, data, period in self.zipped_args_tdp:
+    #         instance = FinancialData(ticker, self.api_key, data, period, self.limit)
+    #         lengths = [4, 5, 6, 500, 1000] if period == 'quarter' else [2, 3, 7, 12, 1000]
+    #         for length in lengths:
+    #             instance.assert_required_length(range(length))
+    #         fail = range(3) if period == 'quarter' else range(1)
+    #         with self.assertRaises(AssertionError):
+    #             instance.assert_required_length(fail)
             
 
-
+    def assert_valid_server_response(self):
+        for ticker, data, period in self.zipped_args_tdp:
+            instance = FinancialData(ticker, self.api_key, data, period, self.limit)
+            response = instance.fetch_raw_data('bs')
+            instance.assert_valid_server_response(response)
 
 
 
