@@ -17,6 +17,7 @@ from typing import Dict, Tuple
 
 yf.pdr_override()
 
+
 class FinancialData:
     """
     A class for fetching and processing financial data for a given stock.
@@ -90,8 +91,14 @@ class FinancialData:
             Saves the financial data to local parquet files.
     """
 
-    def __init__(self, ticker: str, api_key: str='', data: str='local', 
-                    period: str='annual', limit: int=120):
+    def __init__(
+        self,
+        ticker: str,
+        api_key: str = "",
+        data: str = "local",
+        period: str = "annual",
+        limit: int = 120,
+    ):
         """
         Initializes a new instance of the FinancialData class.
 
@@ -111,24 +118,23 @@ class FinancialData:
         self.period = period.lower().strip()
         self.assert_valid_user_inputs()
         self.limit = int(limit)
-        self.days_in_period = 365 if period == 'annual' else 90
+        self.days_in_period = 365 if period == "annual" else 90
 
-        self.balance_sheets       = self.build_dataframe(self.fetch_raw_data('bs'))
-        self.income_statements    = self.build_dataframe(self.fetch_raw_data('is'))
-        self.cash_flow_statements = self.build_dataframe(self.fetch_raw_data('cfs'))
-        self.reported_key_metrics = self.build_dataframe(self.fetch_raw_data('metrics'))
+        self.balance_sheets = self.build_dataframe(self.fetch_raw_data("bs"))
+        self.income_statements = self.build_dataframe(self.fetch_raw_data("is"))
+        self.cash_flow_statements = self.build_dataframe(self.fetch_raw_data("cfs"))
+        self.reported_key_metrics = self.build_dataframe(self.fetch_raw_data("metrics"))
 
         if not self.check_for_matching_indecies():
             self.filter_for_common_indecies(self.get_common_df_indicies())
-        
+
         self.assert_required_length(self.balance_sheets)
         self.frame_indecies = self.get_frame_indecies()
-        self.filing_date_objects = self.balance_sheets['date']
+        self.filing_date_objects = self.balance_sheets["date"]
         self.stock_price_data = self.fetch_stock_price_data_yf()
         self.assert_required_length(self.stock_price_data)
         self.save_financial_attributes()
 
-        
     def assert_valid_user_inputs(self):
         """
         Ensures that valid user inputs are provided for data and period.
@@ -136,8 +142,11 @@ class FinancialData:
         Raises:
             AssertionError: If invalid input is provided for data or period.
         """
-        assert self.data in ['online', 'local'], "data must be 'online' or 'local'"
-        assert self.period in ['annual', 'quarter'], "period must be 'annual' or 'quarter"
+        assert self.data in ["online", "local"], "data must be 'online' or 'local'"
+        assert self.period in [
+            "annual",
+            "quarter",
+        ], "period must be 'annual' or 'quarter"
 
     def generate_request_url(self, data_type: str) -> str:
         """
@@ -153,26 +162,26 @@ class FinancialData:
         Raises:
             ValueError: If an invalid data type is provided.
         """
-        fmp_template = 'https://financialmodelingprep.com/api/v3/{}/{}?period={}&limit={}&apikey={}'
+        fmp_template = "https://financialmodelingprep.com/api/v3/{}/{}?period={}&limit={}&apikey={}"
         ticker = self.ticker
         period = self.period
         limit = self.limit
         api_key = self.api_key
 
-        if data_type == 'bs':
-            data_str = 'balance-sheet-statement'
-        elif data_type == 'is':
-            data_str = 'income-statement'
-        elif data_type == 'cfs':
-            data_str = 'cash-flow-statement'
-        elif data_type == 'metrics':
-            data_str = 'ratios'
+        if data_type == "bs":
+            data_str = "balance-sheet-statement"
+        elif data_type == "is":
+            data_str = "income-statement"
+        elif data_type == "cfs":
+            data_str = "cash-flow-statement"
+        elif data_type == "metrics":
+            data_str = "ratios"
         else:
             err_msg = f"{data_type} is not a valid API call"
             raise ValueError(err_msg)
-        
+
         return fmp_template.format(data_str, ticker, period, limit, api_key)
-    
+
     def fetch_raw_data(self, data_type: str) -> pd.DataFrame:
         """
         Fetches raw financial data from either the Financial Modeling Prep API
@@ -184,16 +193,16 @@ class FinancialData:
         Returns:
             pandas.DataFrame if the data is fetched locally, otherwise requests.Response
         """
-        if self.data == 'online':
+        if self.data == "online":
             url = self.generate_request_url(data_type)
             raw_data = requests.get(url)
             self.assert_valid_server_response(raw_data)
             self.assert_server_response_not_empty(raw_data)
-        elif self.data == 'local':
+        elif self.data == "local":
             path = self.get_load_path(data_type, self.ticker, self.period)
             raw_data = pd.read_parquet(path)
         return raw_data
-            
+
     def get_load_path(self, data_type: str, ticker: str, period: str) -> Path:
         """
         Gets the file path to load a local financial data file.
@@ -207,20 +216,27 @@ class FinancialData:
         Returns:
             pathlib.Path: The file path for the requested data.
         """
-        if data_type == 'bs':
-            file = 'balance_sheets.parquet'
-        elif data_type == 'is':
-            file = 'income_statements.parquet'
-        elif data_type == 'cfs':
-            file = 'cash_flow_statements.parquet'
-        elif data_type == 'metrics':
-            file= 'reported_key_metrics.parquet'
-        elif data_type == 'price':
-            file = 'stock_price_data.parquet'
+        if data_type == "bs":
+            file = "balance_sheets.parquet"
+        elif data_type == "is":
+            file = "income_statements.parquet"
+        elif data_type == "cfs":
+            file = "cash_flow_statements.parquet"
+        elif data_type == "metrics":
+            file = "reported_key_metrics.parquet"
+        elif data_type == "price":
+            file = "stock_price_data.parquet"
         else:
             err_msg = f"{data_type} is not a valid API call"
             raise ValueError(err_msg)
-        return Path.cwd().parent/'data'/'Company_Financial_Data'/ticker/period/file
+        return (
+            Path.cwd().parent
+            / "data"
+            / "Company_Financial_Data"
+            / ticker
+            / period
+            / file
+        )
 
     def get_frame_indecies(self) -> pd.Index:
         """
@@ -241,7 +257,6 @@ class FinancialData:
         other.index = self.frame_indecies
         return other
 
-
     def build_dataframe(self, data: dict) -> pd.DataFrame:
         """
         Builds a pandas.DataFrame from provided raw data. If the raw data
@@ -253,18 +268,18 @@ class FinancialData:
         Returns:
             pandas.DataFrame: The built DataFrame.
         """
-        if self.data == 'local':
+        if self.data == "local":
             return data
         data = data.json()
         working_array = []
         for statement in reversed(data):
             working_array.append(list(statement.values()))
-        df = pd.DataFrame(working_array, columns = data[0].keys())
-        df['index'] = df['date'].apply(lambda x: self.generate_index(x))
-        df['date'] = df['date'].apply(lambda x: self.generate_date(x))
-        df = df.set_index('index')
-        if 'netIncome' and 'eps' in df.keys():
-            df['outstandingShares_calc'] = df['netIncome']/df['eps']
+        df = pd.DataFrame(working_array, columns=data[0].keys())
+        df["index"] = df["date"].apply(lambda x: self.generate_index(x))
+        df["date"] = df["date"].apply(lambda x: self.generate_date(x))
+        df = df.set_index("index")
+        if "netIncome" and "eps" in df.keys():
+            df["outstandingShares_calc"] = df["netIncome"] / df["eps"]
         return df
 
     def generate_index(self, date: str) -> str:
@@ -277,22 +292,21 @@ class FinancialData:
         Returns:
             str: The generated index string.
         """
-        year, month, _ = [int(i) for i in date.split('-')]
-        
-        if self.period == 'annual':
+        year, month, _ = [int(i) for i in date.split("-")]
+
+        if self.period == "annual":
             return f"{self.ticker}-FY-{year}"
 
-        if month in (1,2,3):
+        if month in (1, 2, 3):
             quarter = 1
-        elif month in (4,5,6):
+        elif month in (4, 5, 6):
             quarter = 2
-        elif month in (7,8,9):
+        elif month in (7, 8, 9):
             quarter = 3
         elif month in (10, 11, 12):
             quarter = 4
-        
-        return f"{self.ticker}-Q{quarter}-{year}"
 
+        return f"{self.ticker}-Q{quarter}-{year}"
 
     def generate_date(self, date_str: str) -> dt.date:
         """
@@ -304,9 +318,8 @@ class FinancialData:
         Returns:
             datetime.date: The generated date object.
         """
-        year, month, day = [int(i) for i in date_str.split()[0].split('-')]
+        year, month, day = [int(i) for i in date_str.split()[0].split("-")]
         return dt.date(year, month, day)
-
 
     def check_for_matching_indecies(self) -> bool:
         """
@@ -315,19 +328,26 @@ class FinancialData:
         Returns:
             bool: True if the financial data has matching indices, False otherwise.
         """
-        print('Checking matching frame indecies')
+        print("Checking matching frame indecies")
         len_bs = len(self.balance_sheets)
         len_is = len(self.income_statements)
         len_cfs = len(self.cash_flow_statements)
         len_ratios = len(self.reported_key_metrics)
-        print(f"Financial statement lengths are BS: {len_bs}, IS:{len_is}, CFS:{len_cfs}, Ratios:{len_ratios}")
+        print(
+            f"Financial statement lengths are BS: {len_bs}, IS:{len_is}, CFS:{len_cfs}, Ratios:{len_ratios}"
+        )
         # Logical checks for matching indecies
-        matching_index_1 =  self.balance_sheets['date'].equals(self.income_statements['date'])
-        matching_index_2 = self.balance_sheets['date'].equals(self.cash_flow_statements['date'])
-        matching_index_3 = self.balance_sheets['date'].equals(self.reported_key_metrics['date'])
+        matching_index_1 = self.balance_sheets["date"].equals(
+            self.income_statements["date"]
+        )
+        matching_index_2 = self.balance_sheets["date"].equals(
+            self.cash_flow_statements["date"]
+        )
+        matching_index_3 = self.balance_sheets["date"].equals(
+            self.reported_key_metrics["date"]
+        )
         matching_indecies = matching_index_1 and matching_index_2 and matching_index_3
         return True if matching_indecies else False
-
 
     def get_common_df_indicies(self) -> pd.Index:
         """
@@ -343,7 +363,6 @@ class FinancialData:
         common_elements = idx1.intersection(idx2).intersection(idx3).intersection(idx4)
         return common_elements
 
-
     def filter_for_common_indecies(self, common_elements: pd.Index):
         """
         Filters the financial data attributes to only include common indices.
@@ -358,17 +377,19 @@ class FinancialData:
         self.assert_identical_indecies()
         print(f"Financial statement lengths are now each: {len(self.balance_sheets)}")
 
-
     def assert_identical_indecies(self):
         """
         Asserts that the financial data has identical indices 
             for each of its statements.
         """
-        err_msg = 'Indecies could not be filtered for common elements'
-        assert self.cash_flow_statements.index.equals(self.balance_sheets.index), err_msg
+        err_msg = "Indecies could not be filtered for common elements"
+        assert self.cash_flow_statements.index.equals(
+            self.balance_sheets.index
+        ), err_msg
         assert self.income_statements.index.equals(self.balance_sheets.index), err_msg
-        assert self.reported_key_metrics.index.equals(self.balance_sheets.index), err_msg
-
+        assert self.reported_key_metrics.index.equals(
+            self.balance_sheets.index
+        ), err_msg
 
     def assert_required_length(self, item: list):
         """
@@ -377,7 +398,7 @@ class FinancialData:
         Args:
             item (pandas.DataFrame): The item to check the length of.
         """
-        if self.period == 'annual':
+        if self.period == "annual":
             required_length = 2
         else:
             required_length = 4
@@ -391,7 +412,9 @@ class FinancialData:
         Args:
             response (requests.Response): The server response.
         """
-        assert response.status_code == 200, f"API call failed. Code <{response.status_code}>"
+        assert (
+            response.status_code == 200
+        ), f"API call failed. Code <{response.status_code}>"
 
     def assert_server_response_not_empty(self, response: requests.Response):
         """
@@ -400,8 +423,7 @@ class FinancialData:
         Args:
             response (requests.Response): The server response.
         """
-        assert len(response.json()) != 0, 'Server response successful but empty'
-        
+        assert len(response.json()) != 0, "Server response successful but empty"
 
     def fetch_stock_price_data_yf(self) -> pd.DataFrame:
         """
@@ -410,13 +432,19 @@ class FinancialData:
         Returns:
             pandas.DataFrame: The fetched stock price data.
         """
-        start_date = dt.date(*[int(i) for i in str(self.filing_date_objects.iloc[0]).split()[0].split('-')]) - dt.timedelta(days=370)
+        start_date = dt.date(
+            *[
+                int(i)
+                for i in str(self.filing_date_objects.iloc[0]).split()[0].split("-")
+            ]
+        ) - dt.timedelta(days=370)
         end_date = dt.date.today()
-        price_interval = '1d'
-        raw_data = pdr.get_data_yahoo(self.ticker, start_date, end_date, interval=price_interval)
-        raw_data['date'] = raw_data.index.date
+        price_interval = "1d"
+        raw_data = pdr.get_data_yahoo(
+            self.ticker, start_date, end_date, interval=price_interval
+        )
+        raw_data["date"] = raw_data.index.date
         return self.periodise(raw_data)
-
 
     def periodise(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -435,47 +463,55 @@ class FinancialData:
                 filter_date_end = self.filing_date_objects[i]
                 filter_date_start = filter_date_end - dt.timedelta(days=days)
             else:
-                filter_date_start = self.filing_date_objects.iloc[i-1]
+                filter_date_start = self.filing_date_objects.iloc[i - 1]
                 filter_date_end = self.filing_date_objects.iloc[i]
 
-            period_data = df[(df['date'] >= filter_date_start) & (df['date'] < filter_date_end)]
+            period_data = df[
+                (df["date"] >= filter_date_start) & (df["date"] < filter_date_end)
+            ]
 
             try:
-                max_price = max(period_data['High'])
-                min_price = min(period_data['Low'])
-                avg_close = period_data['Close'].mean()
+                max_price = max(period_data["High"])
+                min_price = min(period_data["Low"])
+                avg_close = period_data["Close"].mean()
             except ValueError:
-                working_array.append([np.nan]*3)
+                working_array.append([np.nan] * 3)
             else:
                 working_array.append([max_price, min_price, avg_close])
 
-        cols = ['high', 'low', 'avg_close']
-        periodised = pd.DataFrame(working_array, index=self.frame_indecies, columns=cols)
-        assert sum(periodised['high'] < periodised['low']) <= 1, 'Stock highs and lows not consistent'
+        cols = ["high", "low", "avg_close"]
+        periodised = pd.DataFrame(
+            working_array, index=self.frame_indecies, columns=cols
+        )
+        assert (
+            sum(periodised["high"] < periodised["low"]) <= 1
+        ), "Stock highs and lows not consistent"
         return periodised
-
 
     def save_financial_attributes(self):
         """
         Saves the financial data to local parquet files.
         """
-        save_path = Path.cwd().parent/'data'/'Company_Financial_Data'/self.ticker/self.period
+        save_path = (
+            Path.cwd().parent
+            / "data"
+            / "Company_Financial_Data"
+            / self.ticker
+            / self.period
+        )
         try:
             os.makedirs(save_path)
         except FileExistsError:
             print(f"Path already exists. Overwriting saved data.")
         except Exception:
-            msg = f'Could not create directory {save_path}'
+            msg = f"Could not create directory {save_path}"
             raise Exception(msg)
-        
-        self.balance_sheets.to_parquet(save_path/'balance_sheets.parquet')
-        self.income_statements.to_parquet(save_path/'income_statements.parquet')
-        self.cash_flow_statements.to_parquet(save_path/'cash_flow_statements.parquet')
-        self.stock_price_data.to_parquet(save_path/'stock_price_data.parquet')
-        self.reported_key_metrics.to_parquet(save_path/'reported_key_metrics.parquet')
 
-
-
+        self.balance_sheets.to_parquet(save_path / "balance_sheets.parquet")
+        self.income_statements.to_parquet(save_path / "income_statements.parquet")
+        self.cash_flow_statements.to_parquet(save_path / "cash_flow_statements.parquet")
+        self.stock_price_data.to_parquet(save_path / "stock_price_data.parquet")
+        self.reported_key_metrics.to_parquet(save_path / "reported_key_metrics.parquet")
 
 
 class ManualAnalysis:
@@ -517,7 +553,8 @@ class ManualAnalysis:
             the fractional errors.
 
     """
-    def __init__(self, financial_data:FinancialData, verbose: bool=False) -> None:
+
+    def __init__(self, financial_data: FinancialData, verbose: bool = False) -> None:
         """
         Initializes the ManualAnalysis object.
 
@@ -538,7 +575,7 @@ class ManualAnalysis:
             self.assert_non_null_frame(self.fractional_metric_errors)
             self.print_metric_errors(self.fractional_metric_errors, 0.05)
 
-    def print_metric_errors(self, metric_errors: pd.DataFrame, tolerance: float=0.05):
+    def print_metric_errors(self, metric_errors: pd.DataFrame, tolerance: float = 0.05):
         """
         Prints the number of values for each metric that exceed the given tolerance level.
 
@@ -566,10 +603,10 @@ class ManualAnalysis:
             AssertionError: If any column in `df` is completely null.
 
         """
-        err_msg = 'Metric error calculations returned a null dataframe. Unreliable calculations.'
+        err_msg = "Metric error calculations returned a null dataframe. Unreliable calculations."
         for header in df.columns:
             assert not df[header].isnull().all(), err_msg
-                
+
     def concat_stock_eval_ratios(self, df: pd.DataFrame):
         """Calculate and concatenate stock evaluation ratios to the given DataFrame.
 
@@ -591,30 +628,42 @@ class ManualAnalysis:
 
         All ratios are calculated using financial data from the associated FinancialData object.
         """
-        total_assets = self.data.balance_sheets['totalAssets'].copy()
-        total_liabilities = self.data.balance_sheets['totalLiabilities'].copy()
-        long_term_debt = self.data.balance_sheets['longTermDebt'].copy()
-        dividends_paid = self.data.cash_flow_statements['dividendsPaid'].copy()
-        outstanding_shares = self.data.income_statements['outstandingShares_calc'].copy()
-        cash_and_equivalents = self.data.balance_sheets['cashAndCashEquivalents'].copy()
-        eps = self.data.income_statements['eps'].copy()
-        stock_price_high = self.data.stock_price_data['high'].copy()
-        stock_price_avg = self.data.stock_price_data['avg_close'].copy()
-        stock_price_low = self.data.stock_price_data['low'].copy()
-        df['eps'] = eps #authorized stock!!!
-        df['eps_diluted'] = self.data.income_statements['epsdiluted']
-        df['PE_high'] = stock_price_high/eps
-        df['PE_low'] = stock_price_low /eps
-        df['PE_avg_close'] = stock_price_avg/eps
-        df['bookValuePerShare'] = (total_assets-total_liabilities)/outstanding_shares
-        df['dividendPayoutRatio'] = (-dividends_paid/outstanding_shares)/eps
-        df['dividendYield_low'] = (-dividends_paid/outstanding_shares)/stock_price_high
-        df['dividendYield_high'] = (-dividends_paid/outstanding_shares)/stock_price_low 
-        df['dividendYield_avg_close'] = (-dividends_paid/outstanding_shares)/stock_price_avg
-        df['ebitdaratio'] = self.data.income_statements['ebitdaratio']
-        df['cashPerShare'] = (1*(cash_and_equivalents-long_term_debt))/outstanding_shares
+        total_assets = self.data.balance_sheets["totalAssets"].copy()
+        total_liabilities = self.data.balance_sheets["totalLiabilities"].copy()
+        long_term_debt = self.data.balance_sheets["longTermDebt"].copy()
+        dividends_paid = self.data.cash_flow_statements["dividendsPaid"].copy()
+        outstanding_shares = self.data.income_statements[
+            "outstandingShares_calc"
+        ].copy()
+        cash_and_equivalents = self.data.balance_sheets["cashAndCashEquivalents"].copy()
+        eps = self.data.income_statements["eps"].copy()
+        stock_price_high = self.data.stock_price_data["high"].copy()
+        stock_price_avg = self.data.stock_price_data["avg_close"].copy()
+        stock_price_low = self.data.stock_price_data["low"].copy()
+        df["eps"] = eps  # authorized stock!!!
+        df["eps_diluted"] = self.data.income_statements["epsdiluted"]
+        df["PE_high"] = stock_price_high / eps
+        df["PE_low"] = stock_price_low / eps
+        df["PE_avg_close"] = stock_price_avg / eps
+        df["bookValuePerShare"] = (
+            total_assets - total_liabilities
+        ) / outstanding_shares
+        df["dividendPayoutRatio"] = (-dividends_paid / outstanding_shares) / eps
+        df["dividendYield_low"] = (
+            -dividends_paid / outstanding_shares
+        ) / stock_price_high
+        df["dividendYield_high"] = (
+            -dividends_paid / outstanding_shares
+        ) / stock_price_low
+        df["dividendYield_avg_close"] = (
+            -dividends_paid / outstanding_shares
+        ) / stock_price_avg
+        df["ebitdaratio"] = self.data.income_statements["ebitdaratio"]
+        df["cashPerShare"] = (
+            1 * (cash_and_equivalents - long_term_debt)
+        ) / outstanding_shares
         return df
-    
+
     def concat_profitability_ratios(self, df: pd.DataFrame):
         """
         Concatenates profitability ratios to the given DataFrame.
@@ -636,23 +685,28 @@ class ManualAnalysis:
 
         All ratios are calculated using financial data from the associated FinancialData object.
         """
-        revenue = self.data.income_statements['revenue'].copy()
-        total_assets = self.data.balance_sheets['totalAssets'].copy()
-        gross_profit = self.data.income_statements['grossProfit'].copy()
-        operating_income = self.data.income_statements['operatingIncome'].copy()
-        income_before_tax = self.data.income_statements['incomeBeforeTax'].copy()
-        total_capitalization = self.data.balance_sheets['totalEquity'].copy() + self.data.balance_sheets['longTermDebt'].copy()
-        net_income = self.data.income_statements['netIncome'].copy()
-        total_shareholder_equity = self.data.balance_sheets['totalStockholdersEquity'].copy()
-        df['grossProfitMargin'] = gross_profit/revenue
-        df['operatingProfitMargin'] = operating_income/revenue
-        df['pretaxProfitMargin'] = income_before_tax/revenue
-        df['netProfitMargin'] = net_income/revenue
-        df['ROIC'] = net_income/total_capitalization
-        df['returnOnEquity'] = net_income/total_shareholder_equity
-        df['returnOnAssets'] = net_income/total_assets
+        revenue = self.data.income_statements["revenue"].copy()
+        total_assets = self.data.balance_sheets["totalAssets"].copy()
+        gross_profit = self.data.income_statements["grossProfit"].copy()
+        operating_income = self.data.income_statements["operatingIncome"].copy()
+        income_before_tax = self.data.income_statements["incomeBeforeTax"].copy()
+        total_capitalization = (
+            self.data.balance_sheets["totalEquity"].copy()
+            + self.data.balance_sheets["longTermDebt"].copy()
+        )
+        net_income = self.data.income_statements["netIncome"].copy()
+        total_shareholder_equity = self.data.balance_sheets[
+            "totalStockholdersEquity"
+        ].copy()
+        df["grossProfitMargin"] = gross_profit / revenue
+        df["operatingProfitMargin"] = operating_income / revenue
+        df["pretaxProfitMargin"] = income_before_tax / revenue
+        df["netProfitMargin"] = net_income / revenue
+        df["ROIC"] = net_income / total_capitalization
+        df["returnOnEquity"] = net_income / total_shareholder_equity
+        df["returnOnAssets"] = net_income / total_assets
         return df
-    
+
     def concat_debt_interest_ratios(self, df: pd.DataFrame):
         """
         Concatenates debt and interest ratios to the given DataFrame.
@@ -671,20 +725,26 @@ class ManualAnalysis:
 
         All ratios are calculated using financial data from the associated FinancialData object.
         """
-        operating_income = self.data.income_statements['operatingIncome'].copy()
-        total_assets = self.data.balance_sheets['totalAssets'].copy()
-        long_term_debt = self.data.balance_sheets['longTermDebt'].copy()
-        total_capitalization = self.data.balance_sheets['totalEquity'].copy() + self.data.balance_sheets['longTermDebt'].copy()
-        interest_expense = self.data.income_statements['interestExpense'].copy()
+        operating_income = self.data.income_statements["operatingIncome"].copy()
+        total_assets = self.data.balance_sheets["totalAssets"].copy()
+        long_term_debt = self.data.balance_sheets["longTermDebt"].copy()
+        total_capitalization = (
+            self.data.balance_sheets["totalEquity"].copy()
+            + self.data.balance_sheets["longTermDebt"].copy()
+        )
+        interest_expense = self.data.income_statements["interestExpense"].copy()
         # The fixed_charges calculation below is likely incomplete
-        fixed_charges = self.data.income_statements['interestExpense'].copy() + self.data.balance_sheets['capitalLeaseObligations'].copy()
-        ebitda = self.data.income_statements['ebitda'].copy()
-        total_equity = self.data.balance_sheets['totalEquity'].copy()
+        fixed_charges = (
+            self.data.income_statements["interestExpense"].copy()
+            + self.data.balance_sheets["capitalLeaseObligations"].copy()
+        )
+        ebitda = self.data.income_statements["ebitda"].copy()
+        total_equity = self.data.balance_sheets["totalEquity"].copy()
         total_debt = total_assets - total_equity
-        df['interestCoverage'] = operating_income/interest_expense
-        df['fixedChargeCoverage'] = ebitda/fixed_charges
-        df['debtToTotalCap'] = long_term_debt/total_capitalization
-        df['totalDebtRatio'] = total_debt/total_assets
+        df["interestCoverage"] = operating_income / interest_expense
+        df["fixedChargeCoverage"] = ebitda / fixed_charges
+        df["debtToTotalCap"] = long_term_debt / total_capitalization
+        df["totalDebtRatio"] = total_debt / total_assets
         return df
 
     def concat_liquidity_ratios(self, df: pd.DataFrame):
@@ -704,18 +764,18 @@ class ManualAnalysis:
 
         All ratios are calculated using financial data from the associated FinancialData object.
         """
-        current_assets = self.data.balance_sheets['totalCurrentAssets'].copy()
-        current_liabilities = self.data.balance_sheets['totalCurrentLiabilities'].copy()
-        inventory = self.data.balance_sheets['inventory'].copy()
-        cash_and_equivalents = self.data.balance_sheets['cashAndCashEquivalents'].copy()
+        current_assets = self.data.balance_sheets["totalCurrentAssets"].copy()
+        current_liabilities = self.data.balance_sheets["totalCurrentLiabilities"].copy()
+        inventory = self.data.balance_sheets["inventory"].copy()
+        cash_and_equivalents = self.data.balance_sheets["cashAndCashEquivalents"].copy()
         quick_assets = current_assets - inventory
-        df['currentRatio'] = current_assets/current_liabilities
-        df['quickRatio'] = quick_assets/current_liabilities
-        df['cashRatio'] = cash_and_equivalents/current_liabilities
+        df["currentRatio"] = current_assets / current_liabilities
+        df["quickRatio"] = quick_assets / current_liabilities
+        df["cashRatio"] = cash_and_equivalents / current_liabilities
         return df
-    
+
     def concat_efficiency_ratios(self, df: pd.DataFrame):
-        '''
+        """
         Concatenates efficiency ratios to the given DataFrame.
 
         Args:
@@ -734,24 +794,26 @@ class ManualAnalysis:
             - Receivables turnover in days
 
         All ratios are calculated using financial data from the associated FinancialData object.
-        '''
-        inventory = self.data.balance_sheets['inventory'].copy()
-        revenue = self.data.income_statements['revenue'].copy()
-        total_assets = self.data.balance_sheets['totalAssets'].copy()
-        net_receivables = self.data.balance_sheets['netReceivables'].copy()
-        df['totalAssetTurnover'] = revenue/total_assets
-        df['inventoryToSalesRatio'] = inventory/revenue
-        df['inventoryTurnoverRatio'] = 1/df['inventoryToSalesRatio']
-        days = 365 if self.data.period == 'annual' else 90
-        df['inventoryTurnoverInDays'] = days/df['inventoryTurnoverRatio'].copy()
-        accounts_receivable_to_sales_ratio = self.data.balance_sheets['netReceivables'].copy()/revenue
-        df['accountsReceivableToSalesRatio'] = accounts_receivable_to_sales_ratio
-        df['receivablesTurnover'] = revenue/net_receivables
-        df['receivablesTurnoverInDays'] = days/df['receivablesTurnover'].copy()
+        """
+        inventory = self.data.balance_sheets["inventory"].copy()
+        revenue = self.data.income_statements["revenue"].copy()
+        total_assets = self.data.balance_sheets["totalAssets"].copy()
+        net_receivables = self.data.balance_sheets["netReceivables"].copy()
+        df["totalAssetTurnover"] = revenue / total_assets
+        df["inventoryToSalesRatio"] = inventory / revenue
+        df["inventoryTurnoverRatio"] = 1 / df["inventoryToSalesRatio"]
+        days = 365 if self.data.period == "annual" else 90
+        df["inventoryTurnoverInDays"] = days / df["inventoryTurnoverRatio"].copy()
+        accounts_receivable_to_sales_ratio = (
+            self.data.balance_sheets["netReceivables"].copy() / revenue
+        )
+        df["accountsReceivableToSalesRatio"] = accounts_receivable_to_sales_ratio
+        df["receivablesTurnover"] = revenue / net_receivables
+        df["receivablesTurnoverInDays"] = days / df["receivablesTurnover"].copy()
         return df
-    
+
     def concat_metric_growth(self, df: pd.DataFrame):
-        '''
+        """
         Concatenates growth rates for specified metrics to the given DataFrame.
 
         Args:
@@ -773,23 +835,35 @@ class ManualAnalysis:
             - Total debt ratio
 
         All growth rates are calculated using financial data from the associated FinancialData object.
-        '''
-        growth_metrics = ['eps', 'returnOnEquity', 'cashPerShare', 'PE_avg_close', 'ebitdaratio', 'ROIC',
-                   'netProfitMargin', 'returnOnAssets', 'debtToTotalCap', 'totalDebtRatio']
-        span, init_idx = (1,1) if self.data.period == 'annual' else (4,4)
+        """
+        growth_metrics = [
+            "eps",
+            "returnOnEquity",
+            "cashPerShare",
+            "PE_avg_close",
+            "ebitdaratio",
+            "ROIC",
+            "netProfitMargin",
+            "returnOnAssets",
+            "debtToTotalCap",
+            "totalDebtRatio",
+        ]
+        span, init_idx = (1, 1) if self.data.period == "annual" else (4, 4)
         for metric in growth_metrics:
             series = df[metric]
-            col_header = metric+'_growth'
+            col_header = metric + "_growth"
             col_data = []
             for idx, value in enumerate(series):
                 if idx < init_idx:
                     col_data.append(np.nan)
                 else:
-                    col_data.append((value-series[idx-span])/abs(series[idx-span]))
+                    col_data.append(
+                        (value - series[idx - span]) / abs(series[idx - span])
+                    )
             df[col_header] = pd.Series(col_data, index=self.data.frame_indecies)
         return df
-    
-    def analyse(self) -> pd.DataFrame: 
+
+    def analyse(self) -> pd.DataFrame:
         """
         Analyzes the financial data and calculates a variety of financial ratios.
 
@@ -839,17 +913,25 @@ class ManualAnalysis:
         if not self.verbose:
             return
         fractional_errors = pd.DataFrame(index=self.data.frame_indecies)
-        metrics_to_check = ['grossProfitMargin', 'operatingProfitMargin', 'netProfitMargin',
-                            'currentRatio', 'returnOnEquity', 'returnOnAssets',
-                            'cashPerShare', 'interestCoverage', 'dividendPayoutRatio']
+        metrics_to_check = [
+            "grossProfitMargin",
+            "operatingProfitMargin",
+            "netProfitMargin",
+            "currentRatio",
+            "returnOnEquity",
+            "returnOnAssets",
+            "cashPerShare",
+            "interestCoverage",
+            "dividendPayoutRatio",
+        ]
         for metric in metrics_to_check:
             reported = self.data.reported_key_metrics[metric]
             calculated = self.calculated_metrics[metric]
-            fractional_errors[metric] = ((calculated-reported)/calculated).abs()
+            fractional_errors[metric] = ((calculated - reported) / calculated).abs()
         return fractional_errors
 
 
-class Plots:    
+class Plots:
     """
     A class to create trend plots and export them as a PDF.
 
@@ -903,6 +985,7 @@ class Plots:
             Export the trend plots as a PDF.
 
     """
+
     def __init__(self, ticker, period, metrics, limit, filing_dates):
         """
         Creates an instance of the `Plots` class.
@@ -929,40 +1012,46 @@ class Plots:
         self.filing_dates = filing_dates
         self.limit = self.set_limit(limit)
         self.metric_units_dict = {
-            'Stock Evaluation Ratios':  {'eps' : '$/share',
-                                         'eps_diluted': '$/share',
-                                         'PE_high': 'x',
-                                         'PE_low': 'x',
-                                         'bookValuePerShare': '$/share',
-                                         'dividendPayoutRatio': 'x',
-                                         'cashPerShare': '$/share',
-                                         'ebitdaratio': 'x'
-                                        },
-            'Profitability Ratios':     {'grossProfitMargin': 'x',
-                                         'operatingProfitMargin': 'x',
-                                         'pretaxProfitMargin': 'x',
-                                         'netProfitMargin': 'x',
-                                         'ROIC': 'x',
-                                         'returnOnEquity': 'x',
-                                         'returnOnAssets': 'x'
-                                        },
-            'Debt & Interest Ratios':   {'interestCoverage': 'x',
-                                         'fixedChargeCoverage': 'x',
-                                         'debtToTotalCap': 'x',
-                                         'totalDebtRatio': 'x'
-                                         },
-            'Liquidity Ratios':         {'currentRatio': 'x',
-                                         'quickRatio': 'x',
-                                         'cashRatio': 'x'},
-            'Efficiency Ratios':     {'totalAssetTurnover': 'YYY',
-                                         'inventoryToSalesRatio': 'x',
-                                         'inventoryTurnoverRatio': 'YYY',
-                                         'inventoryTurnoverInDays': 'YYY',
-                                         'accountsReceivableToSalesRatio': 'YYY',
-                                         'receivablesTurnover': 'YYY',
-                                         'receivablesTurnoverInDays': 'YYY'
-                                         }
- }
+            "Stock Evaluation Ratios": {
+                "eps": "$/share",
+                "eps_diluted": "$/share",
+                "PE_high": "x",
+                "PE_low": "x",
+                "bookValuePerShare": "$/share",
+                "dividendPayoutRatio": "x",
+                "cashPerShare": "$/share",
+                "ebitdaratio": "x",
+            },
+            "Profitability Ratios": {
+                "grossProfitMargin": "x",
+                "operatingProfitMargin": "x",
+                "pretaxProfitMargin": "x",
+                "netProfitMargin": "x",
+                "ROIC": "x",
+                "returnOnEquity": "x",
+                "returnOnAssets": "x",
+            },
+            "Debt & Interest Ratios": {
+                "interestCoverage": "x",
+                "fixedChargeCoverage": "x",
+                "debtToTotalCap": "x",
+                "totalDebtRatio": "x",
+            },
+            "Liquidity Ratios": {
+                "currentRatio": "x",
+                "quickRatio": "x",
+                "cashRatio": "x",
+            },
+            "Efficiency Ratios": {
+                "totalAssetTurnover": "YYY",
+                "inventoryToSalesRatio": "x",
+                "inventoryTurnoverRatio": "YYY",
+                "inventoryTurnoverInDays": "YYY",
+                "accountsReceivableToSalesRatio": "YYY",
+                "receivablesTurnover": "YYY",
+                "receivablesTurnoverInDays": "YYY",
+            },
+        }
 
         self.plots = []
         self.plot_metrics()
@@ -995,7 +1084,7 @@ class Plots:
             return 4
         else:
             return 6
-        
+
     def filter_x_labels(self, x_labels, spacing):
         """
         Filters the x-tick labels for the plots, based on the specified spacing.
@@ -1007,8 +1096,8 @@ class Plots:
         Returns:
             list: The filtered list of x-tick labels.
         """
-        return [x_labels[i] if i%spacing==0 else ' ' for i in range(len(x_labels))]
-    
+        return [x_labels[i] if i % spacing == 0 else " " for i in range(len(x_labels))]
+
     def generate_x_labels(self):
         """
         Generates the x-tick labels for the plots, based on the metrics data and the specified period.
@@ -1016,7 +1105,9 @@ class Plots:
         Returns:
             list: The list of x-tick labels for the plots.
         """
-        return ['-'.join(str(i).split('-')[1:]) for i in self.metrics.index[-self.limit:]]
+        return [
+            "-".join(str(i).split("-")[1:]) for i in self.metrics.index[-self.limit :]
+        ]
 
     def calculate_subplots_shape(self, metrics_container):
         """
@@ -1030,7 +1121,7 @@ class Plots:
             tuple: A tuple containing the number of rows and columns required for the subplot grid.
         """
         nplots = len(metrics_container)
-        nrows = -(-nplots//2)
+        nrows = -(-nplots // 2)
         ncols = 2
         return nrows, ncols
 
@@ -1045,7 +1136,7 @@ class Plots:
         Returns:
             plt.subplot: The selected subplot.
         """
-        i, j = counter//2, counter%2
+        i, j = counter // 2, counter % 2
         return subplots[i][j]
 
     def get_y_data(self, metric):
@@ -1058,7 +1149,7 @@ class Plots:
         Returns:
             pd.Series: The y-axis data for the specified metric.
         """
-        return self.metrics[metric][-self.limit:]
+        return self.metrics[metric][-self.limit :]
 
     def get_y_units(self, metric_type, metric):
         """
@@ -1082,11 +1173,11 @@ class Plots:
             data (dict): A dictionary containing the plotting data, including the metric data, labels, 
                 and units of measure.
         """
-        axis.plot(data['y'], label='data')
-        axis.set_title(data['metric'])
-        axis.set_xticks(data['x_true'])
-        axis.set_xticklabels(data['x_labels'])
-        axis.set_ylabel(['y_label'])
+        axis.plot(data["y"], label="data")
+        axis.set_title(data["metric"])
+        axis.set_xticks(data["x_true"])
+        axis.set_xticklabels(data["x_labels"])
+        axis.set_ylabel(["y_label"])
         return axis
 
     def get_linear_coeffs(self, x, y):
@@ -1105,11 +1196,11 @@ class Plots:
         `linregress` function from the `scipy.stats` module. The slope, intercept, and R-squared 
         value are returned as a tuple.
         """
-        slope, intercept, r_value, _, _ = linregress(x, y)     
-        return slope, intercept, r_value**2
-    
+        slope, intercept, r_value, _, _ = linregress(x, y)
+        return slope, intercept, r_value ** 2
+
     def generate_linear_series(self, x, slope, intercept):
-        '''
+        """
         Returns a pandas Series containing the y-values of a linear series with the given x-values, 
         slope, and intercept.
 
@@ -1120,11 +1211,11 @@ class Plots:
 
         Returns:
             pandas.Series: The y-values of the linear series.
-        '''
-        return slope*x + intercept
-  
+        """
+        return slope * x + intercept
+
     def plot_linear_trend(self, axis, x, y, r2):
-        '''
+        """
         Plots linear regression line on given axis with r-squared value in legend.
 
         Args:
@@ -1135,13 +1226,13 @@ class Plots:
 
         Returns:
             matplotlib axis: axis object with the plotted line.
-        '''
-        axis.plot(x, y, alpha=0.5, linestyle='--', label='linear trend')
-        axis.plot([], [], ' ', label=f'R2: {r2:.2f}') # Adding R2 value to legend
+        """
+        axis.plot(x, y, alpha=0.5, linestyle="--", label="linear trend")
+        axis.plot([], [], " ", label=f"R2: {r2:.2f}")  # Adding R2 value to legend
         return axis
 
     def plot_metrics(self):
-        '''
+        """
         The plot_metrics method generates plots of financial metrics for a given company. The method first 
             generates the necessary subplots to hold each metric type. Each metric type is then plotted on 
             an individual axis within the metric type's subplot. Each metric's trend data is gathered, and 
@@ -1154,10 +1245,10 @@ class Plots:
 
         Returns:
         None. The method appends the generated plots to the Plots instance.
-        '''
+        """
         spacing = self.get_spacing()
         x_labels = self.filter_x_labels(self.generate_x_labels(), spacing)
-        
+
         for metric_type in self.metric_units_dict.keys():
             # creating subplot axes to hold all metrics of each metric type
             metrics = self.metric_units_dict[metric_type].keys()
@@ -1173,15 +1264,15 @@ class Plots:
                 y_label = self.get_y_units(metric_type, metric)
                 x_true = y.index
                 x_dummy = range(len(y))
-                
-                #plotting the data
+
+                # plotting the data
                 plotting_data = {
-                    'metric': metric,
-                    'y': y,
-                    'l_label': y_label,
-                    'x_true': x_true,
-                    'x_dummy': x_dummy,
-                    'x_labels': x_labels
+                    "metric": metric,
+                    "y": y,
+                    "l_label": y_label,
+                    "x_true": x_true,
+                    "x_dummy": x_dummy,
+                    "x_labels": x_labels,
                 }
                 self.plot_data_on_axis(axis, plotting_data)
 
@@ -1189,15 +1280,15 @@ class Plots:
                 slope, intercept, r2_value = self.get_linear_coeffs(x_dummy, y)
                 y_linear = self.generate_linear_series(x_dummy, slope, intercept)
                 self.plot_linear_trend(axis, x_dummy, y_linear, r2_value)
-                axis.legend(loc='upper right', frameon=False, fontsize=8)
+                axis.legend(loc="upper right", frameon=False, fontsize=8)
 
             # formatting and appending the figure
             fig.suptitle(metric_type)
             fig.tight_layout()
             self.plots.append(fig)
-        
+
     def generate_save_path_object(self, file=False):
-        '''
+        """
         Generates the path to the PDF file where the charts will be saved.
 
         Args:
@@ -1206,13 +1297,23 @@ class Plots:
 
         Returns:
             PosixPath: The file path object.
-        '''
+        """
         date = str(dt.datetime.now()).split()[0]
         end_date = self.filing_dates[-1]
         start_date = self.filing_dates[-self.limit]
-        file_name = f"{self.ticker}_{self.period}_{str(start_date)}_to_{str(end_date)}.pdf"
-        file_path = Path.cwd()/'investment_tools'/'data'/'Company Analysis'/date/self.ticker/self.period
-        return file_path/file_name if file else file_path
+        file_name = (
+            f"{self.ticker}_{self.period}_{str(start_date)}_to_{str(end_date)}.pdf"
+        )
+        file_path = (
+            Path.cwd()
+            / "investment_tools"
+            / "data"
+            / "Company Analysis"
+            / date
+            / self.ticker
+            / self.period
+        )
+        return file_path / file_name if file else file_path
 
     def create_path_from_object(self, path_object):
         """
@@ -1225,22 +1326,22 @@ class Plots:
             os.makedirs(path_object)
         except FileExistsError:
             pass
-    
+
     def make_bin_folder(self):
         """
         Creates a 'bin' folder if it does not already exist.
         """
         try:
-            os.mkdir('bin')
+            os.mkdir("bin")
         except FileExistsError:
             pass
-    
+
     def make_pdf_title_page(self):
         """
         Generates a PDF title page using the ticker and period of the company, and saves it in the 'bin' folder.
         """
-        self.title_path = 'bin/title.pdf'
-        self.charts_path = 'bin/charts.pdf'
+        self.title_path = "bin/title.pdf"
+        self.charts_path = "bin/charts.pdf"
         title_message = f"Financial Ratio Trends for {self.ticker}"
         title_page = canvas.Canvas(self.title_path)
         title_page.drawString(210, 520, title_message)
@@ -1250,7 +1351,7 @@ class Plots:
         """
         Generates individual PDFs for each figure in self.plots, and saves them in the 'bin' folder.
         """
-        self.charts_path = 'bin/charts.pdf'
+        self.charts_path = "bin/charts.pdf"
         with PdfPages(self.charts_path) as pdf:
             for figure in self.plots:
                 pdf.savefig(figure)
@@ -1262,16 +1363,16 @@ class Plots:
         Args:
             export_path (str): The file path to export the combined PDF to.
         """
-        with open(self.title_path, 'rb') as f1:
-            with open(self.charts_path, 'rb') as f2:
-                pdf1 = PdfReader(f1, 'rb')
-                pdf2 = PdfReader(f2, 'rb')
+        with open(self.title_path, "rb") as f1:
+            with open(self.charts_path, "rb") as f2:
+                pdf1 = PdfReader(f1, "rb")
+                pdf2 = PdfReader(f2, "rb")
                 pdf_output = PdfWriter()
                 for page_num in range(len(pdf1.pages)):
                     pdf_output.add_page(pdf1.pages[page_num])
                 for page_num in range(len(pdf2.pages)):
                     pdf_output.add_page(pdf2.pages[page_num])
-                with open(export_path, 'wb') as output_file:
+                with open(export_path, "wb") as output_file:
                     pdf_output.write(output_file)
 
     def _export_charts_pdf(self):
@@ -1286,12 +1387,6 @@ class Plots:
         self.make_pdf_charts()
         path_object = self.generate_save_path_object(file=True)
         self.combine_and_export_pdfs(path_object)
-
-
-    
-        
-
-
 
 
 class Company:
@@ -1404,7 +1499,9 @@ class Company:
         Exports the financial trend charts to disk as a pdf file. Also exports key findings based on the analysis.
     """
 
-    def __init__(self, ticker, api_key, data='online', period='annual', limit=20, verbose=False):
+    def __init__(
+        self, ticker, api_key, data="online", period="annual", limit=20, verbose=False
+    ):
         """
         Initialize a new instance of the Company class.
 
@@ -1440,7 +1537,6 @@ class Company:
         if self.outcome:
             self.print_charts()
             self.export()
-        
 
     def recommendation(self) -> Dict[str, dict]:
         """
@@ -1450,13 +1546,18 @@ class Company:
         scores (Dict[str, dict]): A dictionary containing the scores and strengths for each 
         financial metric considered.
         """
-        key_metrics = ['eps_growth', 'returnOnEquity_growth', 'ROIC_growth', 'returnOnAssets_growth', 
-                       'debtToTotalCap_growth', 'totalDebtRatio_growth']
+        key_metrics = [
+            "eps_growth",
+            "returnOnEquity_growth",
+            "ROIC_growth",
+            "returnOnAssets_growth",
+            "debtToTotalCap_growth",
+            "totalDebtRatio_growth",
+        ]
         scores = dict()
         for metric in key_metrics:
             score, strength = self.score(metric)
-            scores[metric] = {'score': score,
-                              'strength': strength}
+            scores[metric] = {"score": score, "strength": strength}
         return scores
 
     def get_modifier(self, metric: str) -> int:
@@ -1470,7 +1571,7 @@ class Company:
         Returns:
         int: The modifier to be used in calculations.
         """
-        if 'debt' in metric.lower():
+        if "debt" in metric.lower():
             return -1
         else:
             return 1
@@ -1499,10 +1600,10 @@ class Company:
 
         """
         try:
-            slope, intercept, r_val, _, _= linregress(range(len(metrics)), metrics)
-            return r_val**2
+            slope, intercept, r_val, _, _ = linregress(range(len(metrics)), metrics)
+            return r_val ** 2
         except ValueError:
-            return 0.
+            return 0.0
 
     def score(self, metric: str) -> Tuple[int, int]:
         """
@@ -1523,7 +1624,6 @@ class Company:
         growth_score = self.score_mean_growth(modifier * mean)
         stability_score = self.score_trend_strength(r2)
         return (growth_score, stability_score)
-
 
     def score_mean_growth(self, mean_growth: float) -> int:
         """
@@ -1552,7 +1652,7 @@ class Company:
             return 3
         else:
             return 4
-    
+
     def score_trend_strength(self, r2: float) -> int:
         """
         Calculate the trend strength score for a financial metric.
@@ -1571,11 +1671,10 @@ class Company:
             return 1
         elif r2_ <= 0.5:
             return 2
-        elif r2_  <= 0.75:
+        elif r2_ <= 0.75:
             return 3
         else:
             return 4
-        
 
     def eval_(self, scores: Dict[str, dict]) -> bool:
         """
@@ -1590,9 +1689,9 @@ class Company:
         """
         vote = 0
         for key in scores.keys():
-            vote += scores[key]['score']
+            vote += scores[key]["score"]
         # Require an average score of 1.5 for each metric
-        return False if vote < 1.5*len(scores) else True 
+        return False if vote < 1.5 * len(scores) else True
 
     def print_charts(self) -> None:
         """
@@ -1605,10 +1704,12 @@ class Company:
         """
         if self._charts_printed:
             return
-        self._plots = Plots(self.ticker, self.period, self.metrics, self.limit, self.filing_dates)
+        self._plots = Plots(
+            self.ticker, self.period, self.metrics, self.limit, self.filing_dates
+        )
         self.trends = self._plots.plots
         self._charts_printed = True
-    
+
     def export(self) -> None:
         """
         The export() method exports the financial trend charts to a PDF file.
@@ -1618,12 +1719,3 @@ class Company:
         """
         self._plots._export_charts_pdf()
         # also export key findings based on the analyis
-
-
-
-
-        
-
-        
-
-        
