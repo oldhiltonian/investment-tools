@@ -385,33 +385,89 @@ class TestFinancialData(unittest.TestCase):
 #             with self.assertRaises(AssertionError):
 #                 instance.assert_identical_indecies()
 
-    # def test_assert_required_length(self):
-    #     for ticker, data, period in self.zipped_args_tdp:
-    #         instance = FinancialData(ticker, self.api_key, data, period, self.limit)
-    #         lengths = [4, 5, 6, 500, 1000] if period == 'quarter' else [2, 3, 7, 12, 1000]
-    #         for length in lengths:
-    #             instance.assert_required_length(range(length))
-    #         fail = range(3) if period == 'quarter' else range(1)
-    #         with self.assertRaises(AssertionError):
-    #             instance.assert_required_length(fail)
+    def test_assert_required_length(self):
+        """
+        Test that the assert_required_length method of FinancialData class raises an AssertionError
+        when the length of the provided iterable does not match the required length for the
+        specified period.
+
+        This method creates a new FinancialData instance for each given ticker and test period and
+        checks that the assert_required_length method raises an AssertionError for a range of lengths
+        that do not match the required length for the specified period. It also checks that the method
+        does not raise an error for a range of lengths that do match the required length.
+
+        Args:
+            self: An instance of the unittest.TestCase class.
+
+        Returns:
+            None.
+        """
+        for ticker, data, period in self.zipped_args_tdp:
+            instance = FinancialData(ticker, self.api_key, data, period, self.limit)
+            lengths = [4, 5, 6, 500, 1000] if period == 'quarter' else [2, 3, 7, 12, 1000]
+            for length in lengths:
+                instance.assert_required_length(range(length))
+            fail = range(3) if period == 'quarter' else range(1)
+            with self.assertRaises(AssertionError):
+                instance.assert_required_length(fail)
             
 
-    # def test_assert_valid_server_response(self):
-    #     for ticker, _, period in self.zipped_args_tdp:
-    #         instance = FinancialData(ticker, self.api_key, 'online', period, self.limit)
-    #         response = instance.fetch_raw_data('bs')
-    #         instance.assert_valid_server_response(response)
+    def test_assert_valid_server_response(self):
+        """
+        Test that the assert_valid_server_response method of FinancialData class raises an AssertionError
+        when the server response is invalid.
 
-    # def test_assert_server_response_not_empty(self):
-    #     for ticker, data, period in self.zipped_args_tdp:
-    #         instance = FinancialData(ticker, self.api_key, data, period, self.limit)
-    #         response = requests.Response()
-    #         response._content = b'{"key": "value"}'
-    #         response.status_code = 200
-    #         result = instance.assert_server_response_not_empty(response)
-    #         self.assertIsNone(result)
+        This method creates a new FinancialData instance for each given ticker and test period and
+        checks that the assert_valid_server_response method raises an AssertionError for an invalid
+        server response. It also checks that the method does not raise an error for a valid server response.
+
+        Args:
+            self: An instance of the unittest.TestCase class.
+
+        Returns:
+            None.
+        """
+        for ticker, _, period in self.zipped_args_tdp:
+            instance = FinancialData(ticker, self.api_key, 'online', period, self.limit)
+            response = instance.fetch_raw_data('bs')
+            instance.assert_valid_server_response(response)
+
+    def test_assert_server_response_not_empty(self):
+        """
+        Test that the assert_server_response_not_empty method of FinancialData class raises an AssertionError
+        when the server response is empty.
+
+        This method creates a new FinancialData instance for each given ticker and test period and
+        checks that the assert_server_response_not_empty method raises an AssertionError for an empty
+        server response. It also checks that the method does not raise an error for a non-empty server response.
+
+        Args:
+            self: An instance of the unittest.TestCase class.
+
+        Returns:
+            None.
+        """
+        for ticker, data, period in self.zipped_args_tdp:
+            instance = FinancialData(ticker, self.api_key, data, period, self.limit)
+            response = requests.Response()
+            response._content = b'{"key": "value"}'
+            response.status_code = 200
+            result = instance.assert_server_response_not_empty(response)
+            self.assertIsNone(result)
 
     def test_fetch_stock_price_data(self):
+        """
+        Test that the fetch_stock_price_data_yf method of FinancialData class returns a non-empty DataFrame.
+
+        This method creates a new FinancialData instance for each given ticker and test period and
+        checks that the fetch_stock_price_data_yf method returns a DataFrame with more than 0 rows.
+
+        Args:
+            self: An instance of the unittest.TestCase class.
+
+        Returns:
+            None.
+        """
         for ticker, data, period in self.zipped_args_tdp:
             instance = FinancialData(ticker, self.api_key, data, period, self.limit)
             data = instance.fetch_stock_price_data_yf()
