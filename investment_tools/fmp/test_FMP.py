@@ -7,6 +7,7 @@ from fmp_layer_1 import FinancialData, ManualAnalysis, Plots, Company
 from pathlib import Path
 import itertools
 import random
+from scipy.stats import linregress
 
 key_path = Path().home()/'desktop'/'FinancialModellingPrep_API.txt'
 with open(key_path) as file:
@@ -499,15 +500,31 @@ class TestCompany(unittest.TestCase):
     #             result = instance.get_modifier(string)
     #             self.assertEqual(expected, result)
     
-    def test_get_copy_of_df_column(self):
+    # def test_get_copy_of_df_column(self):
+    #     for ticker, data, period in self.zipped_args_tdp:
+    #         instance = Company(ticker, self.api_key, data, period, self.limit)
+    #         for string in ['eps', 'ebitdaratio', 'ROIC', 'totalDebtRatio']:
+    #             expected = instance.metrics[string].copy().dropna()
+    #             fetched = instance.get_copy_of_df_column(string)
+    #             result = expected.equals(fetched)
+    #             self.assertEqual(result, True)
+    
+    def test_get_r2_val(self):
+        series_dict = {
+            '1': [0,1,2,3,4,5],
+            '0.9888': [2, 4, 6, 9],
+            '0.9704': [1, 3, 4, 6, 9],
+            '0.9730': [0, -1, -2, -3, -5],
+            '0.9795': [0, -3, -4, -7, -10]
+        }
         for ticker, data, period in self.zipped_args_tdp:
             instance = Company(ticker, self.api_key, data, period, self.limit)
-            for string in ['eps', 'ebitdaratio', 'ROIC', 'totalDebtRatio']:
-                expected = instance.metrics[string].copy().dropna()
-                fetched = instance.get_copy_of_df_column(string)
-                result = expected.equals(fetched)
-                self.assertEqual(result, True)
-    
+            for r2, series in series_dict.items():
+                r2_ = float(r2)
+                expected = instance.get_r2_val(series)
+                self.assertAlmostEqual(expected, r2_, places=3)
+
+
 
 
 if __name__ == '__main__':
