@@ -499,7 +499,7 @@ class TestCompany(unittest.TestCase):
     #             result = instance.get_modifier(string)
     #             self.assertEqual(expected, result)
     
-    def test_get_copy_of_dfcolumn(self):
+    def test_get_copy_of_df_column(self):
         for ticker, data, period in self.zipped_args_tdp:
             instance = Company(ticker, self.api_key, data, period, self.limit)
             for string in ['eps', 'ebitdaratio', 'ROIC', 'totalDebtRatio']:
