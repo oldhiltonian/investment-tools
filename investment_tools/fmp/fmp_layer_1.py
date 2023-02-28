@@ -608,7 +608,8 @@ class ManualAnalysis:
             assert not df[header].isnull().all(), err_msg
 
     def concat_stock_eval_ratios(self, df: pd.DataFrame):
-        """Calculate and concatenate stock evaluation ratios to the given DataFrame.
+        """
+        Calculate and concatenate stock evaluation ratios to the given DataFrame.
 
         Args:
             df (pandas.DataFrame): The DataFrame to concatenate the calculated metrics to.
@@ -1305,8 +1306,7 @@ class Plots:
             f"{self.ticker}_{self.period}_{str(start_date)}_to_{str(end_date)}.pdf"
         )
         file_path = (
-            Path.cwd()
-            / "investment_tools"
+            Path.cwd().parent
             / "data"
             / "Company Analysis"
             / date
@@ -1546,17 +1546,17 @@ class Company:
         scores (Dict[str, dict]): A dictionary containing the scores and strengths for each 
         financial metric considered.
         """
-        key_metrics = [
-            "eps_growth",
-            "returnOnEquity_growth",
-            "ROIC_growth",
-            "returnOnAssets_growth",
-            "debtToTotalCap_growth",
-            "totalDebtRatio_growth",
-        ]
+        key_metrics = {
+            "eps": "eps_growth",
+            "returnOnEquity": "returnOnEquity_growth",
+            "ROIC": "ROIC_growth",
+            "returnOnAssets": "returnOnAssets_growth",
+            "debtToTotalCap": "debtToTotalCap_growth",
+            "totalDebtRatio": "totalDebtRatio_growth"
+        }
         scores = dict()
-        for metric in key_metrics:
-            score, strength = self.score(metric)
+        for metric, growth in key_metrics.items():
+            score, strength = self.score(metric, growth)
             scores[metric] = {"score": score, "strength": strength}
         return scores
 
@@ -1605,7 +1605,7 @@ class Company:
         except ValueError:
             return 0.0
 
-    def score(self, metric: str) -> Tuple[int, int]:
+    def score(self, metric: str, growth: str) -> Tuple[int, int]:
         """
         Calculates the growth score and the trend stability score of the given financial metric.
         
@@ -1618,10 +1618,11 @@ class Company:
         The trend stability score is an integer value between 0 and 4, indicating the strength of the trend of the metric.
         """
         modifier = self.get_modifier(metric)
-        metrics = self.get_copy_of_df_column(metric)
-        mean = metrics.mean()
-        r2 = self.get_r2_val(metrics)
-        growth_score = self.score_mean_growth(modifier * mean)
+        metric_ = self.get_copy_of_df_column(metric)
+        growth_ = self.get_copy_of_df_column(growth)
+        mean_growth = growth_.mean()
+        r2 = self.get_r2_val(metric_)
+        growth_score = self.score_mean_growth(modifier * mean_growth)
         stability_score = self.score_trend_strength(r2)
         return (growth_score, stability_score)
 
