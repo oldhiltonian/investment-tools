@@ -605,7 +605,7 @@ class ManualAnalysis:
         """
         err_msg = "Metric error calculations returned a null dataframe. Unreliable calculations."
         for header in df.columns:
-            assert not df[header].isnull().all(), err_msg
+            assert not df[header].isnull().all(), f"<{header}> -- {err_msg}"
 
     def concat_stock_eval_ratios(self, df: pd.DataFrame):
         """
@@ -1306,7 +1306,8 @@ class Plots:
             f"{self.ticker}_{self.period}_{str(start_date)}_to_{str(end_date)}.pdf"
         )
         file_path = (
-            Path.cwd().parent
+            Path.cwd()
+            /"investment_tools"
             / "data"
             / "Company Analysis"
             / date
