@@ -928,7 +928,10 @@ class ManualAnalysis:
         for metric in metrics_to_check:
             reported = self.data.reported_key_metrics[metric]
             calculated = self.calculated_metrics[metric]
-            fractional_errors[metric] = ((calculated - reported) / calculated).abs()
+            if sum(reported) == 0 and sum(calculated) == 0:
+                fractional_errors[metric] = calculated
+            else:
+                fractional_errors[metric] = ((calculated - reported) / calculated).abs()
         return fractional_errors
 
 
