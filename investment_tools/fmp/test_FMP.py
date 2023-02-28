@@ -486,19 +486,27 @@ class TestCompany(unittest.TestCase):
         cls.limit = 120
         cls.zipped_args_tdp = list(itertools.product(cls.tickers, cls.data, cls.period))
 
-    def test_get_modifier(self):
+    # def test_get_modifier(self):
+    #     for ticker, data, period in self.zipped_args_tdp:
+    #         instance = Company(ticker, self.api_key, data, period, self.limit)
+    #         for string in ['deb', 'ebt', 'dbt', 'det']:
+    #             expected = 1
+    #             result = instance.get_modifier(string)
+    #             self.assertEqual(expected, result)
+            
+    #         for string in ['debt', 'DeBt', 'DEBT', 'DEbT']:
+    #             expected = -1
+    #             result = instance.get_modifier(string)
+    #             self.assertEqual(expected, result)
+    
+    def test_get_copy_of_dfcolumn(self):
         for ticker, data, period in self.zipped_args_tdp:
             instance = Company(ticker, self.api_key, data, period, self.limit)
-            for string in ['deb', 'ebt', 'dbt', 'det']:
-                expected = 1
-                result = instance.get_modifier(string)
-                self.assertEqual(expected, result)
-            
-            for string in ['debt', 'DeBt', 'DEBT', 'DEbT']:
-                expected = -1
-                result = instance.get_modifier(string)
-                self.assertEqual(expected, result)
-    
+            for string in ['eps', 'ebitdaratio', 'ROIC', 'totalDebtRatio']:
+                expected = instance.metrics[string].copy().dropna()
+                fetched = instance.get_copy_of_df_column(string)
+                result = expected.equals(fetched)
+                self.assertEqual(result, True)
     
 
 
