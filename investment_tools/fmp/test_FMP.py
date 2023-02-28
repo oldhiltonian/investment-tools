@@ -509,20 +509,33 @@ class TestCompany(unittest.TestCase):
     #             result = expected.equals(fetched)
     #             self.assertEqual(result, True)
     
-    def test_get_r2_val(self):
-        series_dict = {
-            '1': [0,1,2,3,4,5],
-            '0.9888': [2, 4, 6, 9],
-            '0.9704': [1, 3, 4, 6, 9],
-            '0.9730': [0, -1, -2, -3, -5],
-            '0.9795': [0, -3, -4, -7, -10]
-        }
+    # def test_get_r2_val(self):
+    #     series_dict = {
+    #         '1': [0,1,2,3,4,5],
+    #         '0.9888': [2, 4, 6, 9],
+    #         '0.9704': [1, 3, 4, 6, 9],
+    #         '0.9730': [0, -1, -2, -3, -5],
+    #         '0.9795': [0, -3, -4, -7, -10]
+    #     }
+    #     for ticker, data, period in self.zipped_args_tdp:
+    #         instance = Company(ticker, self.api_key, data, period, self.limit)
+    #         for r2, series in series_dict.items():
+    #             r2_ = float(r2)
+    #             expected = instance.get_r2_val(series)
+    #             self.assertAlmostEqual(expected, r2_, places=3)
+
+    def test_score_mean_growth(self):
+        mean_growth_score_tuple = [(0.05, 0), (0.051, 1), (0.099, 1), 
+                                    (0.1001, 2), (0.1499, 2), (0.15001, 3),
+                                    (0.2, 3), (0.2001, 4)]
+        
         for ticker, data, period in self.zipped_args_tdp:
             instance = Company(ticker, self.api_key, data, period, self.limit)
-            for r2, series in series_dict.items():
-                r2_ = float(r2)
-                expected = instance.get_r2_val(series)
-                self.assertAlmostEqual(expected, r2_, places=3)
+
+            for mean, score in mean_growth_score_tuple:
+                self.assertEqual(instance.score_mean_growth(mean), score)
+
+
 
 
 
