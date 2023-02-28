@@ -524,18 +524,24 @@ class TestCompany(unittest.TestCase):
     #             expected = instance.get_r2_val(series)
     #             self.assertAlmostEqual(expected, r2_, places=3)
 
-    def test_score_mean_growth(self):
-        mean_growth_score_tuple = [(0.05, 0), (0.051, 1), (0.099, 1), 
-                                    (0.1001, 2), (0.1499, 2), (0.15001, 3),
-                                    (0.2, 3), (0.2001, 4)]
+    # def test_score_mean_growth(self):
+    #     mean_growth_score_tuple = [(0.05, 0), (0.051, 1), (0.099, 1), 
+    #                                 (0.1001, 2), (0.1499, 2), (0.15001, 3),
+    #                                 (0.2, 3), (0.2001, 4)]
         
+    #     for ticker, data, period in self.zipped_args_tdp:
+    #         instance = Company(ticker, self.api_key, data, period, self.limit)
+
+    #         for mean, score in mean_growth_score_tuple:
+    #             self.assertEqual(instance.score_mean_growth(mean), score)
+
+    def test_score_trend_groth(self):
+        r2_to_score_tuples = [(0.01, 0), (0.2, 0), (0.2001, 1), (0.3, 1), (0.3001, 2),
+                              (0.5, 2), (0.5001, 3), (0.75, 3), (0.751, 4)]
         for ticker, data, period in self.zipped_args_tdp:
             instance = Company(ticker, self.api_key, data, period, self.limit)
-
-            for mean, score in mean_growth_score_tuple:
-                self.assertEqual(instance.score_mean_growth(mean), score)
-
-
+            for r2, score in r2_to_score_tuples:
+                self.assertEqual(instance.score_trend_strength(r2), score)
 
 
 
