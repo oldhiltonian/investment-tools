@@ -15,6 +15,7 @@ import os
 import time
 from typing import Dict, Tuple
 import pyarrow as pa
+import math
 
 yf.pdr_override()
 
@@ -454,7 +455,6 @@ class FinancialData:
         )
         if raw_data.empty:
             return self.generate_empty_df(["high", "low", "avg_close"])
-        # print(raw_data)
         raw_data["date"] = raw_data.index.date
         return self.periodise(raw_data)
 
@@ -1672,7 +1672,7 @@ class Company:
             int: The score for the mean growth of the metric based on the above ranges.
         """
         growth = float(mean_growth)
-        if growth <= 0.05:
+        if growth <= 0.05 or math.isnan(growth):
             return 0
         elif growth <= 0.10:
             return 1
@@ -1695,7 +1695,7 @@ class Company:
 
         """
         r2_ = float(r2)
-        if r2_ <= 0.2:
+        if r2_ <= 0.2 or math.isnan(r2):
             return 0
         elif r2_ <= 0.3:
             return 1
