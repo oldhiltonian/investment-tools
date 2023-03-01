@@ -140,7 +140,8 @@ class FinancialData:
         self.save_financial_attributes()
 
     def replace_None(self, df: pd.DataFrame) -> pd.DataFrame:
-        return df.replace(to_replace=[None,'None'], value=0)
+        df_ = df.replace(to_replace=np.nan, value=0)
+        return df_.replace(to_replace=[None,'None'], value=0)
 
     def assert_valid_user_inputs(self):
         """

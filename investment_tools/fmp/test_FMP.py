@@ -43,6 +43,14 @@ class TestFinancialData(unittest.TestCase):
         cls.zipped_args_tdp = list(itertools.product(cls.tickers, cls.data, cls.period))
         cls.generic_instance = FinancialData('AAPL', cls.api_key, 'local', 'annual', 10)
 
+    def test_replace_None(self):
+        for ticker, data, period in self.zipped_args_tdp:
+            instance = Company(ticker, self.api_key, data, period, self.limit)
+            none_df = pd.DataFrame({'A': [1, None, 3, None, 5], 'B': [6, 7, None, 9, 10]})
+            expected = pd.DataFrame({'A': [1., 0., 3., 0., 5.], 'B': [6., 7., 0., 9., 10.]})
+            result = instance._financial_data.replace_None(none_df)
+            self.assertEqual(expected.equals(result), True)
+
 #     def test_assert_valid_user_input(self):
 #         """
 #         Test that the assert_valid_user_inputs method raises a ValueError when an
