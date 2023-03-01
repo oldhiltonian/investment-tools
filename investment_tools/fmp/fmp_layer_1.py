@@ -121,9 +121,13 @@ class FinancialData:
         self.days_in_period = 365 if period == "annual" else 90
 
         self.balance_sheets = self.build_dataframe(self.fetch_raw_data("bs"))
+        self.balance_sheets = self.replace_None(self.balance_sheets)
         self.income_statements = self.build_dataframe(self.fetch_raw_data("is"))
+        self.income_statements = self.replace_None(self.income_statements)
         self.cash_flow_statements = self.build_dataframe(self.fetch_raw_data("cfs"))
+        self.cash_flow_statements = self.replace_None(self.cash_flow_statements)
         self.reported_key_metrics = self.build_dataframe(self.fetch_raw_data("metrics"))
+        self.reported_key_metrics = self.replace_None(self.reported_key_metrics)
 
         if not self.check_for_matching_indecies():
             self.filter_for_common_indecies(self.get_common_df_indicies())
@@ -134,6 +138,9 @@ class FinancialData:
         self.stock_price_data = self.fetch_stock_price_data_yf()
         self.assert_required_length(self.stock_price_data)
         self.save_financial_attributes()
+
+    def replace_None(self, df: pd.DataFrame) -> pd.DataFrame:
+        return df.replace(to_replace=[None,'None'], value=0)
 
     def assert_valid_user_inputs(self):
         """
@@ -928,10 +935,13 @@ class ManualAnalysis:
         for metric in metrics_to_check:
             reported = self.data.reported_key_metrics[metric]
             calculated = self.calculated_metrics[metric]
-            if sum(reported) == 0 and sum(calculated) == 0:
-                fractional_errors[metric] = calculated
-            else:
-                fractional_errors[metric] = ((calculated - reported) / calculated).abs()
+            try:
+                if sum(reported) == 0 and sum(calculated) == 0:
+                    fractional_errors[metric] = calculated
+                else:
+                    fractional_errors[metric] = ((calculated - reported) / calculated).abs()
+            except TypeError:
+                print(f"{metric} series has sunsupported type for sum()")
         return fractional_errors
 
 

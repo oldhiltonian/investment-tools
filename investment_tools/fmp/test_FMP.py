@@ -13,35 +13,35 @@ key_path = Path().home()/'desktop'/'FinancialModellingPrep_API.txt'
 with open(key_path) as file:
     api_key = file.read()
 
-# class TestFinancialData(unittest.TestCase):
-#     """
-#     Test suite for the FinancialData class.
+class TestFinancialData(unittest.TestCase):
+    """
+    Test suite for the FinancialData class.
 
-#     Attributes:
-#         tickers (list): A list of stock tickers to test.
-#         api_key (str): An API key for the Financial Modeling Prep API.
-#         data (list): A list of data types to test.
-#         period (list): A list of periods to test.
-#         limit (int): A limit on the number of records to fetch.
-#         zipped_args_tdp (list): A list of tuples representing all combinations
-#             of tickers, data, and period.
-#     """
+    Attributes:
+        tickers (list): A list of stock tickers to test.
+        api_key (str): An API key for the Financial Modeling Prep API.
+        data (list): A list of data types to test.
+        period (list): A list of periods to test.
+        limit (int): A limit on the number of records to fetch.
+        zipped_args_tdp (list): A list of tuples representing all combinations
+            of tickers, data, and period.
+    """
 
-#     @classmethod
-#     def setUpClass(cls):
-#         """
-#         Set up the test suite.
+    @classmethod
+    def setUpClass(cls):
+        """
+        Set up the test suite.
 
-#         This method is called before any test methods are run.
-#         """
-#         # self.tickers = ['AAPL', 'MSFT', 'NVDA','VAC', 'WBA', 'ATVI', 'A', 'AMD']
-#         cls.tickers = ['AAPL']
-#         cls.api_key = api_key
-#         cls.data =    ['online', 'local']
-#         cls.period =  ['annual', 'quarter']
-#         cls.limit = 120
-#         cls.zipped_args_tdp = list(itertools.product(cls.tickers, cls.data, cls.period))
-#         cls.generic_instance = FinancialData('AAPL', cls.api_key, 'local', 'annual', 10)
+        This method is called before any test methods are run.
+        """
+        # self.tickers = ['AAPL', 'MSFT', 'NVDA','VAC', 'WBA', 'ATVI', 'A', 'AMD']
+        cls.tickers = ['AAPL']
+        cls.api_key = api_key
+        cls.data =    ['online', 'local']
+        cls.period =  ['annual', 'quarter']
+        cls.limit = 120
+        cls.zipped_args_tdp = list(itertools.product(cls.tickers, cls.data, cls.period))
+        cls.generic_instance = FinancialData('AAPL', cls.api_key, 'local', 'annual', 10)
 
 #     def test_assert_valid_user_input(self):
 #         """
@@ -476,16 +476,16 @@ with open(key_path) as file:
 #             self.assertGreater(len(data), 0)
 
 
-class TestCompany(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls) -> None:
-        # cls.tickers = ['AAPL', 'MSFT', 'NVDA','VAC', 'WBA', 'ATVI', 'A', 'AMD']
-        cls.tickers = ['AAPL']
-        cls.api_key = api_key
-        cls.data =    ['online', 'local']
-        cls.period =  ['annual', 'quarter']
-        cls.limit = 120
-        cls.zipped_args_tdp = list(itertools.product(cls.tickers, cls.data, cls.period))
+# class TestCompany(unittest.TestCase):
+#     @classmethod
+#     def setUpClass(cls) -> None:
+#         # cls.tickers = ['AAPL', 'MSFT', 'NVDA','VAC', 'WBA', 'ATVI', 'A', 'AMD']
+#         cls.tickers = ['AAPL']
+#         cls.api_key = api_key
+#         cls.data =    ['online', 'local']
+#         cls.period =  ['annual', 'quarter']
+#         cls.limit = 120
+#         cls.zipped_args_tdp = list(itertools.product(cls.tickers, cls.data, cls.period))
 
     # def test_get_modifier(self):
     #     for ticker, data, period in self.zipped_args_tdp:
