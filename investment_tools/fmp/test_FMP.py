@@ -567,22 +567,50 @@ class TestCompany(unittest.TestCase):
     #             self.assertAlmostEqual(expected_[0], result[0], 4)
     #             self.assertAlmostEqual(expected_[1], result[1], 4)
 
-    def test_calculate_mean_growth_rate(self):
+    # def test_calculate_mean_growth_rate(self):
+    #     for ticker, data, period in self.zipped_args_tdp:
+    #         instance = Company(ticker, self.api_key, data, period, self.limit)
+    #         arrays = [np.array([1, 2, 3, 5, 7, 9]),
+    #                   np.array([1, 2, 3, 5, 8, 9]),
+    #                   np.array([2, 2, 3, 5, 8, 13])
+    #                  ]
+    #         expected = [0.6475489724420656,
+    #                     0.6924323200622291,
+    #                     1.0581116549533673
+    #                     ]      
+    #         for array, expected_ in zip(arrays, expected):
+    #             result = instance.calculate_mean_growth_rate(array)
+    #             self.assertAlmostEqual(expected_, result, 4)
+    #             self.assertAlmostEqual(expected_, result, 4)
+
+    def test_eval(self):
         for ticker, data, period in self.zipped_args_tdp:
             instance = Company(ticker, self.api_key, data, period, self.limit)
-            arrays = [np.array([1, 2, 3, 5, 7, 9]),
-                      np.array([1, 2, 3, 5, 8, 9]),
-                      np.array([2, 2, 3, 5, 8, 13])
-                     ]
-            expected = [0.6475489724420656,
-                        0.6924323200622291,
-                        1.0581116549533673
-                        ]      
-            for array, expected_ in zip(arrays, expected):
-                result = instance.calculate_mean_growth_rate(array)
-                self.assertAlmostEqual(expected_, result, 4)
-                self.assertAlmostEqual(expected_, result, 4)
+            scores = [
+                {'eps': {'score': 0, 'strength': 0},
+                 'returnOnEquity': {'score': 0, 'strength': 0},
+                 'ROIC': {'score': 0, 'strength': 0},
+                 'returnOnAssets': {'score': 0, 'strength': 0},
+                 'debtToTotalCap': {'score': 0, 'strength': 4},
+                 'totalDebtRatio': {'score': 0, 'strength': 4}},
+                 {'eps': {'score': 4, 'strength': 0},
+                 'returnOnEquity': {'score': np.nan, 'strength': 0},
+                 'ROIC': {'score': np.nan, 'strength': 0},
+                 'returnOnAssets': {'score': 4, 'strength': 0},
+                 'debtToTotalCap': {'score': 4, 'strength': 4},
+                 'totalDebtRatio': {'score': 4, 'strength': 4}},
+                 {'eps': {'score': np.nan, 'strength': 0},
+                 'returnOnEquity': {'score': np.nan, 'strength': 0},
+                 'ROIC': {'score': np.nan, 'strength': 0},
+                 'returnOnAssets': {'score': 0, 'strength': 0},
+                 'debtToTotalCap': {'score': 0, 'strength': 4},
+                 'totalDebtRatio': {'score': 0, 'strength': 4}}
+            ]
 
+            evals = [False, True, False]
+            for score, expected in zip(scores, evals):
+                result = instance.eval_(score)
+                self.assertEqual(result, expected)
 
 
 if __name__ == '__main__':

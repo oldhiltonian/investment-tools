@@ -1723,7 +1723,7 @@ class Company:
         else:
             return 4
 
-    def eval_(self, scores: Dict[str, dict]) -> bool:
+    def eval_(self, scores: Dict[str, dict], thresh: int=None) -> bool:
         """
         Determines if the company has favorable financial metrics based on the provided scores.
 
@@ -1734,11 +1734,17 @@ class Company:
         bool: True if the company has favorable financial metrics based on the provided scores, False otherwise.
         
         """
+        if not thresh:
+            thresh = 2*len(scores)
         vote = 0
         for key in scores.keys():
-            vote += scores[key]["score"]
+            score = scores[key]['score']
+            if math.isnan(score):
+                vote += 0
+            else:
+                vote += scores[key]["score"]
         # Require an average score of 1.5 for each metric
-        return False if vote < 1.5 * len(scores) else True
+        return False if vote < thresh else True
 
     def print_charts(self) -> None:
         """
