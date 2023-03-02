@@ -1207,6 +1207,20 @@ class Plots:
         axis.set_xticks(data["x_true"])
         axis.set_xticklabels(data["x_labels"])
         axis.set_ylabel(data["y_label"])
+        axis = self.scale_y_axis(axis, data['metric'])
+        return axis
+
+    def scale_y_axis(self, axis, data_str):
+        if data_str == 'PE_high':
+            y_bounds = [0, 40]
+        elif data_str == 'PE_low':
+            y_bounds = [0, 40]
+        elif data_str in ['dividendPayoutRatio', 'ebitdaratio', 'debtToTotalCap',
+                          'totalDebtRatio']:
+            y_bounds = [0, 1]
+        else:
+            return axis
+        axis.set_ylim(y_bounds)
         return axis
 
     def get_linear_coeffs(self, x, y):
