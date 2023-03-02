@@ -1584,8 +1584,8 @@ class Company:
             "totalDebtRatio": "totalDebtRatio_growth"
         }
         scores = dict()
-        for metric, growth in key_metrics.items():
-            score, strength = self.score(metric, growth)
+        for metric in key_metrics.keys():
+            score, strength = self.score(metric)
             scores[metric] = {"score": score, "strength": strength}
         return scores
 
@@ -1638,7 +1638,7 @@ class Company:
         slope, intercept, _, _, _ = linregress(range(len(df)), df)
         return slope, intercept
 
-    def score(self, metric: str, growth: str) -> Tuple[int, int]:
+    def score(self, metric: str) -> Tuple[int, int]:
         """
         Calculates the growth score and the trend stability score of the given financial metric.
         
@@ -1652,8 +1652,7 @@ class Company:
         """
         modifier = self.get_modifier(metric)
         metric_ = self.get_copy_of_df_column(metric)
-        growth_ = self.calculate_mean_growth_rate(metric_)
-        mean_growth = growth_.mean()
+        mean_growth = self.calculate_mean_growth_rate(metric_)
         r2 = self.get_r2_val(metric_)
         growth_score = self.score_mean_growth(modifier * mean_growth)
         stability_score = self.score_trend_strength(r2)
@@ -1665,7 +1664,6 @@ class Company:
         y = slope*x + intercept
         start, end = y[0], y[-1]
         mean_growth = ((end/start)**(1/len(x)) - 1)
-        print(mean_growth)
         return(mean_growth)
 
 
