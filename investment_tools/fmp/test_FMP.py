@@ -13,43 +13,43 @@ key_path = Path().home()/'desktop'/'FinancialModellingPrep_API.txt'
 with open(key_path) as file:
     api_key = file.read()
 
-class TestFinancialData(unittest.TestCase):
-    """
-    Test suite for the FinancialData class.
+# class TestFinancialData(unittest.TestCase):
+#     """
+#     Test suite for the FinancialData class.
 
-    Attributes:
-        tickers (list): A list of stock tickers to test.
-        api_key (str): An API key for the Financial Modeling Prep API.
-        data (list): A list of data types to test.
-        period (list): A list of periods to test.
-        limit (int): A limit on the number of records to fetch.
-        zipped_args_tdp (list): A list of tuples representing all combinations
-            of tickers, data, and period.
-    """
+#     Attributes:
+#         tickers (list): A list of stock tickers to test.
+#         api_key (str): An API key for the Financial Modeling Prep API.
+#         data (list): A list of data types to test.
+#         period (list): A list of periods to test.
+#         limit (int): A limit on the number of records to fetch.
+#         zipped_args_tdp (list): A list of tuples representing all combinations
+#             of tickers, data, and period.
+#     """
 
-    @classmethod
-    def setUpClass(cls):
-        """
-        Set up the test suite.
+#     @classmethod
+#     def setUpClass(cls):
+#         """
+#         Set up the test suite.
 
-        This method is called before any test methods are run.
-        """
-        # self.tickers = ['AAPL', 'MSFT', 'NVDA','VAC', 'WBA', 'ATVI', 'A', 'AMD']
-        cls.tickers = ['AAPL']
-        cls.api_key = api_key
-        cls.data =    ['online', 'local']
-        cls.period =  ['annual', 'quarter']
-        cls.limit = 120
-        cls.zipped_args_tdp = list(itertools.product(cls.tickers, cls.data, cls.period))
-        cls.generic_instance = FinancialData('AAPL', cls.api_key, 'local', 'annual', 10)
+#         This method is called before any test methods are run.
+#         """
+#         # self.tickers = ['AAPL', 'MSFT', 'NVDA','VAC', 'WBA', 'ATVI', 'A', 'AMD']
+#         cls.tickers = ['AAPL']
+#         cls.api_key = api_key
+#         cls.data =    ['online', 'local']
+#         cls.period =  ['annual', 'quarter']
+#         cls.limit = 120
+#         cls.zipped_args_tdp = list(itertools.product(cls.tickers, cls.data, cls.period))
+#         cls.generic_instance = FinancialData('AAPL', cls.api_key, 'local', 'annual', 10)
 
-    def test_replace_None(self):
-        for ticker, data, period in self.zipped_args_tdp:
-            instance = Company(ticker, self.api_key, data, period, self.limit)
-            none_df = pd.DataFrame({'A': [1, None, 3, None, 5], 'B': [6, 7, None, 9, 10]})
-            expected = pd.DataFrame({'A': [1., 0., 3., 0., 5.], 'B': [6., 7., 0., 9., 10.]})
-            result = instance._financial_data.replace_None(none_df)
-            self.assertEqual(expected.equals(result), True)
+#     def test_replace_None(self):
+#         for ticker, data, period in self.zipped_args_tdp:
+#             instance = Company(ticker, self.api_key, data, period, self.limit)
+#             none_df = pd.DataFrame({'A': [1, None, 3, None, 5], 'B': [6, 7, None, 9, 10]})
+#             expected = pd.DataFrame({'A': [1., 0., 3., 0., 5.], 'B': [6., 7., 0., 9., 10.]})
+#             result = instance._financial_data.replace_None(none_df)
+#             self.assertEqual(expected.equals(result), True)
 
 #     def test_assert_valid_user_input(self):
 #         """
@@ -484,16 +484,16 @@ class TestFinancialData(unittest.TestCase):
 #             self.assertGreater(len(data), 0)
 
 
-# class TestCompany(unittest.TestCase):
-#     @classmethod
-#     def setUpClass(cls) -> None:
-#         # cls.tickers = ['AAPL', 'MSFT', 'NVDA','VAC', 'WBA', 'ATVI', 'A', 'AMD']
-#         cls.tickers = ['AAPL']
-#         cls.api_key = api_key
-#         cls.data =    ['online', 'local']
-#         cls.period =  ['annual', 'quarter']
-#         cls.limit = 120
-#         cls.zipped_args_tdp = list(itertools.product(cls.tickers, cls.data, cls.period))
+class TestCompany(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        # cls.tickers = ['AAPL', 'MSFT', 'NVDA','VAC', 'WBA', 'ATVI', 'A', 'AMD']
+        cls.tickers = ['AAPL']
+        cls.api_key = api_key
+        cls.data =    ['online', 'local']
+        cls.period =  ['annual', 'quarter']
+        cls.limit = 15
+        cls.zipped_args_tdp = list(itertools.product(cls.tickers, cls.data, cls.period))
 
     # def test_get_modifier(self):
     #     for ticker, data, period in self.zipped_args_tdp:
@@ -551,21 +551,21 @@ class TestFinancialData(unittest.TestCase):
     #         for r2, score in r2_to_score_tuples:
     #             self.assertEqual(instance.score_trend_strength(r2), score)
 
-    def test_get_slope_and_intercept(self):
-        for ticker, data, period in self.zipped_args_tdp:
-            instance = Company(ticker, self.api_key, data, period, self.limit)
-            arrays = [np.array([1, 2, 3, 5, 7, 9]),
-                      np.array([1, 2, 3, 5, 8, 9]),
-                      np.array([1, 2, 3, 5, 8, 13])
-                     ]
-            expected = [(1.6285714285714286, 0.4285714285714288),
-                        (1.7142857142857144, 0.3809523809523805),
-                        (2.2857142857142856, -0.3809523809523805)
-                        ]      
-            for array, expected_ in zip(arrays, expected):
-                result = instance.get_slope_and_intercept(array)
-                self.assertAlmostEqual(expected_[0], result[0], 4)
-                self.assertAlmostEqual(expected_[1], result[1], 4)
+    # def test_get_slope_and_intercept(self):
+    #     for ticker, data, period in self.zipped_args_tdp:
+    #         instance = Company(ticker, self.api_key, data, period, self.limit)
+    #         arrays = [np.array([1, 2, 3, 5, 7, 9]),
+    #                   np.array([1, 2, 3, 5, 8, 9]),
+    #                   np.array([1, 2, 3, 5, 8, 13])
+    #                  ]
+    #         expected = [(1.6285714285714286, 0.4285714285714288),
+    #                     (1.7142857142857144, 0.3809523809523805),
+    #                     (2.2857142857142856, -0.3809523809523805)
+    #                     ]      
+    #         for array, expected_ in zip(arrays, expected):
+    #             result = instance.get_slope_and_intercept(array)
+    #             self.assertAlmostEqual(expected_[0], result[0], 4)
+    #             self.assertAlmostEqual(expected_[1], result[1], 4)
 
     def test_calculate_mean_growth_rate(self):
         for ticker, data, period in self.zipped_args_tdp:

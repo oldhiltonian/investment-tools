@@ -1685,7 +1685,9 @@ class Company:
             int: The score for the mean growth of the metric based on the above ranges.
         """
         growth = float(mean_growth)
-        if growth <= 0.05 or math.isnan(growth):
+        if math.isnan(growth):
+            return np.nan
+        elif growth <= 0.05:
             return 0
         elif growth <= 0.10:
             return 1
@@ -1708,7 +1710,9 @@ class Company:
 
         """
         r2_ = float(r2)
-        if r2_ <= 0.2 or math.isnan(r2):
+        if math.isnan(r2):
+            return np.nan
+        elif r2_ <= 0.2:
             return 0
         elif r2_ <= 0.3:
             return 1
