@@ -1650,7 +1650,7 @@ class Company:
 
     def get_slope_and_intercept(self, df: pd.DataFrame) -> Tuple[float, float]:
         slope, intercept, _, _, _ = linregress(range(len(df)), df)
-        return slope, intercept
+        return round(slope,4), round(intercept,4)
 
     def score(self, metric: str) -> Tuple[int, int]:
         """
