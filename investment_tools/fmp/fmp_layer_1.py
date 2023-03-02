@@ -1653,6 +1653,7 @@ class Company:
         modifier = self.get_modifier(metric)
         metric_ = self.get_copy_of_df_column(metric)
         mean_growth = self.calculate_mean_growth_rate(metric_)
+        print(mean_growth)
         r2 = self.get_r2_val(metric_)
         growth_score = self.score_mean_growth(modifier * mean_growth)
         stability_score = self.score_trend_strength(r2)

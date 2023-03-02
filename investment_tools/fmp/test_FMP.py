@@ -543,14 +543,45 @@ class TestFinancialData(unittest.TestCase):
     #         for mean, score in mean_growth_score_tuple:
     #             self.assertEqual(instance.score_mean_growth(mean), score)
 
-    def test_score_trend_groth(self):
-        r2_to_score_tuples = [(0.01, 0), (0.2, 0), (0.2001, 1), (0.3, 1), (0.3001, 2),
-                              (0.5, 2), (0.5001, 3), (0.75, 3), (0.751, 4)]
+    # def test_score_trend_groth(self):
+    #     r2_to_score_tuples = [(0.01, 0), (0.2, 0), (0.2001, 1), (0.3, 1), (0.3001, 2),
+    #                           (0.5, 2), (0.5001, 3), (0.75, 3), (0.751, 4)]
+    #     for ticker, data, period in self.zipped_args_tdp:
+    #         instance = Company(ticker, self.api_key, data, period, self.limit)
+    #         for r2, score in r2_to_score_tuples:
+    #             self.assertEqual(instance.score_trend_strength(r2), score)
+
+    def test_get_slope_and_intercept(self):
         for ticker, data, period in self.zipped_args_tdp:
             instance = Company(ticker, self.api_key, data, period, self.limit)
-            for r2, score in r2_to_score_tuples:
-                self.assertEqual(instance.score_trend_strength(r2), score)
+            arrays = [np.array([1, 2, 3, 5, 7, 9]),
+                      np.array([1, 2, 3, 5, 8, 9]),
+                      np.array([1, 2, 3, 5, 8, 13])
+                     ]
+            expected = [(1.6285714285714286, 0.4285714285714288),
+                        (1.7142857142857144, 0.3809523809523805),
+                        (2.2857142857142856, -0.3809523809523805)
+                        ]      
+            for array, expected_ in zip(arrays, expected):
+                result = instance.get_slope_and_intercept(array)
+                self.assertAlmostEqual(expected_[0], result[0], 4)
+                self.assertAlmostEqual(expected_[1], result[1], 4)
 
+    def test_calculate_mean_growth_rate(self):
+        for ticker, data, period in self.zipped_args_tdp:
+            instance = Company(ticker, self.api_key, data, period, self.limit)
+            arrays = [np.array([1, 2, 3, 5, 7, 9]),
+                      np.array([1, 2, 3, 5, 8, 9]),
+                      np.array([2, 2, 3, 5, 8, 13])
+                     ]
+            expected = [0.6475489724420656,
+                        0.6924323200622291,
+                        1.0581116549533673
+                        ]      
+            for array, expected_ in zip(arrays, expected):
+                result = instance.calculate_mean_growth_rate(array)
+                self.assertAlmostEqual(expected_, result, 4)
+                self.assertAlmostEqual(expected_, result, 4)
 
 
 
