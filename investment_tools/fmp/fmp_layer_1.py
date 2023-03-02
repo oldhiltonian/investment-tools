@@ -1634,6 +1634,10 @@ class Company:
         except ValueError:
             return 0.0
 
+    def get_slope_and_intercept(self, df: pd.DataFrame) -> Tuple[float, float]:
+        slope, intercept, _, _, _ = linregress(range(len(df)), df)
+        return slope, intercept
+
     def score(self, metric: str, growth: str) -> Tuple[int, int]:
         """
         Calculates the growth score and the trend stability score of the given financial metric.
@@ -1648,12 +1652,22 @@ class Company:
         """
         modifier = self.get_modifier(metric)
         metric_ = self.get_copy_of_df_column(metric)
-        growth_ = self.get_copy_of_df_column(growth)
+        growth_ = self.calculate_mean_growth_rate(metric_)
         mean_growth = growth_.mean()
         r2 = self.get_r2_val(metric_)
         growth_score = self.score_mean_growth(modifier * mean_growth)
         stability_score = self.score_trend_strength(r2)
         return (growth_score, stability_score)
+
+    def calculate_mean_growth_rate(self, df: pd.DataFrame) -> float:
+        slope, intercept = self.get_slope_and_intercept(df)
+        x = range(len(df))
+        y = slope*x + intercept
+        start, end = y[0], y[-1]
+        mean_growth = ((end/start)**(1/len(x)) - 1)
+        print(mean_growth)
+        return(mean_growth)
+
 
     def score_mean_growth(self, mean_growth: float) -> int:
         """
