@@ -1206,7 +1206,7 @@ class Plots:
         axis.set_title(data["metric"])
         axis.set_xticks(data["x_true"])
         axis.set_xticklabels(data["x_labels"])
-        axis.set_ylabel(["y_label"])
+        axis.set_ylabel(data["y_label"])
         return axis
 
     def get_linear_coeffs(self, x, y):
@@ -1298,7 +1298,7 @@ class Plots:
                 plotting_data = {
                     "metric": metric,
                     "y": y,
-                    "l_label": y_label,
+                    "y_label": y_label,
                     "x_true": x_true,
                     "x_dummy": x_dummy,
                     "x_labels": x_labels,
