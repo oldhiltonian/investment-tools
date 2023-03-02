@@ -409,9 +409,9 @@ class FinancialData:
             item (pandas.DataFrame): The item to check the length of.
         """
         if self.period == "annual":
-            required_length = 2
+            required_length = 3
         else:
-            required_length = 4
+            required_length = 10
         err_msg = f"Financial statements are shorter than the required length of {required_length}"
         assert len(item) >= required_length, err_msg
 
@@ -1743,7 +1743,6 @@ class Company:
                 vote += 0
             else:
                 vote += scores[key]["score"]
-        # Require an average score of 1.5 for each metric
         return False if vote < thresh else True
 
     def print_charts(self) -> None:
