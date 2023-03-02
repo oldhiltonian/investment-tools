@@ -1678,6 +1678,8 @@ class Company:
         x = range(len(df))
         y = slope*x + intercept
         start, end = y[0], y[-1]
+        if end <= start:
+            return 0
         mean_growth = ((end/start)**(1/len(x)) - 1)
         return(mean_growth)
 
