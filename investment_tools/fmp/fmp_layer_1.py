@@ -1575,11 +1575,19 @@ class Company:
             self.print_charts()
             # self._plots = Plots(self.ticker, self.period, self.metrics, limit, self.filing_dates)
             # self.trends = self._plots.plots
+        self._scoring_metrics = self.get_scoring_metrics()
         self.scores = self.recommendation()
         self.outcome = self.eval_(self.scores)
         if self.outcome:
             self.print_charts()
             self.export()
+
+    def get_scoring_metrics(self):
+        scoring_metrics = [
+            "eps", "returnOnEquity", "ROIC", "returnOnAssets",
+            "debtToTotalCap","totalDebtRatio"
+        ]
+        return scoring_metrics
 
     def recommendation(self) -> Dict[str, dict]:
         """
@@ -1589,16 +1597,8 @@ class Company:
         scores (Dict[str, dict]): A dictionary containing the scores and strengths for each 
         financial metric considered.
         """
-        key_metrics = {
-            "eps": "eps_growth",
-            "returnOnEquity": "returnOnEquity_growth",
-            "ROIC": "ROIC_growth",
-            "returnOnAssets": "returnOnAssets_growth",
-            "debtToTotalCap": "debtToTotalCap_growth",
-            "totalDebtRatio": "totalDebtRatio_growth"
-        }
         scores = dict()
-        for metric in key_metrics.keys():
+        for metric in self._scoring_metrics:
             score, strength = self.score(metric)
             scores[metric] = {"score": score, "strength": strength}
         return scores
