@@ -1742,7 +1742,9 @@ class Company:
                 total_score += scores_dict[key]["score"]
         return total_score
 
-
+    def total_score_to_bool(self, total_score: int, threshold: int=None):
+        threshold = threshold if threshold else 2*len(self._scoring_metrics)
+        return True if total_score >= threshold else False
 
     def eval_(self, scores: Dict[str, dict], thresh: int=None) -> bool:
         """
