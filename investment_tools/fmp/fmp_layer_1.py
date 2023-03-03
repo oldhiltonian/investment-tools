@@ -1577,7 +1577,7 @@ class Company:
             # self.trends = self._plots.plots
         self._scoring_metrics = self.get_scoring_metrics()
         self.scores_dict = self.create_scoring_metrics_results_dict(self._scoring_metrics)
-        self.outcome = self.eval_(self.scores_dict)
+        self.outcome = self.eval_()
         if self.outcome:
             self.print_charts()
             self.export()
@@ -1746,7 +1746,7 @@ class Company:
         threshold = threshold if threshold else 2*len(self._scoring_metrics)
         return True if total_score >= threshold else False
 
-    def eval_(self, scores: Dict[str, dict], thresh: int=None) -> bool:
+    def eval_(self) -> bool:
         """
         Determines if the company has favorable financial metrics based on the provided scores.
 
@@ -1757,8 +1757,6 @@ class Company:
         bool: True if the company has favorable financial metrics based on the provided scores, False otherwise.
         
         """
-        if not thresh:
-            thresh = 2*len(scores)
         total_score = self.sum_of_scoring_metric_dict_scores(self.scores_dict)
         bool_result = self.total_score_to_bool(total_score)
         return bool_result
