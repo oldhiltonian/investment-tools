@@ -1576,7 +1576,7 @@ class Company:
             # self._plots = Plots(self.ticker, self.period, self.metrics, limit, self.filing_dates)
             # self.trends = self._plots.plots
         self._scoring_metrics = self.get_scoring_metrics()
-        self.scores = self.recommendation()
+        self.scores = self.create_scoring_metrics_results_dict()
         self.outcome = self.eval_(self.scores)
         if self.outcome:
             self.print_charts()
@@ -1589,7 +1589,7 @@ class Company:
         ]
         return scoring_metrics
 
-    def recommendation(self) -> Dict[str, dict]:
+    def create_scoring_metrics_results_dict(self) -> Dict[str, dict]:
         """
         Compute a recommendation for the company based on key financial metrics.
 
