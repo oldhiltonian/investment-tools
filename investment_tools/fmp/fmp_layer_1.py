@@ -13,7 +13,7 @@ import pandas as pd
 from pathlib import Path
 import os
 import time
-from typing import Dict, Tuple
+from typing import Dict, Tuple, List
 import pyarrow as pa
 import math
 
@@ -1576,7 +1576,7 @@ class Company:
             # self._plots = Plots(self.ticker, self.period, self.metrics, limit, self.filing_dates)
             # self.trends = self._plots.plots
         self._scoring_metrics = self.get_scoring_metrics()
-        self.scores_dict = self.create_scoring_metrics_results_dict()
+        self.scores_dict = self.create_scoring_metrics_results_dict(self._scoring_metrics)
         self.outcome = self.eval_(self.scores_dict)
         if self.outcome:
             self.print_charts()
@@ -1589,16 +1589,9 @@ class Company:
         ]
         return scoring_metrics
 
-    def create_scoring_metrics_results_dict(self) -> Dict[str, dict]:
-        """
-        Compute a recommendation for the company based on key financial metrics.
-
-        Returns:
-        scores (Dict[str, dict]): A dictionary containing the scores and strengths for each 
-        financial metric considered.
-        """
+    def create_scoring_metrics_results_dict(self, scoring_metrics: List) -> Dict[str, dict]:
         scores = dict()
-        for metric in self._scoring_metrics:
+        for metric in scoring_metrics:
             score, strength = self.score_single_metric(metric)
             scores[metric] = {"score": score, "strength": strength}
         return scores
@@ -1748,6 +1741,8 @@ class Company:
             else:
                 total_score += scores_dict[key]["score"]
         return total_score
+
+
 
     def eval_(self, scores: Dict[str, dict], thresh: int=None) -> bool:
         """
