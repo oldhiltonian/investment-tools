@@ -1599,7 +1599,7 @@ class Company:
         """
         scores = dict()
         for metric in self._scoring_metrics:
-            score, strength = self.score(metric)
+            score, strength = self.score_single_metric(metric)
             scores[metric] = {"score": score, "strength": strength}
         return scores
 
@@ -1652,7 +1652,7 @@ class Company:
         slope, intercept, _, _, _ = linregress(range(len(df)), df)
         return round(slope,4), round(intercept,4)
 
-    def score(self, metric: str) -> Tuple[int, int]:
+    def score_single_metric(self, metric: str) -> Tuple[int, int]:
         """
         Calculates the growth score and the trend stability score of the given financial metric.
         
