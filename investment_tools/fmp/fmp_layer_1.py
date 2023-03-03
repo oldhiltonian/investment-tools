@@ -1760,7 +1760,8 @@ class Company:
         if not thresh:
             thresh = 2*len(scores)
         total_score = self.sum_of_scoring_metric_dict_scores(self.scores_dict)
-        return False if total_score < thresh else True
+        bool_result = self.total_score_to_bool(total_score)
+        return bool_result
 
     def print_charts(self) -> None:
         """
