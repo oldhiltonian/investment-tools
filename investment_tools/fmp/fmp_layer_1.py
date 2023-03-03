@@ -1576,8 +1576,8 @@ class Company:
             # self._plots = Plots(self.ticker, self.period, self.metrics, limit, self.filing_dates)
             # self.trends = self._plots.plots
         self._scoring_metrics = self.get_scoring_metrics()
-        self.scores = self.create_scoring_metrics_results_dict()
-        self.outcome = self.eval_(self.scores)
+        self.scores_dict = self.create_scoring_metrics_results_dict()
+        self.outcome = self.eval_(self.scores_dict)
         if self.outcome:
             self.print_charts()
             self.export()
@@ -1739,6 +1739,16 @@ class Company:
         else:
             return 4
 
+    def sum_of_scoring_metric_dict_scores(self, scores_dict: Dict[str, dict]):
+        total_score = 0
+        for key in scores_dict.keys():
+            score = scores_dict[key]['score']
+            if math.isnan(score):
+                total_score += 0
+            else:
+                total_score += scores_dict[key]["score"]
+        return total_score
+
     def eval_(self, scores: Dict[str, dict], thresh: int=None) -> bool:
         """
         Determines if the company has favorable financial metrics based on the provided scores.
@@ -1752,14 +1762,8 @@ class Company:
         """
         if not thresh:
             thresh = 2*len(scores)
-        vote = 0
-        for key in scores.keys():
-            score = scores[key]['score']
-            if math.isnan(score):
-                vote += 0
-            else:
-                vote += scores[key]["score"]
-        return False if vote < thresh else True
+        total_score = self.sum_of_scoring_metric_dict_scores(self.scores_dict)
+        return False if total_score < thresh else True
 
     def print_charts(self) -> None:
         """
