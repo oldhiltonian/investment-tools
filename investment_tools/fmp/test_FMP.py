@@ -594,6 +594,9 @@ class TestCompany(unittest.TestCase):
     def test_sum_of_scoring_metric_dict_scores(self):
         pass
 
+    def test_total_score_to_bool(self):
+        pass
+
     # def test_eval(self):
     #     '''Needs to be changed as the fucntion has also changed'''
     #     for ticker, data, period in self.zipped_args_tdp:
