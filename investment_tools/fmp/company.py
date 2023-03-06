@@ -164,7 +164,7 @@ class Company:
         self._charts_printed = False
         if self.verbose:
             self.print_charts()
-        self.eval = Evaluation(ticker, api_key, self.metrics)
+        self.eval = Evaluation(ticker, api_key, self.metrics, self._financial_data)
         self.standard_outcome = self.eval.standard_outcome
         if self.standard_outcome:
             self.print_charts()

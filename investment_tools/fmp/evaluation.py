@@ -25,10 +25,12 @@ import json
 yf.pdr_override()
 
 class Evaluation:
-    def __init__(self, ticker: str, api_key: str, metrics: pd.Series) -> None:
+    def __init__(self, ticker: str, api_key: str, metrics: pd.Series,
+                 financial_data: pd.DataFrame) -> None:
         self.ticker = ticker
         self.api_key = api_key
         self.metrics = metrics
+        self._financial_data = financial_data
         self._scoring_metrics = self.get_scoring_metrics()
         self.standard_scores_dict = \
             self.create_scoring_metrics_results_dict(self._scoring_metrics)
@@ -249,7 +251,7 @@ class Evaluation:
         print(growth_rate_10_years)
         
 
-        # determine the value of the compnay relative to government bonds
+        # 3. determine the value of the compnay relative to government bonds
             # maybe get from fmp-economics-treasury rates
 
         treasury_yield_5Y = self.get_5Y_treasury_yield_data(
@@ -266,8 +268,58 @@ class Evaluation:
                                                              1.1)
         
         print(bool_better_than_treasury)
+
+        # 4. Determine projected annual compounding rate of return Part 1
+            # project the per-share equity value for 5-10 years
+            # multiply that by the projected per-share future RoE
+            # this gives future predicted eps
+            # then calculate the compounding rate of return
         
+        equity_per_share = self.metrics['shareholderEquityPerShare']
+        current_equity_per_share = equity_per_share.iloc[-1]
+        average_roe_7y = self.calculate_mean_growth_rate(equity_per_share, 7)
+        future_equity_per_share = self.project_future_value(current_equity_per_share,
+                                                            average_roe_7y,
+                                                            7)
+        discounted_15pct_present_value = self.simple_discount_to_present(future_equity_per_share, 7)
+        print('current equity/share', current_equity_per_share)
+        print('average roe 7Y', average_roe_7y)
+        print('future equity per share', future_equity_per_share)
+        print('future equity discounted at 15%', discounted_15pct_present_value)
+        
+        # 5. Determine future per share earnings and per share stock price
+        average_payout_ratio_7Y = self.metrics['dividendPayoutRatio'].iloc[-7:].mean()
+        average_roe_7Y = self.metrics['returnOnEquity'].iloc[-7:].mean()
+        retained_equity_pct = average_roe_7Y*(1-average_payout_ratio_7Y)
+        future_equity_per_share2 = self.project_future_value(current_equity_per_share,
+                                                            retained_equity_pct,
+                                                            7)
+        print('average payout ratio 7Y', average_payout_ratio_7Y)
+        print('average roe 7y', average_roe_7Y)
+        print('retained equity pct', retained_equity_pct)
+        print('future equity per share incl payouts', future_equity_per_share2)
+        future_eps = average_roe_7Y*future_equity_per_share2
+        average_PE_low = self.metrics['PE_low'].iloc[-7:].mean()
+        average_PE_high = self.metrics['PE_high'].iloc[-7:].mean()
+
+        print('future eps', future_eps)
+        print('average PE low', average_PE_low)
+        print('average PE high', average_PE_high)                    
+        
+
+
+
+
         pass
+
+
+    def project_future_value(self, current_value: float, rate: float, years: int) -> float:
+        return current_value * (1+rate)**years
+    
+    def simple_discount_to_present(self, future, years, rate=0.15):
+        return future/((1+rate)**years)
+        
+
 
     def get_x_day_mean_stock_price(self, days: int=30) -> float:
         start_date = dt.datetime.now() - dt.timedelta(int(days))

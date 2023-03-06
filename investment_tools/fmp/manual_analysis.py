@@ -193,6 +193,7 @@ class ManualAnalysis:
 
         All ratios are calculated using financial data from the associated FinancialData object.
         """
+        total_shares = self.data.income_statements['outstandingShares_calc']
         revenue = self.data.income_statements["revenue"].copy()
         total_assets = self.data.balance_sheets["totalAssets"].copy()
         gross_profit = self.data.income_statements["grossProfit"].copy()
@@ -213,6 +214,7 @@ class ManualAnalysis:
         df["ROIC"] = net_income / total_capitalization
         df["returnOnEquity"] = net_income / total_shareholder_equity
         df["returnOnAssets"] = net_income / total_assets
+        df['shareholderEquityPerShare'] = total_shareholder_equity/total_shares
         return df
 
     def concat_debt_interest_ratios(self, df: pd.DataFrame):
