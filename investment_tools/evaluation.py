@@ -51,12 +51,12 @@ class Evaluation:
             scores[metric] = {"score": score, "strength": strength}
         return scores
 
-    def create_scoring_metrics_results_dict(self, scoring_metrics: List) -> Dict[str, dict]:
-        scores = dict()
-        for metric in scoring_metrics:
-            score, strength = self.score_single_metric(metric)
-            scores[metric] = {"score": score, "strength": strength}
-        return scores
+    # def create_scoring_metrics_results_dict(self, scoring_metrics: List) -> Dict[str, dict]:
+    #     scores = dict()
+    #     for metric in scoring_metrics:
+    #         score, strength = self.score_single_metric(metric)
+    #         scores[metric] = {"score": score, "strength": strength}
+    #     return scores
         
     def score_single_metric(self, metric: str) -> Tuple[int, int]:
             """
