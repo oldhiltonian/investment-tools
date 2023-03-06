@@ -240,7 +240,7 @@ class FinancialData:
             err_msg = f"{data_type} is not a valid API call"
             raise ValueError(err_msg)
         return (
-            Path.cwd().parent
+            Path.cwd()
             / "data"
             / "Company_Financial_Data"
             / ticker
