@@ -19,12 +19,15 @@ import math
 from .financial_data import FinancialData
 from .plots import Plots
 from .manual_analysis import ManualAnalysis
+from urllib.request import urlopen
+import json
 
 yf.pdr_override()
 
 class Evaluation:
-    def __init__(self, ticker: str, metrics: pd.Series) -> None:
+    def __init__(self, ticker: str, api_key: str, metrics: pd.Series) -> None:
         self.ticker = ticker
+        self.api_key = api_key
         self.metrics = metrics
         self._scoring_metrics = self.get_scoring_metrics()
         self.standard_scores_dict = \
@@ -248,6 +251,21 @@ class Evaluation:
 
         # determine the value of the compnay relative to government bonds
             # maybe get from fmp-economics-treasury rates
+
+        treasury_yield_5Y = self.get_5Y_treasury_yield_data(
+                                        self.get_treasury_yield_api_url())
+        print(treasury_yield_5Y)
+
+        breakeven_price_vs_5Y_treasury = self.calculate_breakeven_vs_treasury(
+                                                eps.iloc[-1],
+                                                treasury_yield_5Y
+                                                )
+
+        bool_better_than_treasury = self.treasury_comparison(current_stock_price,
+                                                             breakeven_price_vs_5Y_treasury,
+                                                             1.1)
+        
+        print(bool_better_than_treasury)
         
         pass
 
@@ -259,3 +277,36 @@ class Evaluation:
     def calculate_initial_rate_of_return(self, price: float) -> float:
         latest_eps = self.metrics['eps'][-1]
         return latest_eps/price
+    
+    def get_treasury_yield_api_url(self):
+        fmp_template = "https://financialmodelingprep.com/api/v4/treasury?from={}&to={}&apikey={}"
+        from_ = str(dt.date.today() - dt.timedelta(180))
+        to = str(dt.date.today())
+        return fmp_template.format(from_, to, self.api_key)
+    
+    def get_5Y_treasury_yield_data(self, url):
+        """
+        Receive the content of ``url``, parse it as JSON and return the object.
+
+        Parameters
+        ----------
+        url : str
+
+        Returns
+        -------
+        dict
+        """
+        response = urlopen(url)
+        data = response.read().decode("utf-8")
+        return (json.loads(data)[0]['year5'])/100
+    
+    def calculate_breakeven_vs_treasury(self, eps, treasury_tield):
+        print('breakeven price', eps/treasury_tield)
+        return eps/treasury_tield
+
+    def treasury_comparison(self, stock_price, breakeven_price, margin):
+        # breakeven price neglects the fact that bonds are pre-tax and eps is post-tax
+        # and it also excludes the growth rate of the stock
+        return True if stock_price <= margin*breakeven_price else False #1.1 for close calls
+
+
