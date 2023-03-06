@@ -164,11 +164,8 @@ class Company:
         self._charts_printed = False
         if self.verbose:
             self.print_charts()
-        # self._scoring_metrics = self.get_scoring_metrics()
-        # self.scores_dict = self.create_scoring_metrics_results_dict(self._scoring_metrics)
-        # self.outcome = self.eval_()
-        self.standard_eval = Evaluation(self.metrics)
-        self.standard_outcome = self.standard_eval.outcome
+        self.eval = Evaluation(ticker, self.metrics)
+        self.standard_outcome = self.eval.standard_outcome
         if self.standard_outcome:
             self.print_charts()
             self.export()

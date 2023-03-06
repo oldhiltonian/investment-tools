@@ -23,11 +23,14 @@ from .manual_analysis import ManualAnalysis
 yf.pdr_override()
 
 class Evaluation:
-    def __init__(self, metrics):
+    def __init__(self, ticker: str, metrics: pd.Series) -> None:
+        self.ticker = ticker
         self.metrics = metrics
         self._scoring_metrics = self.get_scoring_metrics()
-        self.scores_dict = self.create_scoring_metrics_results_dict(self._scoring_metrics)
-        self.outcome = self.eval_()
+        self.standard_scores_dict = \
+            self.create_scoring_metrics_results_dict(self._scoring_metrics)
+        self.standard_outcome = self.standard_eval()
+        self.buffet_outcome = self.buffet_eval()
     
     def get_scoring_metrics(self):
         scoring_metrics = [
@@ -117,14 +120,15 @@ class Evaluation:
         """
         return self.metrics[header].copy().dropna()
     
-    def calculate_mean_growth_rate(self, df: pd.DataFrame) -> float:
-        slope, intercept = self.get_slope_and_intercept(df)
-        x = range(len(df))
+    def calculate_mean_growth_rate(self, df: pd.DataFrame, span: int=None) -> float:
+        df_ = df.iloc[-int(span)-1:] if span else df
+        slope, intercept = self.get_slope_and_intercept(df_)
+        x = range(len(df_))
         y = slope*x + intercept
         start, end = y[0], y[-1]
         if end <= start:
             return 0
-        mean_growth = ((end/start)**(1/len(x)) - 1)
+        mean_growth = ((end/start)**(1/(len(x)-1)) - 1)
         return(mean_growth)
     
     def get_slope_and_intercept(self, df: pd.DataFrame) -> Tuple[float, float]:
@@ -200,7 +204,7 @@ class Evaluation:
         threshold = threshold if threshold else 2*len(self._scoring_metrics)
         return True if total_score >= threshold else False
 
-    def eval_(self) -> bool:
+    def standard_eval(self) -> bool:
         """
         Determines if the company has favorable financial metrics based on the provided scores.
 
@@ -211,6 +215,47 @@ class Evaluation:
         bool: True if the company has favorable financial metrics based on the provided scores, False otherwise.
         
         """
-        total_score = self.sum_of_scoring_metric_dict_scores(self.scores_dict)
+        total_score = self.sum_of_scoring_metric_dict_scores(self.standard_scores_dict)
         bool_result = self.total_score_to_bool(total_score)
         return bool_result
+    
+    def buffet_eval(self) -> bool:
+        print('Entering Evaluation.buffet_eval()')
+        # 1. is eps increasing reliably?
+        eps_growth_score = self.standard_scores_dict['eps']['score']
+
+        # 2. determine the initial rate of return as the current price over known eps
+                # higher price == lower initial rate of return
+        current_stock_price = self.get_x_day_mean_stock_price(10)
+        initial_fractional_return = self.calculate_initial_rate_of_return(
+                                        current_stock_price)
+        print('initial rate of return', initial_fractional_return)
+
+        # 3. determine the per share growth rate over 5, 7 and 10 years
+                # compounding from present - probably use the linregress instead
+                #   of the actual values. 
+        eps = self.metrics['eps']
+        growth_rate_3_years = self.calculate_mean_growth_rate(eps, 3)
+        growth_rate_5_years = self.calculate_mean_growth_rate(eps, 5)
+        growth_rate_7_years = self.calculate_mean_growth_rate(eps, 7)
+        growth_rate_10_years = self.calculate_mean_growth_rate(eps, 10)
+        print('growth_rates for 3, 5, 7, 10 years')
+        print(growth_rate_3_years)
+        print(growth_rate_5_years)
+        print(growth_rate_7_years)
+        print(growth_rate_10_years)
+        
+
+        # determine the value of the compnay relative to government bonds
+            # maybe get from fmp-economics-treasury rates
+        
+        pass
+
+    def get_x_day_mean_stock_price(self, days: int=30) -> float:
+        start_date = dt.datetime.now() - dt.timedelta(int(days))
+        price = pdr.get_data_yahoo(self.ticker, start=start_date)['Close'].mean()
+        return price
+    
+    def calculate_initial_rate_of_return(self, price: float) -> float:
+        latest_eps = self.metrics['eps'][-1]
+        return latest_eps/price
