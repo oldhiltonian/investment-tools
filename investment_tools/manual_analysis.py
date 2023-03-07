@@ -178,6 +178,7 @@ class ManualAnalysis:
             - Return on invested capital (ROIC)
             - Return on equity (ROE)
             - Return on Assets (ROA)
+            - shareholderEquityPerShare
 
         All ratios are calculated using financial data from the associated FinancialData object.
         """

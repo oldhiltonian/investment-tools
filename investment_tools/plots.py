@@ -96,7 +96,22 @@ class Plots:
         self.metrics = metrics
         self.filing_dates = filing_dates
         self.limit = self.set_limit(limit)
-        self.metric_units_dict = {
+        self.metric_units_dict = self.get_metric_units_dict()
+        self.plots = []
+        self.plot_metrics()
+
+    @staticmethod
+    def get_metric_units_dict() -> Dict:
+        '''
+        Returns the dictionary that maps the financial metric with its corresponding unit.
+
+        Args:
+            None
+
+        Returns: 
+            Dict: the mapping dictionary.
+        '''
+        metric_units_dict = {
             "Stock Evaluation Ratios": {
                 "eps": "$/share",
                 "eps_diluted": "$/share",
@@ -138,8 +153,7 @@ class Plots:
             },
         }
 
-        self.plots = []
-        self.plot_metrics()
+        return metric_units_dict
 
     def set_limit(self, limit: int) -> int:
         """
@@ -267,6 +281,17 @@ class Plots:
         return axis
 
     def scale_y_axis(self, axis: plt.axis, data_str: str) -> plt.axis:
+        '''
+        Scales the y-axis of a given axis object based on the value of the 
+        data_str parameter. 
+
+        Args:
+            axis (plt.axis): The axis to modify.
+            data_str (str): A string indicating which type of data is plotted on the y-axis.
+
+        Returns:
+            plt.axis: The modified axis object, with the y-axis limits set according to the data_str parameter.
+        '''
         if data_str == 'PE_high':
             y_bounds = [0, 40]
         elif data_str == 'PE_low':
