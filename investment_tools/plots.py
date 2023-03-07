@@ -1,21 +1,16 @@
 import datetime as dt
 import yfinance as yf
-import numpy as np
 import datetime as dt
-from pandas_datareader import data as pdr
+import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from reportlab.pdfgen import canvas
 from PyPDF2 import PdfReader, PdfWriter
 from scipy.stats import linregress
-import requests
-import pandas as pd
 from pathlib import Path
 import os
-import time
 from typing import Dict, Tuple, List
-import pyarrow as pa
-import math
+
 
 yf.pdr_override()
 
@@ -75,7 +70,8 @@ class Plots:
 
     """
 
-    def __init__(self, ticker, period, metrics, limit, filing_dates):
+    def __init__(self, ticker: str, period: str, metrics: pd.DataFrame, limit: str, 
+                    filing_dates: pd.Index):
         """
         Creates an instance of the `Plots` class.
 
@@ -174,7 +170,7 @@ class Plots:
         else:
             return 6
 
-    def filter_x_labels(self, x_labels, spacing):
+    def filter_x_labels(self, x_labels, spacing) -> List[str]:
         """
         Filters the x-tick labels for the plots, based on the specified spacing.
 
@@ -187,7 +183,7 @@ class Plots:
         """
         return [x_labels[i] if i % spacing == 0 else " " for i in range(len(x_labels))]
 
-    def generate_x_labels(self):
+    def generate_x_labels(self) -> List[str]:
         """
         Generates the x-tick labels for the plots, based on the metrics data and the specified period.
 
@@ -198,7 +194,7 @@ class Plots:
             "-".join(str(i).split("-")[1:]) for i in self.metrics.index[-self.limit :]
         ]
 
-    def calculate_subplots_shape(self, metrics_container):
+    def calculate_subplots_shape(self, metrics_container: List) -> Tuple[int, int]:
         """
         Calculates the number of rows and columns required for the subplot grid, based on the number of 
             metrics to be plotted.
@@ -228,7 +224,7 @@ class Plots:
         i, j = counter // 2, counter % 2
         return subplots[i][j]
 
-    def get_y_data(self, metric):
+    def get_y_data(self, metric: str) -> pd.Series:
         """
         Extracts the y-axis data for the specified metric.
 
@@ -240,7 +236,7 @@ class Plots:
         """
         return self.metrics[metric][-self.limit :]
 
-    def get_y_units(self, metric_type, metric):
+    def get_y_units(self, metric_type: str, metric: str) -> str:
         """
         Extracts the unit of measure for the y-axis for the specified metric.
 
@@ -253,7 +249,7 @@ class Plots:
         """
         return self.metric_units_dict[metric_type][metric]
 
-    def plot_data_on_axis(self, axis, data):
+    def plot_data_on_axis(self, axis: plt.axis, data: pd.Series) -> plt.axis:
         """
         Plots the data trend for the specified metric on the specified axis.
 
@@ -270,7 +266,7 @@ class Plots:
         axis = self.scale_y_axis(axis, data['metric'])
         return axis
 
-    def scale_y_axis(self, axis, data_str):
+    def scale_y_axis(self, axis: plt.axis, data_str: str) -> plt.axis:
         if data_str == 'PE_high':
             y_bounds = [0, 40]
         elif data_str == 'PE_low':
@@ -283,7 +279,7 @@ class Plots:
         axis.set_ylim(y_bounds)
         return axis
 
-    def get_linear_coeffs(self, x, y):
+    def get_linear_coeffs(self, x: pd.Series, y: pd.Series) -> Tuple[float, float, float]:
         """
         Calculate the linear regression coefficients and coefficient of determination (R-squared) 
         for the given x and y data points.
@@ -302,7 +298,7 @@ class Plots:
         slope, intercept, r_value, _, _ = linregress(x, y)
         return slope, intercept, r_value ** 2
 
-    def generate_linear_series(self, x, slope, intercept):
+    def generate_linear_series(self, x: pd.Series, slope: float, intercept: float) -> pd.Series:
         """
         Returns a pandas Series containing the y-values of a linear series with the given x-values, 
         slope, and intercept.
@@ -317,7 +313,7 @@ class Plots:
         """
         return slope * x + intercept
 
-    def plot_linear_trend(self, axis, x, y, r2):
+    def plot_linear_trend(self, axis: plt.axis, x: pd.Series, y: pd.Series, r2: float) -> plt.axis:
         """
         Plots linear regression line on given axis with r-squared value in legend.
 
@@ -334,7 +330,7 @@ class Plots:
         axis.plot([], [], " ", label=f"R2: {r2:.2f}")  # Adding R2 value to legend
         return axis
 
-    def plot_metrics(self):
+    def plot_metrics(self) -> None:
         """
         The plot_metrics method generates plots of financial metrics for a given company. The method first 
             generates the necessary subplots to hold each metric type. Each metric type is then plotted on 
@@ -390,7 +386,7 @@ class Plots:
             fig.tight_layout()
             self.plots.append(fig)
 
-    def generate_save_path_object(self, file=False):
+    def generate_save_path_object(self, file: bool=False) -> Path:
         """
         Generates the path to the PDF file where the charts will be saved.
 
@@ -417,7 +413,7 @@ class Plots:
         )
         return file_path / file_name if file else file_path
 
-    def create_path_from_object(self, path_object):
+    def create_path_from_object(self, path_object: Path) -> None:
         """
         Creates a directory at the given path if it does not already exist.
 
@@ -429,7 +425,7 @@ class Plots:
         except FileExistsError:
             pass
 
-    def make_bin_folder(self):
+    def make_bin_folder(self) -> None:
         """
         Creates a 'bin' folder if it does not already exist.
         """
@@ -438,7 +434,7 @@ class Plots:
         except FileExistsError:
             pass
 
-    def make_pdf_title_page(self):
+    def make_pdf_title_page(self) -> None:
         """
         Generates a PDF title page using the ticker and period of the company, and saves it in the 'bin' folder.
         """
@@ -449,7 +445,7 @@ class Plots:
         title_page.drawString(210, 520, title_message)
         title_page.save()
 
-    def make_pdf_charts(self):
+    def make_pdf_charts(self) -> None:
         """
         Generates individual PDFs for each figure in self.plots, and saves them in the 'bin' folder.
         """
@@ -458,7 +454,7 @@ class Plots:
             for figure in self.plots:
                 pdf.savefig(figure)
 
-    def combine_and_export_pdfs(self, export_path):
+    def combine_and_export_pdfs(self, export_path: Path) -> None:
         """
         Combines the PDFs generated in make_pdf_title_page and make_pdf_charts, and exports them to the given path.
 
@@ -477,7 +473,7 @@ class Plots:
                 with open(export_path, "wb") as output_file:
                     pdf_output.write(output_file)
 
-    def _export_charts_pdf(self):
+    def _export_charts_pdf(self) -> None:
         """
         Generates and exports a combined PDF file of the financial ratio trend plots to a file path
         specified by generate_save_path_object.
