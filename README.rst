@@ -6,20 +6,22 @@ Needless to say, you should not make investments based on this tool's recommenda
 
 Prerequisites
 -------------
-Please head over to the 'FMP website <https://site.financialmodelingprep.com/developer/docs/dashboard>'_ and register in order to obtain an API key that you can use to make API requests.
+Please head over to the `FMP website <https://site.financialmodelingprep.com/developer/docs/dashboard>`_ and register in order to obtain an API key that you can use to make API requests.
 
 The requirements for using this library are as follows:
 
-pandas == 1.4.4
-numpy == 1.21.5
-scipy == 1.9.1
-yfinance == 0.2.10
-pandas_datareader == 0.10.0
-matplotlib == 3.5.2
-reportlab == 3.6.12
-pyarrow == 11.0.0
-PyPDF2 == 3.0.1
+- pandas == 1.4.4
+- numpy == 1.21.5
+- scipy == 1.9.1
+- yfinance == 0.2.10
+- pandas_datareader == 0.10.0
+- matplotlib == 3.5.2
+- reportlab == 3.6.12
+- pyarrow == 11.0.0
+- PyPDF2 == 3.0.1
+
 Installing
+----------
 This code is a simple set of classes that can be run on either Windows or Mac. No installation is required other than getting the files into a local directory and then executing scripts from the project root directory.
 
 Getting Started
@@ -39,7 +41,7 @@ Please feel free to contact me on this GitHub if you would like to contribute. T
 
 Authors
 -------
-**JFD ** -  'oldhiltonian<https://github.com/oldhiltonian>'_
+**JFD ** -  `oldhiltonian<https://github.com/oldhiltonian>`_
 
 License
 -------
