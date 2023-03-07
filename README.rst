@@ -28,8 +28,9 @@ Getting Started
 ---------------
 Please see the "Example Use" Jupyter notebook in the root directory for more robust demonstrations on how to use the tools.
 
-The main class that is meant to be interacted with is the Company class. An analysis can be constructed by simply calling the Company constructor and passing the appropriate arguments for the company ticker symbol and your API key.
->>> Company('AAPL', YOUR_API_KEY)
+The main class that is meant to be interacted with is the Company class. An analysis can be constructed by simply calling the Company constructor and passing the appropriate arguments for the company ticker symbol and your API key.\n
+
+:code: `>>> Company('AAPL', YOUR_API_KEY)`
 Optional arguments are:
 
 data: 'online' fetches from the online API, 'local' fetched previously obtained API data from disk.
