@@ -33,7 +33,7 @@ The main class that is meant to be interacted with is the Company class. An anal
 :code: `>>> Company('AAPL', YOUR_API_KEY)`
 Optional arguments are:
 
-- data: 'online' fetches from the online API, 'local' fetched previously obtained API data from disk.
+- data: 'online' fetches from the online API, 'local' fetches previously saved API data from disk.
 - period: 'annual' or 'quarter' determines the type of financial statement data that is loaded.
 - limit: detemines the number of historical periods that data is obtained for.
 - verbose: setting to True will force the output of all visualisations regardless of company health.
