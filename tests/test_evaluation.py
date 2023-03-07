@@ -10,7 +10,7 @@ key_path = Path().home()/'desktop'/'FinancialModellingPrep_API.txt'
 with open(key_path) as file:
     api_key = file.read()
 
-class TestEvaluation(unittest.TestCase):
+class TestStandardEvaluation(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         # cls.tickers = ['AAPL', 'MSFT', 'NVDA','VAC', 'WBA', 'ATVI', 'A', 'AMD']
@@ -31,22 +31,41 @@ class TestEvaluation(unittest.TestCase):
             
             for string in ['debt', 'DeBt', 'DEBT', 'DEbT']:
                 expected = -1
-                result = instance.get_modifier(string)
+                result = instance.eval.get_modifier(string)
                 self.assertEqual(expected, result)
     
-
-
     def test_get_scoring_metrics(self):
-        pass
+        for ticker, data, period in self.zipped_args_tdp:
+            instance = Company(ticker, self.api_key, data, period, self.limit)
+            result = instance.eval.get_scoring_metrics()
+            expected = [
+            "eps", "returnOnEquity", "ROIC", "returnOnAssets",
+            "debtToTotalCap","totalDebtRatio"
+            ]
+            self.assertEqual(expected, result)
+        
 
     def test_create_scoring_metrics_results_dict(self):
-        pass
+        for ticker, data, period in self.zipped_args_tdp:
+            instance = Company(ticker, self.api_key, data, period, self.limit)
+            dct = instance.eval.standard_scores_dict
+            self.assertEqual(len(dct), 6)
+            self.assertIsInstance(dct, dict)
+            expected = [
+            "eps", "returnOnEquity", "ROIC", "returnOnAssets",
+            "debtToTotalCap","totalDebtRatio"
+            ]
+            result = list(dct.keys())
+            self.assertEqual(expected, result)
+
+
+
 
     def test_score_single_metric(self):
         pass
 
-    def test_get_modifier(self):
-        pass
+
+
 
 
     def test_get_copy_of_df_column(self):
@@ -125,10 +144,38 @@ class TestEvaluation(unittest.TestCase):
                 self.assertAlmostEqual(expected_, result, 2)
 
     def test_sum_of_scoring_metric_dict_scores(self):
-        pass
+        instance = Company('AAPL', self.api_key, 'online', 'annual')
+        dct_1 = {
+                'eps': {'score': 1, 'strength': 3},
+                'returnOnEquity': {'score': 1, 'strength': 1},
+                'ROIC': {'score': 1, 'strength': 0},
+                'returnOnAssets': {'score': 1, 'strength': 0},
+                'debtToTotalCap': {'score': 0, 'strength': 1},
+                'totalDebtRatio': {'score': 0, 'strength': 0}
+                }
+        result_1 = instance.eval.sum_of_scoring_metric_dict_scores(dct_1)
+        expected_1 = 4
+        self.assertEqual(expected_1, result_1)
+        dct_2 = {
+                'eps': {'score': 2, 'strength': 3},
+                'returnOnEquity': {'score': 2, 'strength': 1},
+                'ROIC': {'score': 1, 'strength': 0},
+                'returnOnAssets': {'score': 1, 'strength': 0},
+                'debtToTotalCap': {'score': 2, 'strength': 1},
+                'totalDebtRatio': {'score': 0, 'strength': 0}}
+        result_2 = instance.eval.sum_of_scoring_metric_dict_scores(dct_2)
+        expected_2 = 8       
+        self.assertEqual(expected_2, result_2)
 
+    
     def test_total_score_to_bool(self):
-        pass
+        instance = Company('AAPL', self.api_key, 'online', 'annual')
+        instance.eval._scoring_metrics = range(5)
+        func = instance.eval.total_score_to_bool
+        self.assertEqual(func(5, 5), True)
+        self.assertEqual(func(4, 5), False)
+        self.assertEqual(func(9), False)
+        self.assertEqual(func(10), True)
 
     def test_standard_eval(self):
         '''Needs to be changed as the fucntion has also changed'''
@@ -161,6 +208,19 @@ class TestEvaluation(unittest.TestCase):
                 result = instance.eval.standard_eval()
                 self.assertEqual(result, expected)
 
+
+
+class TestBuffetEvaluation(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        # cls.tickers = ['AAPL', 'MSFT', 'NVDA','VAC', 'WBA', 'ATVI', 'A', 'AMD']
+        cls.tickers = ['AAPL']
+        cls.api_key = api_key
+        cls.data =    ['online', 'local']
+        cls.period =  ['annual', 'quarter']
+        cls.limit = 15
+        cls.zipped_args_tdp = list(itertools.product(cls.tickers, cls.data, cls.period))
+    
     def test_buffet_eval(self):
         pass
 

@@ -340,6 +340,9 @@ class StandardEvaluation:
 
 
 class BuffetEvaluation(StandardEvaluation):
+    '''
+    This class is under active development
+    '''
     def __init__(self, ticker: str, api_key: str, metrics: pd.Series,
                  financial_data: pd.DataFrame) -> None:
         super().__init__(ticker, api_key, metrics, financial_data)

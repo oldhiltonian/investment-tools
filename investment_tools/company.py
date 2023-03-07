@@ -1,6 +1,4 @@
 import yfinance as yf
-import datetime as dt
-from typing import Dict, Tuple, List
 from .financial_data import FinancialData
 from .plots import Plots
 from .manual_analysis import ManualAnalysis
@@ -13,18 +11,18 @@ class Company:
     Class representing a company and its financial analysis
 
     Args:
-    ticker (str): The stock symbol representing the company
-    api_key (str): API key for accessing financial data from a data source
-    data (str, optional): Source of data either from 'online' (default) or 'offline'
-    period (str, optional): Financial period to use for the analysis either 'annual' (default) or 'quarterly'
-    limit (int, optional): The number of financial periods to include in the analysis (default is 20)
-    verbose (bool, optional): If True, verbose output will be printed during analysis (default is False)
+        ticker (str): The stock symbol representing the company
+        api_key (str): API key for accessing financial data from a data source
+        data (str, optional): Source of data either from 'online' (default) or 'offline'
+        period (str, optional): Financial period to use for the analysis either 'annual' (default) or 'quarterly'
+        limit (int, optional): The number of financial periods to include in the analysis (default is 20)
+        verbose (bool, optional): If True, verbose output will be printed during analysis (default is False)
 
     Attributes:
-    ticker (str): The stock symbol representing the company
-    period (str): Financial period used for the analysis
-    metrics (dict): Dictionary of financial metrics for the company
-    trends (list of plot objects): List of plots showing the trend of the financial metrics over time
+        ticker (str): The stock symbol representing the company
+        period (str): Financial period used for the analysis
+        metrics (dict): Dictionary of financial metrics for the company
+        trends (list of plot objects): List of plots showing the trend of the financial metrics over time
 
     Methods:
     __init__(self, ticker, api_key, data='online', period='annual', limit=20, verbose=False):
