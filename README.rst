@@ -37,7 +37,9 @@ Optional arguments are:
 - period: 'annual' or 'quarter' determines the type of financial statement data that is loaded.
 - limit: detemines the number of historical periods that data is obtained for.
 - verbose: setting to True will force the output of all visualisations regardless of company health.
+
 Contributing
+------------
 Please feel free to contact me on this GitHub if you would like to contribute. This is a personal project that I use to help my own investment workflow, so there is no guarentee that I will accept the proposed changes. I am however very open to hearing your feedback and your experience with the tool.
 
 Authors
