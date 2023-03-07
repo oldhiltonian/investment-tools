@@ -37,26 +37,20 @@ class Evaluation:
         self.standard_outcome = self.standard_eval()
         
     
-    def get_scoring_metrics(self):
+    def get_scoring_metrics(self) -> List[str]:
         scoring_metrics = [
             "eps", "returnOnEquity", "ROIC", "returnOnAssets",
             "debtToTotalCap","totalDebtRatio"
         ]
         return scoring_metrics
     
-    def create_scoring_metrics_results_dict(self, scoring_metrics: List) -> Dict[str, dict]:
+    def create_scoring_metrics_results_dict(self, 
+                                            scoring_metrics: List[str]) -> Dict[str, dict]:
         scores = dict()
         for metric in scoring_metrics:
             score, strength = self.score_single_metric(metric)
             scores[metric] = {"score": score, "strength": strength}
         return scores
-
-    # def create_scoring_metrics_results_dict(self, scoring_metrics: List) -> Dict[str, dict]:
-    #     scores = dict()
-    #     for metric in scoring_metrics:
-    #         score, strength = self.score_single_metric(metric)
-    #         scores[metric] = {"score": score, "strength": strength}
-    #     return scores
         
     def score_single_metric(self, metric: str) -> Tuple[int, int]:
             """
@@ -195,7 +189,7 @@ class Evaluation:
         else:
             return 4
         
-    def sum_of_scoring_metric_dict_scores(self, scores_dict: Dict[str, dict]):
+    def sum_of_scoring_metric_dict_scores(self, scores_dict: Dict[str, dict]) -> int:
         total_score = 0
         for key in scores_dict.keys():
             score = scores_dict[key]['score']
@@ -205,7 +199,7 @@ class Evaluation:
                 total_score += scores_dict[key]["score"]
         return total_score
 
-    def total_score_to_bool(self, total_score: int, threshold: int=None):
+    def total_score_to_bool(self, total_score: int, threshold: int=None) -> bool:
         threshold = threshold if threshold else 2*len(self._scoring_metrics)
         return True if total_score >= threshold else False
 

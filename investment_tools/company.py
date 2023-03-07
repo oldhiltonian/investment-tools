@@ -1,21 +1,6 @@
-import datetime as dt
 import yfinance as yf
-import numpy as np
 import datetime as dt
-from pandas_datareader import data as pdr
-from matplotlib import pyplot as plt
-from matplotlib.backends.backend_pdf import PdfPages
-from reportlab.pdfgen import canvas
-from PyPDF2 import PdfReader, PdfWriter
-from scipy.stats import linregress
-import requests
-import pandas as pd
-from pathlib import Path
-import os
-import time
 from typing import Dict, Tuple, List
-import pyarrow as pa
-import math
 from .financial_data import FinancialData
 from .plots import Plots
 from .manual_analysis import ManualAnalysis
