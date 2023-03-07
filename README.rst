@@ -44,7 +44,7 @@ Please feel free to contact me on this GitHub if you would like to contribute. T
 
 Authors
 -------
-**JFD ** -  `oldhiltonian<https://github.com/oldhiltonian>`_
+**JFD ** -  `oldhiltonian <https://github.com/oldhiltonian>`_
 
 License
 -------
