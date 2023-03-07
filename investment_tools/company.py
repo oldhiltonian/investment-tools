@@ -134,7 +134,8 @@ class Company:
     """
 
     def __init__(
-        self, ticker, api_key, data="online", period="annual", limit=20, verbose=False
+        self, ticker: str, api_key: str, data: str="online", period: str="annual", 
+        limit: int=20, verbose: bool=False
     ):
         """
         Initialize a new instance of the Company class.

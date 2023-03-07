@@ -3,19 +3,12 @@ import yfinance as yf
 import numpy as np
 import datetime as dt
 from pandas_datareader import data as pdr
-from matplotlib import pyplot as plt
-from matplotlib.backends.backend_pdf import PdfPages
-from reportlab.pdfgen import canvas
-from PyPDF2 import PdfReader, PdfWriter
-from scipy.stats import linregress
 import requests
 import pandas as pd
 from pathlib import Path
 import os
-import time
 from typing import Dict, Tuple, List
 import pyarrow as pa
-import math
 
 yf.pdr_override()
 
@@ -97,9 +90,9 @@ class FinancialData:
         self,
         ticker: str,
         api_key: str = "",
-        data: str = "local",
-        period: str = "annual",
-        limit: int = 120,
+        data: str="local",
+        period: str="annual",
+        limit: int=120,
     ):
         """
         Initializes a new instance of the FinancialData class.
@@ -145,7 +138,7 @@ class FinancialData:
         df_ = df.replace(to_replace=np.nan, value=0)
         return df_.replace(to_replace=[None,'None'], value=0)
 
-    def assert_valid_user_inputs(self):
+    def assert_valid_user_inputs(self) -> None:
         """
         Ensures that valid user inputs are provided for data and period.
         
@@ -373,7 +366,7 @@ class FinancialData:
         common_elements = idx1.intersection(idx2).intersection(idx3).intersection(idx4)
         return common_elements
 
-    def filter_for_common_indecies(self, common_elements: pd.Index):
+    def filter_for_common_indecies(self, common_elements: pd.Index) -> None:
         """
         Filters the financial data attributes to only include common indices.
         
@@ -387,7 +380,7 @@ class FinancialData:
         self.assert_identical_indecies()
         print(f"Financial statement lengths are now each: {len(self.balance_sheets)}")
 
-    def assert_identical_indecies(self):
+    def assert_identical_indecies(self) -> None:
         """
         Asserts that the financial data has identical indices 
             for each of its statements.
@@ -401,7 +394,7 @@ class FinancialData:
             self.balance_sheets.index
         ), err_msg
 
-    def assert_required_length(self, item: list):
+    def assert_required_length(self, item: list) -> None:
         """
         Asserts that a given item has the required length based on the period.
         
@@ -415,7 +408,7 @@ class FinancialData:
         err_msg = f"Financial statements are shorter than the required length of {required_length}"
         assert len(item) >= required_length, err_msg
 
-    def assert_valid_server_response(self, response: requests.Response):
+    def assert_valid_server_response(self, response: requests.Response) -> None:
         """
         Asserts that the server response is valid (status code 200).
         
@@ -426,7 +419,7 @@ class FinancialData:
             response.status_code == 200
         ), f"API call failed. Code <{response.status_code}>"
 
-    def assert_server_response_not_empty(self, response: requests.Response):
+    def assert_server_response_not_empty(self, response: requests.Response) -> None:
         """
         Asserts that the server response not empty.
         
@@ -458,7 +451,7 @@ class FinancialData:
         raw_data["date"] = raw_data.index.date
         return self.periodise(raw_data)
 
-    def generate_empty_df(self, columns):
+    def generate_empty_df(self, columns: pd.Index) -> pd.DataFrame:
         data = [[0]*len(columns)]*len(self.balance_sheets)
         index = self.balance_sheets.index
         return pd.DataFrame(data, index=index, columns=columns)
@@ -505,7 +498,7 @@ class FinancialData:
         ), "Stock highs and lows not consistent"
         return periodised
 
-    def save_financial_attributes(self):
+    def save_financial_attributes(self) -> None:
         """
         Saves the financial data to local parquet files.
         """
