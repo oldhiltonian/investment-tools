@@ -24,7 +24,7 @@ import json
 
 yf.pdr_override()
 
-class Evaluation:
+class StandardEvaluation:
     def __init__(self, ticker: str, api_key: str, metrics: pd.Series,
                  financial_data: pd.DataFrame) -> None:
         self.ticker = ticker
@@ -221,7 +221,7 @@ class Evaluation:
 
 
 
-class BuffetEvaluation(Evaluation):
+class BuffetEvaluation(StandardEvaluation):
     def __init__(self, ticker: str, api_key: str, metrics: pd.Series,
                  financial_data: pd.DataFrame) -> None:
         super().__init__(ticker, api_key, metrics, financial_data)

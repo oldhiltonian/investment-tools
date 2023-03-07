@@ -4,7 +4,7 @@ from typing import Dict, Tuple, List
 from .financial_data import FinancialData
 from .plots import Plots
 from .manual_analysis import ManualAnalysis
-from .evaluation import Evaluation, BuffetEvaluation
+from .evaluation import StandardEvaluation, BuffetEvaluation
 
 yf.pdr_override()
 
@@ -150,7 +150,7 @@ class Company:
         self._charts_printed = False
         if self.verbose:
             self.print_charts()
-        self.eval = Evaluation(ticker, api_key, self.metrics, self._financial_data)
+        self.eval = StandardEvaluation(ticker, api_key, self.metrics, self._financial_data)
         self.eval_buffet = BuffetEvaluation(ticker, api_key, self.metrics, self._financial_data)
         self.standard_outcome = self.eval.standard_outcome
         if self.standard_outcome:
