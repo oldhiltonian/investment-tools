@@ -15,16 +15,19 @@ yf.pdr_override()
 
 class FinancialData:
     """
-    A class for fetching and processing financial data for a given stock.
+    A class for retrieving and storing financial data for a given stock ticker.
 
     Attributes:
-        ticker (str): The ticker symbol for the stock.
-        api_key (str): The user's API key for accessing financial data (optional).
-        data (str): Whether to fetch data from online or local source. Either 'online'
-            or 'local'.
-        period (str): The period of the data, either 'annual' or 'quarter'.
-        limit (int): The maximum number of data points to fetch from the API.
-            Default = 120
+        ticker (str): The stock ticker symbol.
+        api_key (str, optional): An optional API key to access financial data.
+        data (str): Specifies whether to retrieve data from an online source or a local data store.
+        period (str): The time period for which data is retrieved, either "annual" or "quarterly".
+        limit (int): The maximum number of financial statements to retrieve.
+        balance_sheets (pandas.DataFrame): The balance sheet data for the stock.
+        income_statements (pandas.DataFrame): The income statement data for the stock.
+        cash_flow_statements (pandas.DataFrame): The cash flow statement data for the stock.
+        reported_key_metrics (pandas.DataFrame): The reported key metric data for the stock.
+        stock_price_data (pandas.DataFrame): The stock price data for the stock.
 
     Raises:
         AssertionError: If invalid input is provided for data or period attributes.
@@ -98,14 +101,11 @@ class FinancialData:
         Initializes a new instance of the FinancialData class.
 
         Args:
-            ticker (str): The ticker symbol for the stock.
-            api_key (str): The user's API key for accessing financial data (optional).
-            data (str): Whether to fetch data from online or local source. Either 'online'
-                or 'local'.
-            period (str): The period of the data, either 'annual' or 'quarter'.
-            limit (int): The maximum number of data points to fetch from the API.
-                Default = 120
-
+            ticker (str): The stock ticker symbol.
+            api_key (str, optional): An optional API key to access financial data.
+            data (str): Specifies whether to retrieve data from an online source or a local data store.
+            period (str): The time period for which data is retrieved, either "annual" or "quarterly".
+            limit (int): The maximum number of financial statements to retrieve.
         """
         self.ticker = ticker.upper().strip()
         self.api_key = str(api_key)
@@ -135,15 +135,24 @@ class FinancialData:
         self.save_financial_attributes()
 
     def replace_None(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Replaces None values in a DataFrame with 0.
+
+        Args:
+            df (pandas.DataFrame): The DataFrame to process.
+
+        Returns:
+            pandas.DataFrame: The processed DataFrame with None values replaced by 0.
+        """
         df_ = df.replace(to_replace=np.nan, value=0)
         return df_.replace(to_replace=[None,'None'], value=0)
 
     def assert_valid_user_inputs(self) -> None:
         """
-        Ensures that valid user inputs are provided for data and period.
-        
+        Asserts that the user inputs for the FinancialData instance are valid.
+
         Raises:
-            AssertionError: If invalid input is provided for data or period.
+            AssertionError: If the data or period attributes are invalid.
         """
         assert self.data in ["online", "local"], "data must be 'online' or 'local'"
         assert self.period in [
@@ -211,8 +220,7 @@ class FinancialData:
         Gets the file path to load a local financial data file.
         
         Args:
-            data_type (str): The type of financial data to fetch. Acceptable 
-                values are 'bs', 'is', 'cfs', and 'ratios'.
+            data_type (str): The type of financial data to fetch. Acceptable values are 'bs', 'is', 'cfs', and 'ratios'.
             ticker (str): The ticker symbol for the stock.
             period (str): The period of the data, either 'annual' or 'quarter'.
         
@@ -252,10 +260,13 @@ class FinancialData:
 
     def set_frame_index(self, other: pd.DataFrame) -> pd.DataFrame:
         """
-        Sets the index for the provided DataFrame.
-        
+        Set the index of another dataframe to be equal to the index of the balance sheet dataframe.
+
+        Args:
+        other (pd.DataFrame): A dataframe whose index is to be set to that of the balance sheet dataframe.
+
         Returns:
-            pandas.DataFrame: Updated with the global frame index
+        pd.DataFrame: A copy of the other dataframe with its index set to that of the balance sheet dataframe.
         """
         other.index = self.frame_indecies
         return other
@@ -452,6 +463,15 @@ class FinancialData:
         return self.periodise(raw_data)
 
     def generate_empty_df(self, columns: pd.Index) -> pd.DataFrame:
+        """
+        Generate an empty dataframe with the global frame indices and provided column names.
+    
+        Args:
+            columns (pandas.Index): the provided columns.
+
+        Returns:
+            pandas.DataFrame: the empty dataframe.
+        """
         data = [[0]*len(columns)]*len(self.balance_sheets)
         index = self.balance_sheets.index
         return pd.DataFrame(data, index=index, columns=columns)
