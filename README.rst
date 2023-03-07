@@ -28,15 +28,15 @@ Getting Started
 ---------------
 Please see the "Example Use" Jupyter notebook in the root directory for more robust demonstrations on how to use the tools.
 
-The main class that is meant to be interacted with is the Company class. An analysis can be constructed by simply calling the Company constructor and passing the appropriate arguments for the company ticker symbol and your API key.\n
+The main class that is meant to be interacted with is the Company class. An analysis can be constructed by simply calling the Company constructor and passing the appropriate arguments for the company ticker symbol and your API key.
 
 :code: `>>> Company('AAPL', YOUR_API_KEY)`
 Optional arguments are:
 
-data: 'online' fetches from the online API, 'local' fetched previously obtained API data from disk.
-period: 'annual' or 'quarter' determines the type of financial statement data that is loaded.
-limit: detemines the number of historical periods that data is obtained for.
-verbose: setting to True will force the output of all visualisations regardless of company health.
+- data: 'online' fetches from the online API, 'local' fetched previously obtained API data from disk.
+- period: 'annual' or 'quarter' determines the type of financial statement data that is loaded.
+- limit: detemines the number of historical periods that data is obtained for.
+- verbose: setting to True will force the output of all visualisations regardless of company health.
 Contributing
 Please feel free to contact me on this GitHub if you would like to contribute. This is a personal project that I use to help my own investment workflow, so there is no guarentee that I will accept the proposed changes. I am however very open to hearing your feedback and your experience with the tool.
 
