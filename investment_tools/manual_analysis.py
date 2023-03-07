@@ -62,12 +62,9 @@ class ManualAnalysis:
         self.data = financial_data
         self.verbose = verbose
         self.calculated_metrics = self.analyse()
-        # print(self.calculated_metrics)
-        # self.assert_non_null_frame(self.calculated_metrics)
         self.calculation_error_dict = {}
         if self.verbose:
             self.fractional_metric_errors = self.cross_check_metric_calculations()
-            # self.assert_non_null_frame(self.fractional_metric_errors)
             self.print_metric_errors(self.fractional_metric_errors, 0.05)
 
     def print_metric_errors(self, metric_errors: pd.DataFrame, tolerance: float = 0.05) -> None:

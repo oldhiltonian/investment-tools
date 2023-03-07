@@ -13,6 +13,28 @@ with open(key_path) as file:
 class TestStandardEvaluation(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        """
+        Sets up the class attributes for running the test suite.
+
+        - cls.tickers : List[str]
+            List of ticker symbols to be used in the test.
+
+        - cls.api_key : str
+            API key for the Financial Modeling Prep API.
+
+        - cls.data : List[str]
+            List of strings representing the location of data.
+        
+        - cls.period : List[str]
+            List of strings representing the time period of data.
+        
+        - cls.limit : int
+            Limit for the number of data rows returned by API.
+        
+        - cls.zipped_args_tdp : List[Tuple[str,str,str]]
+            List of tuples representing the combination of ticker symbol, data location, 
+            and time period.
+        """
         # cls.tickers = ['AAPL', 'MSFT', 'NVDA','VAC', 'WBA', 'ATVI', 'A', 'AMD']
         cls.tickers = ['AAPL']
         cls.api_key = api_key
@@ -22,6 +44,13 @@ class TestStandardEvaluation(unittest.TestCase):
         cls.zipped_args_tdp = list(itertools.product(cls.tickers, cls.data, cls.period))
 
     def test_get_modifier(self):
+        """
+        Tests the `get_modifier()` method of the `StandardEvaluation` class.
+
+        For each combination of ticker symbol, data location, and time period, 
+        it creates an instance of the `Company` class, and tests whether the
+        `get_modifier()` method returns the expected output for various input strings.
+        """
         for ticker, data, period in self.zipped_args_tdp:
             instance = Company(ticker, self.api_key, data, period, self.limit)
             for string in ['deb', 'ebt', 'dbt', 'det']:
@@ -35,6 +64,13 @@ class TestStandardEvaluation(unittest.TestCase):
                 self.assertEqual(expected, result)
     
     def test_get_scoring_metrics(self):
+        """
+        Tests the `get_scoring_metrics()` method of the `StandardEvaluation` class.
+
+        For each combination of ticker symbol, data location, and time period, 
+        it creates an instance of the `Company` class, and tests whether the
+        `get_scoring_metrics()` method returns the expected output.
+        """
         for ticker, data, period in self.zipped_args_tdp:
             instance = Company(ticker, self.api_key, data, period, self.limit)
             result = instance.eval.get_scoring_metrics()
@@ -46,6 +82,13 @@ class TestStandardEvaluation(unittest.TestCase):
         
 
     def test_create_scoring_metrics_results_dict(self):
+        """
+        Tests the `create_scoring_metrics_results_dict()` method of the `StandardEvaluation` class.
+
+        For each combination of ticker symbol, data location, and time period, 
+        it creates an instance of the `Company` class, and tests whether the
+        `create_scoring_metrics_results_dict()` method returns the expected output.
+        """
         for ticker, data, period in self.zipped_args_tdp:
             instance = Company(ticker, self.api_key, data, period, self.limit)
             dct = instance.eval.standard_scores_dict
@@ -69,6 +112,14 @@ class TestStandardEvaluation(unittest.TestCase):
 
 
     def test_get_copy_of_df_column(self):
+        """
+        Test that the get_copy_of_df_column method returns a copy of a
+        DataFrame column with NaN values dropped.
+
+        For each combination of ticker symbol, data location, and time period, 
+        it creates an instance of the `Company` class, and tests whether the
+        `get_copy_of_df_column()` method returns the expected output.
+        """
         for ticker, data, period in self.zipped_args_tdp:
             instance = Company(ticker, self.api_key, data, period, self.limit)
             for string in ['eps', 'ebitdaratio', 'ROIC', 'totalDebtRatio']:
@@ -78,6 +129,14 @@ class TestStandardEvaluation(unittest.TestCase):
                 self.assertEqual(result, True)
     
     def test_get_r2_val(self):
+        """
+        Test that the get_r2_val method correctly calculates the R-squared
+        value of a given series.
+
+        For each combination of ticker symbol, data location, and time period, 
+        it creates an instance of the `Company` class, and tests whether the
+        `get_r2_val()` method returns the expected output.
+        """
         series_dict = {
             '1': [0,1,2,3,4,5],
             '0.9888': [2, 4, 6, 9],
@@ -93,6 +152,14 @@ class TestStandardEvaluation(unittest.TestCase):
                 self.assertAlmostEqual(expected, r2_, places=3)
 
     def test_score_mean_growth(self):
+        """
+        Test that the score_mean_growth method returns the correct score for a
+        given mean growth rate.
+
+        For each combination of ticker symbol, data location, and time period, 
+        it creates an instance of the `Company` class, and tests whether the
+        `score_mean_growth()` method returns the expected output.
+        """
         mean_growth_score_tuple = [(0.05, 0), (0.051, 1), (0.099, 1), 
                                     (0.1001, 2), (0.1499, 2), (0.15001, 3),
                                     (0.2, 3), (0.2001, 4)]
@@ -104,6 +171,14 @@ class TestStandardEvaluation(unittest.TestCase):
                 self.assertEqual(instance.eval.score_mean_growth(mean), score)
 
     def test_score_trend_strength(self):
+        """
+        Test that the score_trend_strength method returns the correct score for a
+        given R-squared value.
+
+        For each combination of ticker symbol, data location, and time period, 
+        it creates an instance of the `Company` class, and tests whether the
+        `score_trend_strength()` method returns the expected output.
+        """
         r2_to_score_tuples = [(0.01, 0), (0.2, 0), (0.2001, 1), (0.3, 1), (0.3001, 2),
                               (0.5, 2), (0.5001, 3), (0.75, 3), (0.751, 4)]
         for ticker, data, period in self.zipped_args_tdp:
@@ -112,6 +187,14 @@ class TestStandardEvaluation(unittest.TestCase):
                 self.assertEqual(instance.eval.score_trend_strength(r2), score)
 
     def test_get_slope_and_intercept(self):
+        """
+        Test that the `get_slope_and_intercept()` method correctly calculates the slope 
+        and y-intercept of a linear regression model.
+
+        For each combination of ticker symbol, data location, and time period, 
+        it creates an instance of the `Company` class, and tests whether the
+        `get_slope_and_intercept()` method returns the expected output.
+        """
         for ticker, data, period in self.zipped_args_tdp:
             instance = Company(ticker, self.api_key, data, period, self.limit)
             arrays = [np.array([1, 2, 3, 5, 7, 9]),
@@ -128,6 +211,14 @@ class TestStandardEvaluation(unittest.TestCase):
                 self.assertAlmostEqual(expected_[1], result[1], 4)
 
     def test_calculate_mean_growth_rate(self):
+        """
+        Test that the calculate_mean_growth_rate method correctly calculates the 
+        mean growth rate of a given series.
+
+        For each combination of ticker symbol, data location, and time period, 
+        it creates an instance of the `Company` class, and tests whether the
+        `calculate_mean_growth_rate()` method returns the expected output.
+        """
         for ticker, data, period in self.zipped_args_tdp:
             instance = Company(ticker, self.api_key, data, period, self.limit)
             arrays = [np.array([1, 2, 3, 5, 7, 9]),
@@ -144,6 +235,12 @@ class TestStandardEvaluation(unittest.TestCase):
                 self.assertAlmostEqual(expected_, result, 2)
 
     def test_sum_of_scoring_metric_dict_scores(self):
+        """
+        Test if the function correctly calculates the sum of scores in a dictionary of scoring metrics.
+
+        For a Company instance, it generates two dictionaries of scoring metrics and tests whether the 
+        `sum_of_scoring_metric_dict_scores()` method returns the expected output for each of them.
+        """
         instance = Company('AAPL', self.api_key, 'online', 'annual')
         dct_1 = {
                 'eps': {'score': 1, 'strength': 3},
@@ -169,16 +266,37 @@ class TestStandardEvaluation(unittest.TestCase):
 
     
     def test_total_score_to_bool(self):
+        """
+        Test the total_score_to_bool method of the StandardEvaluation class.
+        
+        For the AAPL company instance created for the 'online' data location, and 'annual' time period,
+        it tests whether the total_score_to_bool method returns the expected output. Note that the default
+        threshold score is twice the length of the ._scoring_metrics attribute.
+
+        It tests the following test cases:
+            - when the total score is equal to or greater than the threshold score, it should return True
+            - when the total score is less than the threshold score, it should return False
+        """
         instance = Company('AAPL', self.api_key, 'online', 'annual')
         instance.eval._scoring_metrics = range(5)
         func = instance.eval.total_score_to_bool
         self.assertEqual(func(5, 5), True)
+        self.assertEqual(func(6, 5), True)
         self.assertEqual(func(4, 5), False)
         self.assertEqual(func(9), False)
         self.assertEqual(func(10), True)
+        self.assertEqual(func(11), True)
 
     def test_standard_eval(self):
-        '''Needs to be changed as the fucntion has also changed'''
+        """
+        Test that the standard evaluation method correctly returns a boolean
+        value based on a given set of scoring metrics.
+
+        For each combination of ticker symbol, data location, and time period, 
+        it creates an instance of the `Company` class and sets the standard
+        scores dict. It then tests whether the `standard_eval()` method returns
+        the expected output.
+        """
         for ticker, data, period in self.zipped_args_tdp:
             instance = Company(ticker, self.api_key, data, period, self.limit)
             scores = [
