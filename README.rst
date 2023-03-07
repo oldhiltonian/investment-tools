@@ -1,10 +1,12 @@
 investment-tools
+================
 A set of tools to help pull, analyse and visualise company financial data from the Financial Modelling Prep (FMP) API. The tool includes functionality to assess company health and future prospects, and can be used as an screener to quickly determine if a company warrants a closer, manual analysis.
 
 Needless to say, you should not make investments based on this tool's recommendations. It is merely here to help you filter through the bad investment opportunities such that you may focus your attention on the good ones.
 
 Prerequisites
-Please head over to the FMP website <https://site.financialmodelingprep.com/developer/docs/dashboard>_ and register in order to obtain an API key that you can use to make API requests.
+-------------
+Please head over to the 'FMP website <https://site.financialmodelingprep.com/developer/docs/dashboard>'_ and register in order to obtain an API key that you can use to make API requests.
 
 The requirements for using this library are as follows:
 
@@ -21,12 +23,10 @@ Installing
 This code is a simple set of classes that can be run on either Windows or Mac. No installation is required other than getting the files into a local directory and then executing scripts from the project root directory.
 
 Getting Started
+---------------
 Please see the "Example Use" Jupyter notebook in the root directory for more robust demonstrations on how to use the tools.
 
 The main class that is meant to be interacted with is the Company class. An analysis can be constructed by simply calling the Company constructor and passing the appropriate arguments for the company ticker symbol and your API key.
-
-python
-Copy code
 >>> Company('AAPL', YOUR_API_KEY)
 Optional arguments are:
 
@@ -38,6 +38,9 @@ Contributing
 Please feel free to contact me on this GitHub if you would like to contribute. This is a personal project that I use to help my own investment workflow, so there is no guarentee that I will accept the proposed changes. I am however very open to hearing your feedback and your experience with the tool.
 
 Authors
-**JFD ** -  oldhiltonian
+-------
+**JFD ** -  'oldhiltonian<https://github.com/oldhiltonian>'_
+
 License
+-------
 This project is unlicensed and is completely open source.
