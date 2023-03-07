@@ -2,20 +2,8 @@ import datetime as dt
 import yfinance as yf
 import numpy as np
 import datetime as dt
-from pandas_datareader import data as pdr
-from matplotlib import pyplot as plt
-from matplotlib.backends.backend_pdf import PdfPages
-from reportlab.pdfgen import canvas
-from PyPDF2 import PdfReader, PdfWriter
-from scipy.stats import linregress
-import requests
 import pandas as pd
-from pathlib import Path
-import os
-import time
 from typing import Dict, Tuple, List
-import pyarrow as pa
-import math
 from .financial_data import FinancialData
 
 yf.pdr_override()
@@ -82,7 +70,7 @@ class ManualAnalysis:
             # self.assert_non_null_frame(self.fractional_metric_errors)
             self.print_metric_errors(self.fractional_metric_errors, 0.05)
 
-    def print_metric_errors(self, metric_errors: pd.DataFrame, tolerance: float = 0.05):
+    def print_metric_errors(self, metric_errors: pd.DataFrame, tolerance: float = 0.05) -> None:
         """
         Prints the number of values for each metric that exceed the given tolerance level.
 
@@ -99,7 +87,7 @@ class ManualAnalysis:
             self.calculation_error_dict[header] = (count, message)
             print(message)
 
-    def assert_non_null_frame(self, df: pd.DataFrame):
+    def assert_non_null_frame(self, df: pd.DataFrame) -> None:
         """
         Raises an AssertionError if any column in the input DataFrame is completely null.
 
@@ -114,7 +102,7 @@ class ManualAnalysis:
         for header in df.columns:
             assert not df[header].isnull().all(), f"<{header}> -- {err_msg}"
 
-    def concat_stock_eval_ratios(self, df: pd.DataFrame):
+    def concat_stock_eval_ratios(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Calculate and concatenate stock evaluation ratios to the given DataFrame.
 
@@ -172,7 +160,7 @@ class ManualAnalysis:
         ) / outstanding_shares
         return df
 
-    def concat_profitability_ratios(self, df: pd.DataFrame):
+    def concat_profitability_ratios(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Concatenates profitability ratios to the given DataFrame.
 
@@ -217,7 +205,7 @@ class ManualAnalysis:
         df['shareholderEquityPerShare'] = total_shareholder_equity/total_shares
         return df
 
-    def concat_debt_interest_ratios(self, df: pd.DataFrame):
+    def concat_debt_interest_ratios(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Concatenates debt and interest ratios to the given DataFrame.
 
@@ -257,7 +245,7 @@ class ManualAnalysis:
         df["totalDebtRatio"] = total_debt / total_assets
         return df
 
-    def concat_liquidity_ratios(self, df: pd.DataFrame):
+    def concat_liquidity_ratios(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Concatenates liquidity ratios to the given DataFrame.
 
@@ -284,7 +272,7 @@ class ManualAnalysis:
         df["cashRatio"] = cash_and_equivalents / current_liabilities
         return df
 
-    def concat_efficiency_ratios(self, df: pd.DataFrame):
+    def concat_efficiency_ratios(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Concatenates efficiency ratios to the given DataFrame.
 
@@ -322,7 +310,7 @@ class ManualAnalysis:
         df["receivablesTurnoverInDays"] = days / df["receivablesTurnover"].copy()
         return df
 
-    def concat_metric_growth(self, df: pd.DataFrame):
+    def concat_metric_growth(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Concatenates growth rates for specified metrics to the given DataFrame.
 
