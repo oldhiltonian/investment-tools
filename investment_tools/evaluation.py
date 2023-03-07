@@ -25,8 +25,72 @@ import json
 yf.pdr_override()
 
 class StandardEvaluation:
+    """
+    A class to standardize and evaluate the financial data for a given company.
+
+    Attributes:
+        ticker (str): The stock symbol for the company.
+        api_key (str): The API key for the financial data provider.
+        metrics (pd.Series): A Pandas Series of financial data for the company.
+        _financial_data (pd.DataFrame): A Pandas DataFrame of the financial data for the company.
+        _scoring_metrics (List[str]): A list of financial metrics used to calculate scores.
+        standard_scores_dict (Dict[str, dict]): A dictionary containing scores and strengths for each financial metric.
+        standard_outcome (bool): A boolean indicating whether the company has favorable financial metrics based on the provided scores.
+
+    Methods:
+        get_scoring_metrics(self) -> List[str]: 
+            Returns a list of financial metrics used to calculate scores.
+            
+        create_scoring_metrics_results_dict(self, scoring_metrics: List[str]) -> Dict[str, dict]: 
+            Creates a dictionary containing scores and strengths for each financial metric.
+            
+        score_single_metric(self, metric: str) -> Tuple[int, int]: 
+            Calculates the growth score and trend stability score of the given financial metric.
+            
+        get_r2_val(self, metrics: pd.Series) -> float: 
+            Calculates and returns the R-squared value of a linear regression model for the given Pandas series of metrics.
+            
+        get_modifier(self, metric: str) -> int: 
+            Returns a modifier based on the provided metric.
+            
+        get_copy_of_df_column(self, header: str) -> pd.Series: 
+            Returns a copy of a pandas Series for a given column header in the calculated metrics DataFrame.
+            
+        calculate_mean_growth_rate(self, df: pd.DataFrame, span: int=None) -> float: 
+            Calculates the mean growth rate of a metric over a specified time span.
+            
+        get_slope_and_intercept(self, df: pd.DataFrame) -> Tuple[float, float]: 
+            Calculates and returns the slope and intercept of a linear regression model for the given Pandas DataFrame.
+            
+        score_mean_growth(self, mean_growth: float) -> int: 
+            Scores the mean growth of a metric based on a set of ranges.
+            
+        score_trend_strength(self, r2: float) -> int: 
+            Calculate the trend strength score for a financial metric.
+            
+        sum_of_scoring_metric_dict_scores(self, scores_dict: Dict[str, dict]) -> int: 
+            Calculates the total score for a dictionary of scores and strengths.
+            
+        total_score_to_bool(self, total_score: int, threshold: int=None) -> bool: 
+            Determines whether the total score meets a threshold and returns a boolean.
+            
+        standard_eval(self) -> bool: 
+            Determines if the company has favorable financial metrics based on the provided scores.
+    """
     def __init__(self, ticker: str, api_key: str, metrics: pd.Series,
                  financial_data: pd.DataFrame) -> None:
+        """
+        Initializes a StandardEvaluation object.
+
+        Args:
+            ticker (str): A string representing the stock ticker of the company.
+            api_key (str): A string representing the API key to use for financial data retrieval.
+            metrics (pd.Series): A Pandas series of financial metrics for the company.
+            financial_data (pd.DataFrame): A Pandas dataframe of the financial data for the company.
+
+        Returns:
+            None
+        """
         self.ticker = ticker
         self.api_key = api_key
         self.metrics = metrics
@@ -38,14 +102,28 @@ class StandardEvaluation:
         
     
     def get_scoring_metrics(self) -> List[str]:
+        """
+        Returns a list of financial metrics to score.
+
+        Returns:
+            List[str]: A list of strings representing financial metrics.
+        """
         scoring_metrics = [
             "eps", "returnOnEquity", "ROIC", "returnOnAssets",
             "debtToTotalCap","totalDebtRatio"
         ]
         return scoring_metrics
     
-    def create_scoring_metrics_results_dict(self, 
-                                            scoring_metrics: List[str]) -> Dict[str, dict]:
+    def create_scoring_metrics_results_dict(self, scoring_metrics: List[str]) -> Dict[str, dict]:
+        """
+        Creates and returns a dictionary of scores and strengths for the provided list of scoring metrics.
+
+        Args:
+        scoring_metrics (List[str]): A list of the scoring metrics to create the dictionary for.
+
+        Returns:
+        Dict[str, dict]: A dictionary of scores and strengths for the provided scoring metrics.
+        """
         scores = dict()
         for metric in scoring_metrics:
             score, strength = self.score_single_metric(metric)
@@ -120,6 +198,18 @@ class StandardEvaluation:
         return self.metrics[header].copy().dropna()
     
     def calculate_mean_growth_rate(self, df: pd.DataFrame, span: int=None) -> float:
+        """
+        Calculates the mean growth rate of a financial metric over a specified span of time.
+
+        Args:
+            df (pd.DataFrame): A pandas DataFrame containing the financial metric data.
+            span (int, optional): The number of periods over which to calculate the growth rate. 
+                If not provided, calculates the growth rate over the full length of the DataFrame.
+
+        Returns:
+            float: The mean growth rate of the financial metric over the specified span of time.
+
+        """
         df_ = df.iloc[-int(span)-1:] if span else df
         slope, intercept = self.get_slope_and_intercept(df_)
         x = range(len(df_))
@@ -131,6 +221,15 @@ class StandardEvaluation:
         return(mean_growth)
     
     def get_slope_and_intercept(self, df: pd.DataFrame) -> Tuple[float, float]:
+        """
+        Calculates the slope and intercept of a linear regression line for the given pandas DataFrame.
+
+        Args:
+            df (pd.DataFrame): A pandas DataFrame containing the data to calculate the slope and intercept from.
+
+        Returns:
+            Tuple[float, float]: A tuple containing the calculated slope and intercept as floats with rounding to 4 decimal places.
+        """
         slope, intercept, _, _, _ = linregress(range(len(df)), df)
         return round(slope,4), round(intercept,4)
 
@@ -190,6 +289,16 @@ class StandardEvaluation:
             return 4
         
     def sum_of_scoring_metric_dict_scores(self, scores_dict: Dict[str, dict]) -> int:
+        """
+        Sums the scores for each metric in a given dictionary of scores and strengths.
+
+        Args:
+            scores_dict (Dict[str, dict]): A dictionary of scores and strengths for various financial metrics.
+
+        Returns:
+            int: The sum of the scores for each metric in the given dictionary. If a score is NaN, it is treated as 0.
+
+        """
         total_score = 0
         for key in scores_dict.keys():
             score = scores_dict[key]['score']
@@ -200,6 +309,16 @@ class StandardEvaluation:
         return total_score
 
     def total_score_to_bool(self, total_score: int, threshold: int=None) -> bool:
+        """
+        Determines if the total score of the scoring metrics meets the threshold.
+
+        Args:
+            total_score (int): The total score of the scoring metrics.
+            threshold (int, optional): The threshold to meet or exceed. Defaults to 2*len(self._scoring_metrics).
+
+        Returns:
+            bool: True if the total score meets or exceeds the threshold, False otherwise.
+        """
         threshold = threshold if threshold else 2*len(self._scoring_metrics)
         return True if total_score >= threshold else False
 
@@ -208,11 +327,10 @@ class StandardEvaluation:
         Determines if the company has favorable financial metrics based on the provided scores.
 
         Args:
-        scores (Dict[str, dict]): A dictionary of scores and strengths for various financial metrics
+            None
 
         Returns:
-        bool: True if the company has favorable financial metrics based on the provided scores, False otherwise.
-        
+            bool: True if the company has favorable financial metrics based on the provided scores, False otherwise.
         """
         total_score = self.sum_of_scoring_metric_dict_scores(self.standard_scores_dict)
         bool_result = self.total_score_to_bool(total_score)
