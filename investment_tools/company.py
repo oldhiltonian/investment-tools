@@ -19,7 +19,7 @@ import math
 from .financial_data import FinancialData
 from .plots import Plots
 from .manual_analysis import ManualAnalysis
-from .evaluation import Evaluation
+from .evaluation import Evaluation, BuffetEvaluation
 
 yf.pdr_override()
 
@@ -165,6 +165,7 @@ class Company:
         if self.verbose:
             self.print_charts()
         self.eval = Evaluation(ticker, api_key, self.metrics, self._financial_data)
+        self.eval_buffet = BuffetEvaluation(ticker, api_key, self.metrics, self._financial_data)
         self.standard_outcome = self.eval.standard_outcome
         if self.standard_outcome:
             self.print_charts()

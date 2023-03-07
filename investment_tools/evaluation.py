@@ -35,7 +35,7 @@ class Evaluation:
         self.standard_scores_dict = \
             self.create_scoring_metrics_results_dict(self._scoring_metrics)
         self.standard_outcome = self.standard_eval()
-        self.buffet_outcome = self.buffet_eval()
+        
     
     def get_scoring_metrics(self):
         scoring_metrics = [
@@ -224,6 +224,15 @@ class Evaluation:
         bool_result = self.total_score_to_bool(total_score)
         return bool_result
     
+
+
+
+class BuffetEvaluation(Evaluation):
+    def __init__(self, ticker: str, api_key: str, metrics: pd.Series,
+                 financial_data: pd.DataFrame) -> None:
+        super().__init__(ticker, api_key, metrics, financial_data)
+        self.buffet_outcome = self.buffet_eval()
+
     def buffet_eval(self) -> bool:
         print('Entering Evaluation.buffet_eval()')
         # 1. is eps increasing reliably?
@@ -360,5 +369,3 @@ class Evaluation:
         # breakeven price neglects the fact that bonds are pre-tax and eps is post-tax
         # and it also excludes the growth rate of the stock
         return True if stock_price <= margin*breakeven_price else False #1.1 for close calls
-
-
