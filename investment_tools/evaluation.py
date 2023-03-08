@@ -333,7 +333,7 @@ class StandardEvaluation:
             bool: True if the company has favorable financial metrics based on the provided scores, False otherwise.
         """
         total_score = self.sum_of_scoring_metric_dict_scores(self.standard_scores_dict)
-        bool_result = self.total_score_to_bool(total_score)
+        bool_result = self.total_score_to_bool(total_score, 16)
         return bool_result
     
 
