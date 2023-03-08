@@ -78,7 +78,7 @@ class StandardEvaluation:
             Determines if the company has favorable financial metrics based on the provided scores.
     """
     def __init__(self, ticker: str, api_key: str, metrics: pd.Series,
-                 financial_data: pd.DataFrame) -> None:
+                 financial_data: FinancialData) -> None:
         """
         Initializes a StandardEvaluation object.
 
@@ -429,12 +429,7 @@ class BuffetEvaluation(StandardEvaluation):
         print('future eps', future_eps)
         print('average PE low', average_PE_low)
         print('average PE high', average_PE_high)                    
-        
 
-
-
-
-        pass
 
 
     def project_future_value(self, current_value: float, rate: float, years: int) -> float:
@@ -443,7 +438,6 @@ class BuffetEvaluation(StandardEvaluation):
     def simple_discount_to_present(self, future, years, rate=0.15):
         return future/((1+rate)**years)
         
-
 
     def get_x_day_mean_stock_price(self, days: int=30) -> float:
         start_date = dt.datetime.now() - dt.timedelta(int(days))
