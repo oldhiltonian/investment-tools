@@ -352,6 +352,7 @@ class BuffetEvaluation(StandardEvaluation):
         print('Entering Evaluation.buffet_eval()')
         # 1. is eps increasing reliably?
         eps_growth_score = self.standard_scores_dict['eps']['score']
+        eps_growth_trend_strength = self.standard_scores_dict['eps']['strength']
 
         # 2. determine the initial rate of return as the current price over known eps
                 # higher price == lower initial rate of return
@@ -394,11 +395,21 @@ class BuffetEvaluation(StandardEvaluation):
         print(bool_better_than_treasury)
 
         # 4. Determine projected annual compounding rate of return Part 1
-            # project the per-share equity value for 5-10 years
-            # multiply that by the projected per-share future RoE
-            # this gives future predicted eps
-            # then calculate the compounding rate of return
-        
+            # Get current equity per share, EPS, dividedperShare, retained Earnings
+            # fot windows of 3, 5, 7, 10 years to the following:
+                # Get historical PayoutRatio, ROE, PE_low and PE_high, PEq_low, PEq_high
+                # Build a table by iteration year by year,  projecting for 10 years the following:
+                    # future EqPS = current*RoE*(1-PayoutRatio)
+                    # EPS =  EqPS*(historicalRoE)
+                    # dividend = EPS*payoutRatio
+                    # Retained earnings = EPS- dividend
+                    # future price 1: PE_high*EPS
+                    # future price 2: PE_low * EPS
+                    # future price 3: PEq_high*EPS
+                    # future price 4: PEq_low*EPS
+                    # discount all future prices to current value using 15% discount rate 
+                    # Calculate compounding rate of return based on current stock price
+                # Append each "windowed table" to a self.dict() with keys "3 year", "5 year", etc       
         equity_per_share = self.metrics['shareholderEquityPerShare']
         current_equity_per_share = equity_per_share.iloc[-1]
         average_roe_7y = self.calculate_mean_growth_rate(equity_per_share, 7)
