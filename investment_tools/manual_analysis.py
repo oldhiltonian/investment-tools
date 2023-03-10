@@ -118,6 +118,8 @@ class ManualAnalysis:
             - Dividend yield for low, high, and average closing stock prices
             - EBITDA ratio
             - Cash per share
+            - shareholderEquityPerShare
+
 
         All ratios are calculated using financial data from the associated FinancialData object.
         """
@@ -127,6 +129,9 @@ class ManualAnalysis:
         dividends_paid = self.data.cash_flow_statements["dividendsPaid"].copy()
         outstanding_shares = self.data.income_statements[
             "outstandingShares_calc"
+        ].copy()
+        total_shareholder_equity = self.data.balance_sheets[
+            "totalStockholdersEquity"
         ].copy()
         cash_and_equivalents = self.data.balance_sheets["cashAndCashEquivalents"].copy()
         eps = self.data.income_statements["eps"].copy()
@@ -155,6 +160,11 @@ class ManualAnalysis:
         df["cashPerShare"] = (
             1 * (cash_and_equivalents - long_term_debt)
         ) / outstanding_shares
+        df['EqPS'] = total_shareholder_equity/outstanding_shares
+        df["PEq_high"] = stock_price_high / df['EqPS']
+        df["PEq_low"] = stock_price_low / df['EqPS']
+        df["PEq_avg_close"] = stock_price_avg / df['EqPS']
+
         return df
 
     def concat_profitability_ratios(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -175,7 +185,6 @@ class ManualAnalysis:
             - Return on invested capital (ROIC)
             - Return on equity (ROE)
             - Return on Assets (ROA)
-            - shareholderEquityPerShare
 
         All ratios are calculated using financial data from the associated FinancialData object.
         """
@@ -189,10 +198,10 @@ class ManualAnalysis:
             self.data.balance_sheets["totalEquity"].copy()
             + self.data.balance_sheets["longTermDebt"].copy()
         )
-        net_income = self.data.income_statements["netIncome"].copy()
         total_shareholder_equity = self.data.balance_sheets[
             "totalStockholdersEquity"
         ].copy()
+        net_income = self.data.income_statements["netIncome"].copy()
         df["grossProfitMargin"] = gross_profit / revenue
         df["operatingProfitMargin"] = operating_income / revenue
         df["pretaxProfitMargin"] = income_before_tax / revenue
@@ -200,7 +209,6 @@ class ManualAnalysis:
         df["ROIC"] = net_income / total_capitalization
         df["returnOnEquity"] = net_income / total_shareholder_equity
         df["returnOnAssets"] = net_income / total_assets
-        df['shareholderEquityPerShare'] = total_shareholder_equity/total_shares
         return df
 
     def concat_debt_interest_ratios(self, df: pd.DataFrame) -> pd.DataFrame:
