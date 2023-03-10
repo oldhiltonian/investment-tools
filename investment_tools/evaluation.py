@@ -350,46 +350,22 @@ class BuffetEvaluation(StandardEvaluation):
     def buffet_eval(self) -> bool:
         print('Entering Evaluation.buffet_eval()')
         # 1. is eps increasing reliably?
-        eps_growth_score = self.standard_scores_dict['eps']['score']
-        eps_growth_trend_strength = self.standard_scores_dict['eps']['strength']
+        test_1_result = self.buffet_test_1_is_eps_increasing()
 
         # 2. determine the initial rate of return as the current price over known eps
                 # higher price == lower initial rate of return
-        current_stock_price = self.get_x_day_mean_stock_price(10)
-        initial_fractional_return = self.calculate_initial_rate_of_return(
-                                        current_stock_price)
-        print('initial rate of return', initial_fractional_return)
+        test_2_result = self.buffet_test_2_initial_RoR()
 
         # 3. determine the per share growth rate over 5, 7 and 10 years
                 # compounding from present - probably use the linregress instead
-                #   of the actual values. 
-        eps = self.metrics['eps']
-        growth_rate_3_years =  round(self.calculate_mean_growth_from_series_trend(eps, 3), 4)
-        growth_rate_5_years =  round(self.calculate_mean_growth_from_series_trend(eps, 5), 4)
-        growth_rate_7_years =  round(self.calculate_mean_growth_from_series_trend(eps, 7), 4)
-        growth_rate_10_years = round(self.calculate_mean_growth_from_series_trend(eps, 10), 4)
-        print('growth_rates for 3, 5, 7, 10 years', growth_rate_3_years, growth_rate_5_years,
-                growth_rate_7_years, growth_rate_10_years)        
-
-        # 3. determine the value of the compnay relative to government bonds
-            # maybe get from fmp-economics-treasury rates
-
-        treasury_yield_5Y = self.get_5Y_treasury_yield_data(
-                                        self.get_treasury_yield_api_url())
-        print('Treasury yield 5Y: ', treasury_yield_5Y)
-
-        breakeven_price_vs_5Y_treasury = self.calculate_breakeven_vs_treasury(
-                                                eps.iloc[-1],
-                                                treasury_yield_5Y
-                                                )
-
-        bool_better_than_treasury = self.treasury_comparison(current_stock_price,
-                                                             breakeven_price_vs_5Y_treasury,
-                                                             1.1)
+                #   of the actual values.
+        test_3_result = self.buffet_test_3_determine_eps_growth()
         
-        print("Is this stock better than holding TBonds?: ", bool_better_than_treasury)
+        # 4. determine the value of the compnay relative to government bonds
+            # maybe get from fmp-economics-treasury rates
+        test_4_result = self.buffet_test_4_compare_to_TBonds()
 
-        # 4. Determine projected annual compounding rate of return Part 1
+        # 5. Determine projected annual compounding rate of return Part 1
             # for lookback windows of 3, 5, 7, 10 years to the following:
                             # (dont take the trendline growth for EqperShare as buybacks affect it quite heavily!)
                 # Take mean series values for RoE, payoutRatio, PE_low and PE_high, PEq_low, PEq_high
@@ -410,14 +386,60 @@ class BuffetEvaluation(StandardEvaluation):
                     # discount all future prices to current value using 15% discount rate 
                     # Calculate compounding rate of return based on current stock price
                 # Append each "windowed table" to a self.dict() with keys "3 year", "5 year", etc     
+        test_5_result_dict = self.buffet_test_5_RoE_projections()
+        self.RoE_projections = test_5_result_dict
+        print(test_5_result_dict)
 
+
+    def buffet_test_1_is_eps_increasing(self):
+        eps_growth_score = self.standard_scores_dict['eps']['score']
+        eps_growth_trend_strength = self.standard_scores_dict['eps']['strength']
+        return True if (eps_growth_score >= 3) and (eps_growth_trend_strength >= 3) else False
+
+    def buffet_test_2_initial_RoR(self):
+        current_stock_price = self.get_x_day_mean_stock_price(10)
+        initial_fractional_return = self.calculate_initial_rate_of_return(
+                                        current_stock_price)
+        return initial_fractional_return
+
+    def buffet_test_3_determine_eps_growth(self):
+        eps = self.metrics['eps']
+        eps_growth_3Y =  round(self.calculate_mean_growth_from_series_trend(eps, 3), 4)
+        eps_growth_5Y =  round(self.calculate_mean_growth_from_series_trend(eps, 5), 4)
+        eps_growth_7Y =  round(self.calculate_mean_growth_from_series_trend(eps, 7), 4)
+        eps_growth_10Y = round(self.calculate_mean_growth_from_series_trend(eps, 10), 4)
+        print('growth_rates for 3, 5, 7, 10 years', eps_growth_3Y, eps_growth_5Y,
+                eps_growth_7Y, eps_growth_10Y)
+        return (eps_growth_3Y, eps_growth_5Y, eps_growth_7Y, eps_growth_10Y)
+
+    def buffet_test_4_compare_to_TBonds(self):
+        eps = self.metrics['eps']
+        current_stock_price = self.get_current_stock_price()
+        treasury_yield_5Y = self.get_5Y_treasury_yield_data(
+                                        self.get_treasury_yield_api_url())
+        print('Treasury yield 5Y: ', treasury_yield_5Y)
+        breakeven_price_vs_5Y_treasury = self.calculate_breakeven_vs_treasury(
+                                                eps.iloc[-1],
+                                                treasury_yield_5Y
+                                                )
+        bool_better_than_treasury = self.treasury_comparison(current_stock_price,
+                                                             breakeven_price_vs_5Y_treasury,
+                                                             1.1)
+        
+        print("Is this stock better than holding TBonds?: ", bool_better_than_treasury)
+        return bool_better_than_treasury
+
+    def buffet_test_5_RoE_projections(self):
         all_projection_window_data = dict()
-        current_stock_price = pdr.get_data_yahoo(self.ticker, dt.date.today()-dt.timedelta(4),
-                                                 dt.date.today(), interval='1d').iloc[-1]['Close']
+        current_stock_price = self.get_current_stock_price()
         print('current stock price', current_stock_price)
         for span in [3, 5, 7, 10]:
-            dataset_data = dict()
-            dataset_name = f"Projections based on {span}-year historical averages."
+            df = self.setup_test_5_RoE_projection_df(span)
+            dataset = self.calc_test_5_RoE_projection_dataset(df, span, current_stock_price)
+            all_projection_window_data[f"{span}Y"] = dataset
+        return all_projection_window_data
+
+    def setup_test_5_RoE_projection_df(self, span):
             future_years = 12
             df_index = range(future_years)
             df_columns = [
@@ -441,10 +463,6 @@ class BuffetEvaluation(StandardEvaluation):
             df = pd.DataFrame(index=df_index, columns=df_columns)
             mean_roe = self.metrics['returnOnEquity'][-span:].mean()
             mean_payout_ratio = self.metrics['dividendPayoutRatio'][-span:].mean()
-            PE_high = self.metrics['PE_high'][-span:].mean()
-            PE_low = self.metrics['PE_low'][-span:].mean()
-            PEq_low = self.metrics['PEq_low'][-span:].mean()
-            PEq_high = self.metrics['PEq_high'][-span:].mean()
             assumed_EPS = self.calculate_trendline_series(self.metrics['eps'])[-1]
             assumed_EqPS = self.calculate_trendline_series(self.metrics['EqPS'])[-1]
             dividend_per_share = assumed_EPS*mean_payout_ratio
@@ -453,63 +471,73 @@ class BuffetEvaluation(StandardEvaluation):
             df.iloc[0]['EPS'] = assumed_EPS
             df.iloc[0]['DPS'] = dividend_per_share
             df.iloc[0]['REPS'] = retained_per_share
-            
+    
             print('roe', mean_roe)
             print('payout', mean_payout_ratio)
+            return df
 
-            for year in range(1, future_years):
-                idx = year-1
-                df.iloc[year]['EqPS'] = (1+mean_roe)*(1-mean_payout_ratio)*df.iloc[idx]['EqPS']
-                df.iloc[year]['EPS'] = (mean_roe)*df.iloc[year]['EqPS']
-                df.iloc[year]['DPS'] = df.iloc[year]['EPS']*mean_payout_ratio
-                df.iloc[year]['REPS'] = df.iloc[year]['EPS'] - df.iloc[year]['DPS']
+    def calc_test_5_RoE_projection_dataset(self, df, span, current_stock_price):
+        dataset = dict()
+        dataset_name = f"Projections based on {span}-year historical averages."
+        mean_roe = self.metrics['returnOnEquity'][-span:].mean()
+        mean_payout_ratio = self.metrics['dividendPayoutRatio'][-span:].mean()
+        PE_high = self.metrics['PE_high'][-span:].mean()
+        PE_low = self.metrics['PE_low'][-span:].mean()
+        PEq_low = self.metrics['PEq_low'][-span:].mean()
+        PEq_high = self.metrics['PEq_high'][-span:].mean()
+        for year in range(1, len(df)):
+            idx = year-1
+            df.iloc[year]['EqPS'] = df.iloc[idx]['EqPS']*(1+mean_roe)*(1-mean_payout_ratio)
+            df.iloc[year]['EPS'] = (mean_roe)*df.iloc[year]['EqPS']
+            df.iloc[year]['DPS'] = df.iloc[year]['EPS']*mean_payout_ratio
+            df.iloc[year]['REPS'] = df.iloc[year]['EPS'] - df.iloc[year]['DPS']
 
-                df.iloc[year]['FV_price_PE_high'] = df.iloc[year]['EPS']*PE_high
-                future_price_PE_high = df.iloc[year]['FV_price_PE_high']
-                PV_price_PE_high = self.simple_discount_to_present(future_price_PE_high, year)
-                df.iloc[year]['PV_price_PE_high'] = PV_price_PE_high
-                rate = self.calculate_simple_compound_interest(current_stock_price,
-                                                               future_price_PE_high, year)
-                df.iloc[year]['RoR_current_price_to_FV_PE_high'] = rate
+            df.iloc[year]['FV_price_PE_high'] = df.iloc[year]['EPS']*PE_high
+            future_price_PE_high = df.iloc[year]['FV_price_PE_high']
+            PV_price_PE_high = self.simple_discount_to_present(future_price_PE_high, year)
+            df.iloc[year]['PV_price_PE_high'] = PV_price_PE_high
+            rate = self.calculate_simple_compound_interest(current_stock_price,
+                                                            future_price_PE_high, year)
+            df.iloc[year]['RoR_current_price_to_FV_PE_high'] = rate
 
-                df.iloc[year]['FV_price_PE_low'] = df.iloc[year]['EPS']*PE_low
-                future_price_PE_low = df.iloc[year]['FV_price_PE_low']
-                PV_price_PE_low = self.simple_discount_to_present(future_price_PE_low, year)
-                df.iloc[year]['PV_price_PE_low'] = PV_price_PE_low
-                rate = self.calculate_simple_compound_interest(current_stock_price,
-                                                               future_price_PE_low, year)
-                df.iloc[year]['RoR_current_price_to_FV_PE_low'] = rate
+            df.iloc[year]['FV_price_PE_low'] = df.iloc[year]['EPS']*PE_low
+            future_price_PE_low = df.iloc[year]['FV_price_PE_low']
+            PV_price_PE_low = self.simple_discount_to_present(future_price_PE_low, year)
+            df.iloc[year]['PV_price_PE_low'] = PV_price_PE_low
+            rate = self.calculate_simple_compound_interest(current_stock_price,
+                                                            future_price_PE_low, year)
+            df.iloc[year]['RoR_current_price_to_FV_PE_low'] = rate
 
-                df.iloc[year]['FV_price_PEq_high'] = df.iloc[year]['EPS']*PEq_high
-                future_price_PEq_high = df.iloc[year]['FV_price_PEq_high']
-                PV_price_PEq_high = self.simple_discount_to_present(future_price_PEq_high, year)
-                df.iloc[year]['PV_price_PEq_high'] = PV_price_PEq_high
-                rate = self.calculate_simple_compound_interest(current_stock_price,
-                                                               future_price_PEq_high, year)
-                df.iloc[year]['RoR_current_price_to_FV_PEq_high'] = rate
+            df.iloc[year]['FV_price_PEq_high'] = df.iloc[year]['EPS']*PEq_high
+            future_price_PEq_high = df.iloc[year]['FV_price_PEq_high']
+            PV_price_PEq_high = self.simple_discount_to_present(future_price_PEq_high, year)
+            df.iloc[year]['PV_price_PEq_high'] = PV_price_PEq_high
+            rate = self.calculate_simple_compound_interest(current_stock_price,
+                                                            future_price_PEq_high, year)
+            df.iloc[year]['RoR_current_price_to_FV_PEq_high'] = rate
 
-                df.iloc[year]['FV_price_PEq_low'] = df.iloc[year]['EPS']*PEq_low
-                future_price_PEq_low = df.iloc[year]['FV_price_PEq_low']
-                PV_price_PEq_low = self.simple_discount_to_present(future_price_PEq_low, year)
-                df.iloc[year]['PV_price_PEq_low'] = PV_price_PEq_low
-                rate = self.calculate_simple_compound_interest(current_stock_price,
-                                                               future_price_PEq_low, year)
-                df.iloc[year]['RoR_current_price_to_FV_PEq_low'] = rate
+            df.iloc[year]['FV_price_PEq_low'] = df.iloc[year]['EPS']*PEq_low
+            future_price_PEq_low = df.iloc[year]['FV_price_PEq_low']
+            PV_price_PEq_low = self.simple_discount_to_present(future_price_PEq_low, year)
+            df.iloc[year]['PV_price_PEq_low'] = PV_price_PEq_low
+            rate = self.calculate_simple_compound_interest(current_stock_price,
+                                                            future_price_PEq_low, year)
+            df.iloc[year]['RoR_current_price_to_FV_PEq_low'] = rate
 
+            dataset['name'] = dataset_name
+            dataset['Historical RoE'] = mean_roe
+            dataset['Historical Payout Ratio'] = mean_payout_ratio
+            dataset['PE_high'] = PE_high
+            dataset['PE_low'] = PE_low
+            dataset['PEq_high'] = PEq_high
+            dataset['PEq_low'] = PEq_low
+            dataset['Projection Table'] = df
+        return dataset
 
-            print(df)
-            dataset_data['name'] = dataset_name
-            dataset_data['Historical RoE'] = mean_roe
-            dataset_data['Historical Payout Ratio'] = mean_payout_ratio
-            dataset_data['PE_high'] = PE_high
-            dataset_data['PE_low'] = PE_low
-            dataset_data['PEq_high'] = PEq_high
-            dataset_data['PEq_low'] = PEq_low
-            dataset_data['Projection Table'] = df
-            all_projection_window_data[f"{span}Y"] = dataset_data
-        self.projections = all_projection_window_data
-
-
+    def get_current_stock_price(self):
+       current_stock_price = pdr.get_data_yahoo(self.ticker, dt.date.today()-dt.timedelta(4),
+                                                 dt.date.today(), interval='1d').iloc[-1]['Close']
+       return current_stock_price
 
     def calculate_trendline_series(self, metric: pd.Series):
         slope, intercept = self.get_slope_and_intercept(metric)
