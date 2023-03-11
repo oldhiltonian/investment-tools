@@ -582,7 +582,9 @@ class BuffetEvaluation(StandardEvaluation):
         """
         response = urlopen(url)
         data = response.read().decode("utf-8")
-        return (json.loads(data)[0]['year5'])/100
+        yield_ = float((json.loads(data)[0]['year5'])/100)
+        assert yield_ not in [np.nan, math.nan]
+        return yield_
     
     def calculate_breakeven_vs_treasury(self, eps, treasury_tield):
         print('breakeven price', eps/treasury_tield)

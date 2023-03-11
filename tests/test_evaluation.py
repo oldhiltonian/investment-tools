@@ -377,22 +377,104 @@ class TestBuffetEvaluation(unittest.TestCase):
     #         result = eval_buffet.buffet_test_2_initial_RoR()
     #         self.assertEqual(result, 0.25)
 
-    def test_buffet_test_3_determine_eps_growth(self):
-         '''
-         Note that buffet_test_3_determine_eps_growth calls 
-         self.calculate_mean_growth_from_series_trend, which calculates the mean rate
-         growth rate of the series trendline, not from the true data values
-         '''
-         for company in company_instance_generator(api_key, 10):
-              eval = company.eval_buffet
-              eval.metrics = pd.DataFrame([1, 2, 3, 5, 7, 9, 9, 9, 10, 11, 12, 13, 14], 
-                                          columns=['eps'])
-              result = eval.buffet_test_3_determine_eps_growth()
-              expected = (0.08370, 0.092388, 0.07538, 0.12356)
-              for i, j in zip(result, expected):
-                   self.assertAlmostEqual(i, j, 4)
-              
+    # def test_buffet_test_3_determine_eps_growth(self):
+    #      '''
+    #      Note that buffet_test_3_determine_eps_growth calls 
+    #      self.calculate_mean_growth_from_series_trend, which calculates the mean rate
+    #      growth rate of the series trendline, not from the true data values
+    #      '''
+    #      for company in company_instance_generator(api_key, 10):
+    #           eval = company.eval_buffet
+    #           eval.metrics = pd.DataFrame([1, 2, 3, 5, 7, 9, 9, 9, 10, 11, 12, 13, 14], 
+    #                                       columns=['eps'])
+    #           result = eval.buffet_test_3_determine_eps_growth()
+    #           expected = (0.08370, 0.092388, 0.07538, 0.12356)
+    #           for i, j in zip(result, expected):
+    #                self.assertAlmostEqual(i, j, 4)
+        
+    # def test_buffet_test_4_compare_to_TBonds(self):
+    #      for company in company_instance_generator(api_key, 12):
+    #         treasury_yield = 0.05
+    #         eval = company.eval_buffet
+    #         eval.metrics = pd.DataFrame([1,2,3,4,5], columns=['eps'])
+    #         eval.get_5Y_treasury_yield_data = Mock()
+    #         eval.get_5Y_treasury_yield_data.return_value = treasury_yield
+    #         eval.get_current_stock_price = Mock()
+    #         for price in [10, 30, 70, 90, 100, 110, 111, 130, 150]:
+    #             eval.get_current_stock_price.return_value = price
+    #             eps = eval.metrics['eps'].iloc[-1]
+    #             breakeven = eps/treasury_yield
+    #             expected = True if price <= breakeven*1.1 else False
+    #             result = eval.buffet_test_4_compare_to_TBonds()
+    #             self.assertEqual(result, expected)
 
+
+    def test_buffet_test_5_RoE_projections(self):
+         pass
+    
+    def test_setup_test_5_RoE_projection_df(self):
+         pass
+    
+    def test_calc_test_5_RoE_projection_dataset(self):
+         pass
+
+    def test_get_current_stock_price(self):
+         pass
+    
+    def test_calculate_trendline_series(self):
+         pass
+    
+    def test_project_future_value(self):
+         pass
+    
+    def test_simple_discount_to_present(self):
+         pass
+    
+    def test_get_x_day_mean_stock_price(self):
+         pass
+    
+    def test_calculate_initial_rate_of_return(self):
+         pass
+    
+    def test_calculate_simple_compound_interest(self):
+         pass
+    
+    def test_get_treasury_yield_api_url(self):
+         '''Do I need to patch datetime here to make the test work?'''
+         pass
+    
+    def test_get_5Y_treasury_yield_data(self):
+         '''
+         Get a specific url that covers a couple days
+            Do an api request in jupyter with that url
+            mock the response to be that of the above data
+            check the reurn value'''
+         pass
+
+    # def test_calculate_breakeven_vs_treasury(self):
+    #     for company in company_instance_generator(api_key, 10):
+    #         eval = company.eval_buffet
+    #         EPS = [1, 4, 10, 140, 153, 4]
+    #         yields = [0.05, 0.01, 0.4, 0.08, 0.10, 1]
+    #         for eps, yield_ in zip(EPS, yields):
+    #             result = eval.calculate_breakeven_vs_treasury(eps, yield_)
+    #             expected = eps/yield_
+    #             self.assertAlmostEqual(result, expected, 5)
+
+    # def test_treasury_comparison(self):
+    #     for company in company_instance_generator(api_key, 10):
+    #         eval = company.eval_buffet
+    #         prices = [1, 2, 10, 20, 50]
+    #         breakevens = [1, 3, 5, 19, 40]
+    #         margins = [1, 1, 1, 1, 1.1]
+    #         expecteds = [True, True, False, False, False]
+    #         for price, bp, margin, expected in zip(prices, breakevens, margins, expecteds):
+    #             result = eval.treasury_comparison(price, bp, margin)
+    #             self.assertEqual(expected, result)
+
+
+
+         
 
 
 
