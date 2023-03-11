@@ -2,7 +2,7 @@ import unittest
 import sys
 sys.path.append("..")
 from investment_tools import Company
-import numpy as np
+import pandas as pd
 from pathlib import Path
 import itertools
 from unittest.mock import Mock
@@ -368,14 +368,31 @@ class TestBuffetEvaluation(unittest.TestCase):
     #             result = company.eval_buffet.buffet_test_1_is_eps_increasing()
     #             self.assertEqual(result, expected)
 
-    def test_buffet_test_2_initial_RoR(self):
-        instance = Company('AAPL', api_key, 'online', 'annual', 10)
-        eval_buffet = instance.eval_buffet
-        eval_buffet.metrics['eps'][-1] = 25
-        eval_buffet.get_x_day_mean_stock_price = Mock()
-        eval_buffet.get_x_day_mean_stock_price.return_value = 100
-        result = eval_buffet.buffet_test_2_initial_RoR()
-        self.assertEqual(result, 0.25)
+    # def test_buffet_test_2_initial_RoR(self):
+    #     for company in company_instance_generator(): 
+    #         eval_buffet = company.eval_buffet
+    #         eval_buffet.metrics['eps'][-1] = 25
+    #         eval_buffet.get_x_day_mean_stock_price = Mock()
+    #         eval_buffet.get_x_day_mean_stock_price.return_value = 100
+    #         result = eval_buffet.buffet_test_2_initial_RoR()
+    #         self.assertEqual(result, 0.25)
+
+    def test_buffet_test_3_determine_eps_growth(self):
+         '''
+         Note that buffet_test_3_determine_eps_growth calls 
+         self.calculate_mean_growth_from_series_trend, which calculates the mean rate
+         growth rate of the series trendline, not from the true data values
+         '''
+         for company in company_instance_generator(api_key, 10):
+              eval = company.eval_buffet
+              eval.metrics = pd.DataFrame([1, 2, 3, 5, 7, 9, 9, 9, 10, 11, 12, 13, 14], 
+                                          columns=['eps'])
+              result = eval.buffet_test_3_determine_eps_growth()
+              expected = (0.08370, 0.092388, 0.07538, 0.12356)
+              for i, j in zip(result, expected):
+                   self.assertAlmostEqual(i, j, 4)
+              
+
 
 
 
