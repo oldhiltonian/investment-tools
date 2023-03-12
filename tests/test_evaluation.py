@@ -81,7 +81,6 @@ with open(key_path) as file:
 #             ]
 #             self.assertEqual(expected, result)
         
-
 #     def test_create_scoring_metrics_results_dict(self):
 #         """
 #         Tests the `create_scoring_metrics_results_dict()` method of the `StandardEvaluation` class.
@@ -254,7 +253,6 @@ with open(key_path) as file:
 #         result_2 = instance.eval.sum_of_scoring_metric_dict_scores(dct_2)
 #         expected_2 = 8       
 #         self.assertEqual(expected_2, result_2)
-
     
 #     def test_total_score_to_bool(self):
 #         """
