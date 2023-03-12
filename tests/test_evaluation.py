@@ -408,7 +408,6 @@ class TestBuffetEvaluation(unittest.TestCase):
     #             result = eval.buffet_test_4_compare_to_TBonds()
     #             self.assertEqual(result, expected)
 
-
     def test_buffet_test_5_RoE_projections(self):
          pass
     
