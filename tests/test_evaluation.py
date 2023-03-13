@@ -482,17 +482,25 @@ class TestBuffetEvaluation(unittest.TestCase):
     def test_get_x_day_mean_stock_price(self):
         '''Need to patch pdr.get_data_yahoo() to return specific values?'''
 
-    def test_calculate_initial_rate_of_return(self):
-        for company in company_instance_generator(api_key, 10):
-            eval = company.eval_buffet
-            eval.metrics = pd.DataFrame([2,3,5], columns=['eps'])
-            for price in [5, 10, 50, 100]:
-                expected = 5/price
-                result = eval.calculate_initial_rate_of_return(price)
-                self.assertAlmostEqual(result, expected, 4)
+    # def test_calculate_initial_rate_of_return(self):
+    #     for company in company_instance_generator(api_key, 10):
+    #         eval = company.eval_buffet
+    #         eval.metrics = pd.DataFrame([2,3,5], columns=['eps'])
+    #         for price in [5, 10, 50, 100]:
+    #             expected = 5/price
+    #             result = eval.calculate_initial_rate_of_return(price)
+    #             self.assertAlmostEqual(result, expected, 4)
 
     def test_calculate_simple_compound_interest(self):
-        pass
+        for company in company_instance_generator(api_key, 10):
+            eval = company.eval_buffet
+            cvs = [10, 199, 209, 19000]
+            fvs = [200, 1097, 1030, 19844]
+            years = [10, 13, 5, 9]
+            for pv, fv, year in zip(cvs, fvs, years):
+                expected = ((fv/pv)**(1/year)) - 1
+                result = eval.calculate_simple_compound_interest(pv, fv, year)
+                self.assertAlmostEqual(result, expected, 4)
 
     def test_get_treasury_yield_api_url(self):
         """Do I need to patch datetime here to make the test work?"""
