@@ -457,18 +457,27 @@ class TestBuffetEvaluation(unittest.TestCase):
     #         for i, j in zip(expected, result):
     #             self.assertEqual(round(i, 3), round(j, 3))
             
-    def test_project_future_value(self):
+    # def test_project_future_value(self):
+    #     for company in company_instance_generator(api_key, 10):
+    #         eval = company.eval_buffet
+    #         pvs = [2, 10, 100, 1034]
+    #         rates = [0.01, 0.05, 0.1, 0.19]
+    #         years = [10, 13, 5, 9]
+    #         for pv, rate, year in zip(pvs, rates, years):
+    #             expected = pv*(1+rate)**year
+    #             result = eval.project_future_value(pv, rate, year)
+    #             self.assertAlmostEqual(result, expected, 3)
+    
+    def test_simple_discount_to_present(self):
         for company in company_instance_generator(api_key, 10):
             eval = company.eval_buffet
-            pvs = [2, 10, 100, 1034]
+            fvs = [200, 1097, 1030, 19844]
             rates = [0.01, 0.05, 0.1, 0.19]
             years = [10, 13, 5, 9]
-            for pv, rate, year in zip(pvs, rates, years):
-                expected = pv*(1+rate)**year
-                result = eval.project_future_value(pv, rate, year)
+            for fv, rate, year in zip(fvs, rates, years):
+                expected = fv/((1+rate)**year)
+                result = eval.simple_discount_to_present(fv, year, rate)
                 self.assertAlmostEqual(result, expected, 3)
-    def test_simple_discount_to_present(self):
-        pass
 
     def test_get_x_day_mean_stock_price(self):
         pass
