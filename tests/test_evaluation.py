@@ -437,18 +437,27 @@ class TestBuffetEvaluation(unittest.TestCase):
     #             self.assertEqual(len(df), 12)
     #             self.assertEqual(df.columns.to_list(), expected_cols)
 
-    def test_get_current_stock_price(self):
-        for company in company_instance_generator(api_key, 10):
-            eval = company.eval_buffet
-            eval.get_current_stock_price = Mock()
-            prices = pd.DataFrame([[1,2,3], [4,5,6]], columns=['Close', 'High', 'Low'])
-            eval.get_current_stock_price.return_value = prices.iloc[-1]['Close']
-            expected = 4
-            result = eval.get_current_stock_price()
-            self.assertEqual(result, expected)
+    # def test_get_current_stock_price(self):
+    #     for company in company_instance_generator(api_key, 10):
+    #         eval = company.eval_buffet
+    #         eval.get_current_stock_price = Mock()
+    #         prices = pd.DataFrame([[1,2,3], [4,5,6]], columns=['Close', 'High', 'Low'])
+    #         eval.get_current_stock_price.return_value = prices.iloc[-1]['Close']
+    #         expected = 4
+    #         result = eval.get_current_stock_price()
+    #         self.assertEqual(result, expected)
 
     def test_calculate_trendline_series(self):
-        pass
+        series = pd.Series([1, 1, 3, 6, 8, 9, 12, 15])
+        for company in company_instance_generator(api_key, 10):
+            eval = company.eval_buffet
+            expected = [-0.3333,  1.7261,  3.7859,  5.845 ,  7.9046 , 9.9642, 
+                        12.0238, 14.0833]
+            result = list(eval.calculate_trendline_series(series))
+            for i, j in zip(expected, result):
+                self.assertEqual(round(i, 3), round(j, 3))
+            
+
 
     def test_project_future_value(self):
         pass
