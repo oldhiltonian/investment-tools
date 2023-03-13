@@ -333,7 +333,7 @@ class Plots:
         value are returned as a tuple.
         """
         slope, intercept, r_value, _, _ = linregress(x, y)
-        return slope, intercept, r_value**2
+        return slope, intercept, r_value ** 2
 
     def generate_linear_series(
         self, x: pd.Series, slope: float, intercept: float

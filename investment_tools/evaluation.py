@@ -176,7 +176,7 @@ class StandardEvaluation:
         """
         try:
             slope, intercept, r_val, _, _ = linregress(range(len(metrics)), metrics)
-            return r_val**2
+            return r_val ** 2
         except ValueError:
             return 0.0
 
