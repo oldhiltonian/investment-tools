@@ -57,7 +57,7 @@ class StandardEvaluation:
         get_copy_of_df_column(self, header: str) -> pd.Series:
             Returns a copy of a pandas Series for a given column header in the calculated metrics DataFrame.
 
-        calculate_mean_growth_rate(self, df: pd.DataFrame, span: int=None) -> float:
+        calculate_mean_growth_from_series_trend(self, df: pd.DataFrame, span: int=None) -> float:
             Calculates the mean growth rate of a metric over a specified time span.
 
         get_slope_and_intercept(self, df: pd.DataFrame) -> Tuple[float, float]:
