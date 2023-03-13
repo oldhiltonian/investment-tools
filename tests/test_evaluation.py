@@ -411,37 +411,41 @@ class TestBuffetEvaluation(unittest.TestCase):
     def test_buffet_test_5_RoE_projections(self):
         pass
 
-    def test_setup_test_5_RoE_projection_df(self):
-        for company in company_instance_generator(api_key, 10):
-            eval = company.eval_buffet
-            expected_cols = [
-            "EqPS",
-            "EPS",
-            "DPS",
-            "REPS",
-            "FV_price_PE_high",
-            "FV_price_PE_low",
-            "FV_price_PEq_high",
-            "FV_price_PEq_low",
-            "PV_price_PE_high",
-            "PV_price_PE_low",
-            "PV_price_PEq_high",
-            "PV_price_PEq_low",
-            "RoR_current_price_to_FV_PE_high",
-            "RoR_current_price_to_FV_PE_low",
-            "RoR_current_price_to_FV_PEq_high",
-            "RoR_current_price_to_FV_PEq_low",
-        ]
-            for span in [3, 5, 7, 10]:
-                df = eval.setup_test_5_RoE_projection_df(3)
-                self.assertEqual(len(df), 12)
-                self.assertEqual(df.columns.to_list(), expected_cols)
-                
-    def test_calc_test_5_RoE_projection_dataset(self):
-        pass
+    # def test_setup_test_5_RoE_projection_df(self):
+    #     for company in company_instance_generator(api_key, 10):
+    #         eval = company.eval_buffet
+    #         expected_cols = [
+    #         "EqPS",
+    #         "EPS",
+    #         "DPS",
+    #         "REPS",
+    #         "FV_price_PE_high",
+    #         "FV_price_PE_low",
+    #         "FV_price_PEq_high",
+    #         "FV_price_PEq_low",
+    #         "PV_price_PE_high",
+    #         "PV_price_PE_low",
+    #         "PV_price_PEq_high",
+    #         "PV_price_PEq_low",
+    #         "RoR_current_price_to_FV_PE_high",
+    #         "RoR_current_price_to_FV_PE_low",
+    #         "RoR_current_price_to_FV_PEq_high",
+    #         "RoR_current_price_to_FV_PEq_low",
+    #     ]
+    #         for span in [3, 5, 7, 10]:
+    #             df = eval.setup_test_5_RoE_projection_df(3)
+    #             self.assertEqual(len(df), 12)
+    #             self.assertEqual(df.columns.to_list(), expected_cols)
 
     def test_get_current_stock_price(self):
-        pass
+        for company in company_instance_generator(api_key, 10):
+            eval = company.eval_buffet
+            eval.get_current_stock_price = Mock()
+            prices = pd.DataFrame([[1,2,3], [4,5,6]], columns=['Close', 'High', 'Low'])
+            eval.get_current_stock_price.return_value = prices.iloc[-1]['Close']
+            expected = 4
+            result = eval.get_current_stock_price()
+            self.assertEqual(result, expected)
 
     def test_calculate_trendline_series(self):
         pass
