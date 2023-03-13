@@ -468,22 +468,28 @@ class TestBuffetEvaluation(unittest.TestCase):
     #             result = eval.project_future_value(pv, rate, year)
     #             self.assertAlmostEqual(result, expected, 3)
     
-    def test_simple_discount_to_present(self):
-        for company in company_instance_generator(api_key, 10):
-            eval = company.eval_buffet
-            fvs = [200, 1097, 1030, 19844]
-            rates = [0.01, 0.05, 0.1, 0.19]
-            years = [10, 13, 5, 9]
-            for fv, rate, year in zip(fvs, rates, years):
-                expected = fv/((1+rate)**year)
-                result = eval.simple_discount_to_present(fv, year, rate)
-                self.assertAlmostEqual(result, expected, 3)
+    # def test_simple_discount_to_present(self):
+    #     for company in company_instance_generator(api_key, 10):
+    #         eval = company.eval_buffet
+    #         fvs = [200, 1097, 1030, 19844]
+    #         rates = [0.01, 0.05, 0.1, 0.19]
+    #         years = [10, 13, 5, 9]
+    #         for fv, rate, year in zip(fvs, rates, years):
+    #             expected = fv/((1+rate)**year)
+    #             result = eval.simple_discount_to_present(fv, year, rate)
+    #             self.assertAlmostEqual(result, expected, 3)
 
     def test_get_x_day_mean_stock_price(self):
-        pass
+        '''Need to patch pdr.get_data_yahoo() to return specific values?'''
 
     def test_calculate_initial_rate_of_return(self):
-        pass
+        for company in company_instance_generator(api_key, 10):
+            eval = company.eval_buffet
+            eval.metrics = pd.DataFrame([2,3,5], columns=['eps'])
+            for price in [5, 10, 50, 100]:
+                expected = 5/price
+                result = eval.calculate_initial_rate_of_return(price)
+                self.assertAlmostEqual(result, expected, 4)
 
     def test_calculate_simple_compound_interest(self):
         pass

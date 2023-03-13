@@ -603,7 +603,7 @@ class BuffetEvaluation(StandardEvaluation):
         return price
 
     def calculate_initial_rate_of_return(self, price: float) -> float:
-        latest_eps = self.metrics["eps"][-1]
+        latest_eps = self.metrics["eps"].iloc[-1]
         return latest_eps / price
 
     def calculate_simple_compound_interest(
