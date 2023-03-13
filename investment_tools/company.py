@@ -6,6 +6,7 @@ from .evaluation import StandardEvaluation, BuffetEvaluation
 
 yf.pdr_override()
 
+
 class Company:
     """
     Class representing a company and its financial analysis
@@ -90,25 +91,25 @@ class Company:
 
     score_trend_strength(r2: float) -> int:
         Calculates the trend strength score based on the R^2 value of a metric.
-    
+
         Args:
         r2 (float): The R^2 value of a metric.
-        
+
         Returns:
         int: The trend strength score.
 
     eval_(scores: Dict[str, dict]) -> bool:
         Evaluates the overall recommendation for the company based on the scores for each metric.
-        
+
         Args:
         scores (Dict[str, dict]): A dictionary of scores for each metric.
-        
+
         Returns:
         bool: True if the recommendation is positive, False otherwise.
 
     print_charts() -> None:
         Prints the trend charts for each metric.
-        
+
         Returns:
         None
 
@@ -117,8 +118,13 @@ class Company:
     """
 
     def __init__(
-        self, ticker: str, api_key: str, data: str="online", period: str="annual", 
-        limit: int=20, verbose: bool=False
+        self,
+        ticker: str,
+        api_key: str,
+        data: str = "online",
+        period: str = "annual",
+        limit: int = 20,
+        verbose: bool = False,
     ):
         """
         Initialize a new instance of the Company class.
@@ -148,21 +154,23 @@ class Company:
         self._charts_printed = False
         if self.verbose:
             self.print_charts()
-        self.eval = StandardEvaluation(ticker, api_key, self.metrics, self._financial_data)
-        self.eval_buffet = BuffetEvaluation(ticker, api_key, self.metrics, self._financial_data)
+        self.eval = StandardEvaluation(
+            ticker, api_key, self.metrics, self._financial_data
+        )
+        self.eval_buffet = BuffetEvaluation(
+            ticker, api_key, self.metrics, self._financial_data
+        )
         self.standard_outcome = self.eval.standard_outcome
         if self.standard_outcome:
             self.print_charts()
             self.export()
 
-   
-
     def print_charts(self) -> None:
         """
         Prints the trend charts for the company's financial metrics.
-        
+
         If the charts have already been printed, this method does nothing.
-        
+
         Returns:
         None
         """

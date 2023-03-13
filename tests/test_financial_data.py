@@ -1,5 +1,6 @@
 import unittest
 import sys
+
 sys.path.append("..")
 from investment_tools.financial_data import FinancialData
 import requests
@@ -9,9 +10,10 @@ from pathlib import Path
 import itertools
 
 
-key_path = Path().home()/'desktop'/'FinancialModellingPrep_API.txt'
+key_path = Path().home() / "desktop" / "FinancialModellingPrep_API.txt"
 with open(key_path) as file:
     api_key = file.read()
+
 
 class TestFinancialData(unittest.TestCase):
     """
@@ -35,19 +37,23 @@ class TestFinancialData(unittest.TestCase):
         This method is called before any test methods are run.
         """
         # self.tickers = ['AAPL', 'MSFT', 'NVDA','VAC', 'WBA', 'ATVI', 'A', 'AMD']
-        cls.tickers = ['AAPL']
+        cls.tickers = ["AAPL"]
         cls.api_key = api_key
-        cls.data =    ['online', 'local']
-        cls.period =  ['annual', 'quarter']
+        cls.data = ["online", "local"]
+        cls.period = ["annual", "quarter"]
         cls.limit = 120
         cls.zipped_args_tdp = list(itertools.product(cls.tickers, cls.data, cls.period))
-        cls.generic_instance = FinancialData('AAPL', cls.api_key, 'local', 'annual', 10)
+        cls.generic_instance = FinancialData("AAPL", cls.api_key, "local", "annual", 10)
 
     def test_replace_None(self):
         for ticker, data, period in self.zipped_args_tdp:
             instance = FinancialData(ticker, self.api_key, data, period, self.limit)
-            none_df = pd.DataFrame({'A': [1, None, 3, None, 5], 'B': [6, 7, None, 9, 10]})
-            expected = pd.DataFrame({'A': [1., 0., 3., 0., 5.], 'B': [6., 7., 0., 9., 10.]})
+            none_df = pd.DataFrame(
+                {"A": [1, None, 3, None, 5], "B": [6, 7, None, 9, 10]}
+            )
+            expected = pd.DataFrame(
+                {"A": [1.0, 0.0, 3.0, 0.0, 5.0], "B": [6.0, 7.0, 0.0, 9.0, 10.0]}
+            )
             result = instance.replace_None(none_df)
             self.assertEqual(expected.equals(result), True)
 
@@ -71,7 +77,7 @@ class TestFinancialData(unittest.TestCase):
             instance.period = 1
             with self.assertRaises(AssertionError):
                 instance.assert_valid_user_inputs()
-        
+
     def test_generate_request_url(self):
         """
         Test that the generate_request_url method returns the expected URL strings for the
@@ -91,18 +97,18 @@ class TestFinancialData(unittest.TestCase):
         """
         for ticker, data, period in self.zipped_args_tdp:
             instance = FinancialData(ticker, self.api_key, data, period, self.limit)
-            bs_str = f'https://financialmodelingprep.com/api/v3/balance-sheet-statement/{ticker}?period={period}&limit={self.limit}&apikey={api_key}'
-            is_str = f'https://financialmodelingprep.com/api/v3/income-statement/{ticker}?period={period}&limit={self.limit}&apikey={api_key}'
-            cfs_str = f'https://financialmodelingprep.com/api/v3/cash-flow-statement/{ticker}?period={period}&limit={self.limit}&apikey={api_key}'
-            metric_str = f'https://financialmodelingprep.com/api/v3/ratios/{ticker}?period={period}&limit={self.limit}&apikey={api_key}'
-            self.assertEqual(instance.generate_request_url('bs'), bs_str)
-            self.assertEqual(instance.generate_request_url('is'), is_str)
-            self.assertEqual(instance.generate_request_url('cfs'), cfs_str)
-            self.assertEqual(instance.generate_request_url('metrics'), metric_str)
+            bs_str = f"https://financialmodelingprep.com/api/v3/balance-sheet-statement/{ticker}?period={period}&limit={self.limit}&apikey={api_key}"
+            is_str = f"https://financialmodelingprep.com/api/v3/income-statement/{ticker}?period={period}&limit={self.limit}&apikey={api_key}"
+            cfs_str = f"https://financialmodelingprep.com/api/v3/cash-flow-statement/{ticker}?period={period}&limit={self.limit}&apikey={api_key}"
+            metric_str = f"https://financialmodelingprep.com/api/v3/ratios/{ticker}?period={period}&limit={self.limit}&apikey={api_key}"
+            self.assertEqual(instance.generate_request_url("bs"), bs_str)
+            self.assertEqual(instance.generate_request_url("is"), is_str)
+            self.assertEqual(instance.generate_request_url("cfs"), cfs_str)
+            self.assertEqual(instance.generate_request_url("metrics"), metric_str)
             with self.assertRaises(ValueError):
-                instance.generate_request_url('')
+                instance.generate_request_url("")
                 instance.generate_request_url(4)
-                instance.generate_request_url('42')
+                instance.generate_request_url("42")
 
     def test_fetch_raw_data(self):
         """
@@ -122,15 +128,15 @@ class TestFinancialData(unittest.TestCase):
         """
         for ticker, data, period in self.zipped_args_tdp:
             instance = FinancialData(ticker, api_key, data, period)
-            for string in ['bs', 'is', 'cfs', 'metrics']:
+            for string in ["bs", "is", "cfs", "metrics"]:
                 raw_data = instance.fetch_raw_data(string)
-                expected_type = requests.Response if data == 'online' else pd.DataFrame
+                expected_type = requests.Response if data == "online" else pd.DataFrame
                 self.assertEqual(isinstance(raw_data, expected_type), True)
                 with self.assertRaises(ValueError):
-                    instance.fetch_raw_data('')
+                    instance.fetch_raw_data("")
                     instance.fetch_raw_data(4)
                     instance.fetch_raw_data(42)
-        
+
     def test_get_load_path(self):
         """
         Test that the get_load_path method returns the expected file path for the balance sheet,
@@ -149,27 +155,39 @@ class TestFinancialData(unittest.TestCase):
         """
         for ticker, data, period in self.zipped_args_tdp:
             instance = FinancialData(ticker, self.api_key, data, period, self.limit)
-            bs_str = (f'''C:\\Users\\John\\Desktop\\Git\\investment-tools\\data\\
-                            Company_Financial_Data\\{ticker}\\{period}\\balance_sheets.parquet''')
-            is_str = f'''C:\\Users\\John\\Desktop\\Git\\investment-tools\\data\\
-                            Company_Financial_Data\\{ticker}\\{period}\\income_statements.parquet'''
-            cfs_str = f'''C:\\Users\\John\\Desktop\\Git\\investment-tools\\data\\
-                        Company_Financial_Data\\{ticker}\\{period}\\cash_flow_statements.parquet'''
-            metric_str = f'''C:\\Users\\John\\Desktop\\Git\\investment-tools\\data\\
-                        Company_Financial_Data\\{ticker}\\{period}\\reported_key_metrics.parquet'''
-            price_str = f'''C:\\Users\\John\\Desktop\\Git\\investment-tools\\data\\
-                        Company_Financial_Data\\{ticker}\\{period}\\stock_price_data.parquet'''
-            bs_str = bs_str.replace('\n', '').replace('\t', '').replace(' ', '')
-            is_str = is_str.replace('\n', '').replace('\t', '').replace(' ', '')
-            cfs_str = cfs_str.replace('\n', '').replace('\t', '').replace(' ', '')
-            metric_str = metric_str.replace('\n', '').replace('\t', '').replace(' ', '')
-            price_str = price_str.replace('\n', '').replace('\t', '').replace(' ', '')
+            bs_str = f"""C:\\Users\\John\\Desktop\\Git\\investment-tools\\data\\
+                            Company_Financial_Data\\{ticker}\\{period}\\balance_sheets.parquet"""
+            is_str = f"""C:\\Users\\John\\Desktop\\Git\\investment-tools\\data\\
+                            Company_Financial_Data\\{ticker}\\{period}\\income_statements.parquet"""
+            cfs_str = f"""C:\\Users\\John\\Desktop\\Git\\investment-tools\\data\\
+                        Company_Financial_Data\\{ticker}\\{period}\\cash_flow_statements.parquet"""
+            metric_str = f"""C:\\Users\\John\\Desktop\\Git\\investment-tools\\data\\
+                        Company_Financial_Data\\{ticker}\\{period}\\reported_key_metrics.parquet"""
+            price_str = f"""C:\\Users\\John\\Desktop\\Git\\investment-tools\\data\\
+                        Company_Financial_Data\\{ticker}\\{period}\\stock_price_data.parquet"""
+            bs_str = bs_str.replace("\n", "").replace("\t", "").replace(" ", "")
+            is_str = is_str.replace("\n", "").replace("\t", "").replace(" ", "")
+            cfs_str = cfs_str.replace("\n", "").replace("\t", "").replace(" ", "")
+            metric_str = metric_str.replace("\n", "").replace("\t", "").replace(" ", "")
+            price_str = price_str.replace("\n", "").replace("\t", "").replace(" ", "")
 
-            self.assertEqual(str(Path(bs_str)), str(instance.get_load_path('bs', ticker, period)))
-            self.assertEqual(str(Path(is_str)), str(instance.get_load_path('is', ticker, period)))
-            self.assertEqual(str(Path(cfs_str)), str(instance.get_load_path('cfs', ticker, period)))
-            self.assertEqual(str(Path(metric_str)), str(instance.get_load_path('metrics', ticker, period)))
-            self.assertEqual(str(Path(price_str)), str(instance.get_load_path('price', ticker, period)))
+            self.assertEqual(
+                str(Path(bs_str)), str(instance.get_load_path("bs", ticker, period))
+            )
+            self.assertEqual(
+                str(Path(is_str)), str(instance.get_load_path("is", ticker, period))
+            )
+            self.assertEqual(
+                str(Path(cfs_str)), str(instance.get_load_path("cfs", ticker, period))
+            )
+            self.assertEqual(
+                str(Path(metric_str)),
+                str(instance.get_load_path("metrics", ticker, period)),
+            )
+            self.assertEqual(
+                str(Path(price_str)),
+                str(instance.get_load_path("price", ticker, period)),
+            )
 
     def test_get_frame_indecies(self):
         """
@@ -189,9 +207,13 @@ class TestFinancialData(unittest.TestCase):
         """
         for ticker, data, period in self.zipped_args_tdp:
             instance = FinancialData(ticker, self.api_key, data, period, self.limit)
-            for item in [instance.balance_sheets, instance.income_statements,
-                              instance.cash_flow_statements, instance.reported_key_metrics,
-                              instance.stock_price_data]:
+            for item in [
+                instance.balance_sheets,
+                instance.income_statements,
+                instance.cash_flow_statements,
+                instance.reported_key_metrics,
+                instance.stock_price_data,
+            ]:
                 expected = item.index
                 self.assertEqual(instance.get_frame_indecies().equals(expected), True)
 
@@ -217,14 +239,18 @@ class TestFinancialData(unittest.TestCase):
             length = len(instance.balance_sheets)
             expected = pd.Index([str(i) for i in range(length)])
             instance.frame_indecies = expected
-            for item in [instance.balance_sheets, instance.income_statements,
-                        instance.cash_flow_statements, instance.reported_key_metrics,
-                        instance.stock_price_data]:
+            for item in [
+                instance.balance_sheets,
+                instance.income_statements,
+                instance.cash_flow_statements,
+                instance.reported_key_metrics,
+                instance.stock_price_data,
+            ]:
                 instance.set_frame_index(item)
                 result = item.index
                 self.assertEqual(expected.equals(result), True)
 
-   # '''Design a test for build_dataframe'''
+    # '''Design a test for build_dataframe'''
 
     def test_generate_index(self):
         """
@@ -240,19 +266,19 @@ class TestFinancialData(unittest.TestCase):
         Returns:
             None.
         """
-        test_dates = ['1900-09-10', '1945-12-12', '2020-01-01', '2022-05-02']
+        test_dates = ["1900-09-10", "1945-12-12", "2020-01-01", "2022-05-02"]
         for date in test_dates:
             for ticker, data, period in self.zipped_args_tdp:
                 instance = FinancialData(ticker, self.api_key, data, period, self.limit)
-                year, month, _ = [int(i) for i in date.split('-')]
-                if instance.period == 'annual':
+                year, month, _ = [int(i) for i in date.split("-")]
+                if instance.period == "annual":
                     expected = f"{instance.ticker}-FY-{year}"
                 else:
-                    if month in (1,2,3):
+                    if month in (1, 2, 3):
                         quarter = 1
-                    elif month in (4,5,6):
+                    elif month in (4, 5, 6):
                         quarter = 2
-                    elif month in (7,8,9):
+                    elif month in (7, 8, 9):
                         quarter = 3
                     elif month in (10, 11, 12):
                         quarter = 4
@@ -275,11 +301,11 @@ class TestFinancialData(unittest.TestCase):
         Returns:
             None.
         """
-        test_dates = ['1900-09-10', '1945-12-12', '2020-01-01', '2022-05-02']
+        test_dates = ["1900-09-10", "1945-12-12", "2020-01-01", "2022-05-02"]
         for date in test_dates:
             for ticker, data, period in self.zipped_args_tdp:
                 instance = FinancialData(ticker, self.api_key, data, period, self.limit)
-                year, month, day = [int(i) for i in date.split()[0].split('-')]
+                year, month, day = [int(i) for i in date.split()[0].split("-")]
                 expected = dt.date(year, month, day)
                 result = instance.generate_date(date)
                 self.assertEqual(expected, result)
@@ -302,7 +328,7 @@ class TestFinancialData(unittest.TestCase):
         """
         for ticker, data, period in self.zipped_args_tdp:
             instance = FinancialData(ticker, self.api_key, data, period, self.limit)
-            new_df = pd.DataFrame({'date': [str(i) for i in range(30)]})
+            new_df = pd.DataFrame({"date": [str(i) for i in range(30)]})
             instance.balance_sheets = new_df.copy()
             instance.income_statements = new_df.copy()
             instance.cash_flow_statements = new_df.copy()
@@ -310,11 +336,11 @@ class TestFinancialData(unittest.TestCase):
             expected = True
             result = instance.check_for_matching_indecies()
             self.assertEqual(expected, result)
-            instance.balance_sheets = pd.DataFrame({'date': []})
+            instance.balance_sheets = pd.DataFrame({"date": []})
             expected = False
             result = instance.check_for_matching_indecies()
             self.assertEqual(expected, result)
-            
+
     def test_get_common_df_indecies(self):
         """
         Test that the get_common_df_indicies method returns the expected index for a given FinancialData instance.
@@ -332,14 +358,18 @@ class TestFinancialData(unittest.TestCase):
         """
         for ticker, data, period in self.zipped_args_tdp:
             instance = FinancialData(ticker, self.api_key, data, period, self.limit)
-            instance.balance_sheets = pd.DataFrame({'A': [1, 2, 3]}, index=[0, 1, 2])
-            instance.income_statements = pd.DataFrame({'B': [4, 5, 6]}, index=[1, 2, 0])
-            instance.cash_flow_statements = pd.DataFrame({'C': [6, 7, 8]}, index=[2, 3, 0])
-            instance.reported_key_metrics = pd.DataFrame({'D': [8, 9, 0]}, index=[3, 2, 8])
+            instance.balance_sheets = pd.DataFrame({"A": [1, 2, 3]}, index=[0, 1, 2])
+            instance.income_statements = pd.DataFrame({"B": [4, 5, 6]}, index=[1, 2, 0])
+            instance.cash_flow_statements = pd.DataFrame(
+                {"C": [6, 7, 8]}, index=[2, 3, 0]
+            )
+            instance.reported_key_metrics = pd.DataFrame(
+                {"D": [8, 9, 0]}, index=[3, 2, 8]
+            )
             expected = pd.Index([2])
             result = instance.get_common_df_indicies()
             self.assertEqual(expected, result)
-        
+
     def test_filter_for_common_indecies(self):
         """
         Test that the filter_for_common_indecies method filters all financial statements
@@ -359,14 +389,17 @@ class TestFinancialData(unittest.TestCase):
         """
         for ticker, data, period in self.zipped_args_tdp:
             instance = FinancialData(ticker, self.api_key, data, period, self.limit)
-            instance.balance_sheets = pd.DataFrame({'A': [1, 2, 3]}, index=[0, 1, 2])
-            instance.income_statements = pd.DataFrame({'B': [4, 5, 6]}, index=[1, 2, 0])
-            instance.cash_flow_statements = pd.DataFrame({'C': [6, 7, 8]}, index=[2, 3, 0])
-            instance.reported_key_metrics = pd.DataFrame({'D': [8, 9, 0]}, index=[3, 2, 8])
+            instance.balance_sheets = pd.DataFrame({"A": [1, 2, 3]}, index=[0, 1, 2])
+            instance.income_statements = pd.DataFrame({"B": [4, 5, 6]}, index=[1, 2, 0])
+            instance.cash_flow_statements = pd.DataFrame(
+                {"C": [6, 7, 8]}, index=[2, 3, 0]
+            )
+            instance.reported_key_metrics = pd.DataFrame(
+                {"D": [8, 9, 0]}, index=[3, 2, 8]
+            )
             instance.filter_for_common_indecies(pd.Index([2]))
             result = instance.get_common_df_indicies()
             self.assertEqual(pd.Index([2]), result)
-
 
     def test_assert_identical_indecies(self):
         """
@@ -413,13 +446,14 @@ class TestFinancialData(unittest.TestCase):
         """
         for ticker, data, period in self.zipped_args_tdp:
             instance = FinancialData(ticker, self.api_key, data, period, self.limit)
-            lengths = [10, 12, 25, 500, 1000] if period == 'quarter' else [3, 4, 7, 12, 1000]
+            lengths = (
+                [10, 12, 25, 500, 1000] if period == "quarter" else [3, 4, 7, 12, 1000]
+            )
             for length in lengths:
                 instance.assert_required_length(range(length))
-            fail = range(3) if period == 'quarter' else range(1)
+            fail = range(3) if period == "quarter" else range(1)
             with self.assertRaises(AssertionError):
                 instance.assert_required_length(fail)
-            
 
     def test_assert_valid_server_response(self):
         """
@@ -437,8 +471,8 @@ class TestFinancialData(unittest.TestCase):
             None.
         """
         for ticker, _, period in self.zipped_args_tdp:
-            instance = FinancialData(ticker, self.api_key, 'online', period, self.limit)
-            response = instance.fetch_raw_data('bs')
+            instance = FinancialData(ticker, self.api_key, "online", period, self.limit)
+            response = instance.fetch_raw_data("bs")
             instance.assert_valid_server_response(response)
 
     def test_assert_server_response_not_empty(self):
@@ -484,6 +518,5 @@ class TestFinancialData(unittest.TestCase):
             self.assertGreater(len(data), 0)
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

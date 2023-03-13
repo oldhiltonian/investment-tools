@@ -70,8 +70,14 @@ class Plots:
 
     """
 
-    def __init__(self, ticker: str, period: str, metrics: pd.DataFrame, limit: str, 
-                    filing_dates: pd.Index):
+    def __init__(
+        self,
+        ticker: str,
+        period: str,
+        metrics: pd.DataFrame,
+        limit: str,
+        filing_dates: pd.Index,
+    ):
         """
         Creates an instance of the `Plots` class.
 
@@ -102,15 +108,15 @@ class Plots:
 
     @staticmethod
     def get_metric_units_dict() -> Dict:
-        '''
+        """
         Returns the dictionary that maps the financial metric with its corresponding unit.
 
         Args:
             None
 
-        Returns: 
+        Returns:
             Dict: the mapping dictionary.
-        '''
+        """
         metric_units_dict = {
             "Stock Evaluation Ratios": {
                 "eps": "$/share",
@@ -210,7 +216,7 @@ class Plots:
 
     def calculate_subplots_shape(self, metrics_container: List) -> Tuple[int, int]:
         """
-        Calculates the number of rows and columns required for the subplot grid, based on the number of 
+        Calculates the number of rows and columns required for the subplot grid, based on the number of
             metrics to be plotted.
 
         Args:
@@ -269,7 +275,7 @@ class Plots:
 
         Args:
             axis (plt.subplot): The axis on which to plot the data.
-            data (dict): A dictionary containing the plotting data, including the metric data, labels, 
+            data (dict): A dictionary containing the plotting data, including the metric data, labels,
                 and units of measure.
         """
         axis.plot(data["y"], label="data")
@@ -277,13 +283,13 @@ class Plots:
         axis.set_xticks(data["x_true"])
         axis.set_xticklabels(data["x_labels"])
         axis.set_ylabel(data["y_label"])
-        axis = self.scale_y_axis(axis, data['metric'])
+        axis = self.scale_y_axis(axis, data["metric"])
         return axis
 
     def scale_y_axis(self, axis: plt.axis, data_str: str) -> plt.axis:
-        '''
-        Scales the y-axis of a given axis object based on the value of the 
-        data_str parameter. 
+        """
+        Scales the y-axis of a given axis object based on the value of the
+        data_str parameter.
 
         Args:
             axis (plt.axis): The axis to modify.
@@ -291,22 +297,28 @@ class Plots:
 
         Returns:
             plt.axis: The modified axis object, with the y-axis limits set according to the data_str parameter.
-        '''
-        if data_str == 'PE_high':
+        """
+        if data_str == "PE_high":
             y_bounds = [0, 40]
-        elif data_str == 'PE_low':
+        elif data_str == "PE_low":
             y_bounds = [0, 40]
-        elif data_str in ['dividendPayoutRatio', 'ebitdaratio', 'debtToTotalCap',
-                          'totalDebtRatio']:
+        elif data_str in [
+            "dividendPayoutRatio",
+            "ebitdaratio",
+            "debtToTotalCap",
+            "totalDebtRatio",
+        ]:
             y_bounds = [0, 1]
         else:
             return axis
         axis.set_ylim(y_bounds)
         return axis
 
-    def get_linear_coeffs(self, x: pd.Series, y: pd.Series) -> Tuple[float, float, float]:
+    def get_linear_coeffs(
+        self, x: pd.Series, y: pd.Series
+    ) -> Tuple[float, float, float]:
         """
-        Calculate the linear regression coefficients and coefficient of determination (R-squared) 
+        Calculate the linear regression coefficients and coefficient of determination (R-squared)
         for the given x and y data points.
 
         Args:
@@ -316,16 +328,18 @@ class Plots:
         Returns:
             Tuple[float, float, float]: A tuple containing the slope, intercept, and R-squared value.
 
-        Calculates the linear regression coefficients for the given x and y data points using the 
-        `linregress` function from the `scipy.stats` module. The slope, intercept, and R-squared 
+        Calculates the linear regression coefficients for the given x and y data points using the
+        `linregress` function from the `scipy.stats` module. The slope, intercept, and R-squared
         value are returned as a tuple.
         """
         slope, intercept, r_value, _, _ = linregress(x, y)
-        return slope, intercept, r_value ** 2
+        return slope, intercept, r_value**2
 
-    def generate_linear_series(self, x: pd.Series, slope: float, intercept: float) -> pd.Series:
+    def generate_linear_series(
+        self, x: pd.Series, slope: float, intercept: float
+    ) -> pd.Series:
         """
-        Returns a pandas Series containing the y-values of a linear series with the given x-values, 
+        Returns a pandas Series containing the y-values of a linear series with the given x-values,
         slope, and intercept.
 
         Args:
@@ -338,7 +352,9 @@ class Plots:
         """
         return slope * x + intercept
 
-    def plot_linear_trend(self, axis: plt.axis, x: pd.Series, y: pd.Series, r2: float) -> plt.axis:
+    def plot_linear_trend(
+        self, axis: plt.axis, x: pd.Series, y: pd.Series, r2: float
+    ) -> plt.axis:
         """
         Plots linear regression line on given axis with r-squared value in legend.
 
@@ -357,11 +373,11 @@ class Plots:
 
     def plot_metrics(self) -> None:
         """
-        The plot_metrics method generates plots of financial metrics for a given company. The method first 
-            generates the necessary subplots to hold each metric type. Each metric type is then plotted on 
-            an individual axis within the metric type's subplot. Each metric's trend data is gathered, and 
-            its trend is plotted on the selected axis. A linear trendline is also plotted along with its 
-            corresponding R2 value. Finally, each metric type's subplot is given a title and added to the 
+        The plot_metrics method generates plots of financial metrics for a given company. The method first
+            generates the necessary subplots to hold each metric type. Each metric type is then plotted on
+            an individual axis within the metric type's subplot. Each metric's trend data is gathered, and
+            its trend is plotted on the selected axis. A linear trendline is also plotted along with its
+            corresponding R2 value. Finally, each metric type's subplot is given a title and added to the
             list of plots.
 
         Args:
@@ -411,12 +427,12 @@ class Plots:
             fig.tight_layout()
             self.plots.append(fig)
 
-    def generate_save_path_object(self, file: bool=False) -> Path:
+    def generate_save_path_object(self, file: bool = False) -> Path:
         """
         Generates the path to the PDF file where the charts will be saved.
 
         Args:
-            file (bool, optional): Determines whether or not the filename should be appended to the file path. 
+            file (bool, optional): Determines whether or not the filename should be appended to the file path.
                 Defaults to False.
 
         Returns:
@@ -429,12 +445,7 @@ class Plots:
             f"{self.ticker}_{self.period}_{str(start_date)}_to_{str(end_date)}.pdf"
         )
         file_path = (
-            Path.cwd()
-            / "data"
-            / "Company_Analysis"
-            / date
-            / self.ticker
-            / self.period
+            Path.cwd() / "data" / "Company_Analysis" / date / self.ticker / self.period
         )
         return file_path / file_name if file else file_path
 

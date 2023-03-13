@@ -93,9 +93,9 @@ class FinancialData:
         self,
         ticker: str,
         api_key: str = "",
-        data: str="local",
-        period: str="annual",
-        limit: int=120,
+        data: str = "local",
+        period: str = "annual",
+        limit: int = 120,
     ):
         """
         Initializes a new instance of the FinancialData class.
@@ -145,7 +145,7 @@ class FinancialData:
             pandas.DataFrame: The processed DataFrame with None values replaced by 0.
         """
         df_ = df.replace(to_replace=np.nan, value=0)
-        return df_.replace(to_replace=[None,'None'], value=0)
+        return df_.replace(to_replace=[None, "None"], value=0)
 
     def assert_valid_user_inputs(self) -> None:
         """
@@ -163,14 +163,14 @@ class FinancialData:
     def generate_request_url(self, data_type: str) -> str:
         """
         Generates a URL to fetch data from the Financial Modeling Prep API.
-        
+
         Args:
-            data_type (str): The type of financial statement data to fetch. Valid 
+            data_type (str): The type of financial statement data to fetch. Valid
                 inputs are 'bs', 'is, 'cfs', and 'ratios'.
-        
+
         Returns:
             str: The URL for the requested data.
-        
+
         Raises:
             ValueError: If an invalid data type is provided.
         """
@@ -197,11 +197,11 @@ class FinancialData:
     def fetch_raw_data(self, data_type: str) -> pd.DataFrame:
         """
         Fetches raw financial data from either the Financial Modeling Prep API
-          or a local file, based on the self.data attribute. 
-        
+          or a local file, based on the self.data attribute.
+
         Args:
             data_type (str): The type of data to fetch.
-        
+
         Returns:
             pandas.DataFrame if the data is fetched locally, otherwise requests.Response
         """
@@ -218,12 +218,12 @@ class FinancialData:
     def get_load_path(self, data_type: str, ticker: str, period: str) -> Path:
         """
         Gets the file path to load a local financial data file.
-        
+
         Args:
             data_type (str): The type of financial data to fetch. Acceptable values are 'bs', 'is', 'cfs', and 'ratios'.
             ticker (str): The ticker symbol for the stock.
             period (str): The period of the data, either 'annual' or 'quarter'.
-        
+
         Returns:
             pathlib.Path: The file path for the requested data.
         """
@@ -240,19 +240,12 @@ class FinancialData:
         else:
             err_msg = f"{data_type} is not a valid API call"
             raise ValueError(err_msg)
-        return (
-            Path.cwd()
-            / "data"
-            / "Company_Financial_Data"
-            / ticker
-            / period
-            / file
-        )
+        return Path.cwd() / "data" / "Company_Financial_Data" / ticker / period / file
 
     def get_frame_indecies(self) -> pd.Index:
         """
         Gets the index for the financial data.
-        
+
         Returns:
             pandas.Index: The index for the financial data.
         """
@@ -274,11 +267,11 @@ class FinancialData:
     def build_dataframe(self, data: dict) -> pd.DataFrame:
         """
         Builds a pandas.DataFrame from provided raw data. If the raw data
-            is already a DataFrame then it is returned immediately. 
-        
+            is already a DataFrame then it is returned immediately.
+
         Args:
             data (dict): The raw data to build the DataFrame from.
-        
+
         Returns:
             pandas.DataFrame: The built DataFrame.
         """
@@ -299,10 +292,10 @@ class FinancialData:
     def generate_index(self, date: str) -> str:
         """
         Generates an index for the financial data.
-        
+
         Args:
             date (str): The date in 'YYYY-MM-DD' format.
-        
+
         Returns:
             str: The generated index string.
         """
@@ -325,10 +318,10 @@ class FinancialData:
     def generate_date(self, date_str: str) -> dt.date:
         """
         Generates a datetime.date object from a date string.
-        
+
         Args:
             date_str (str): The date in 'YYYY-MM-DD' format.
-        
+
         Returns:
             datetime.date: The generated date object.
         """
@@ -338,7 +331,7 @@ class FinancialData:
     def check_for_matching_indecies(self) -> bool:
         """
         Checks whether the financial data has matching indices.
-        
+
         Returns:
             bool: True if the financial data has matching indices, False otherwise.
         """
@@ -366,7 +359,7 @@ class FinancialData:
     def get_common_df_indicies(self) -> pd.Index:
         """
         Gets the common indices for the financial data.
-        
+
         Returns:
             pandas.Index: The common indices for the financial data.
         """
@@ -380,7 +373,7 @@ class FinancialData:
     def filter_for_common_indecies(self, common_elements: pd.Index) -> None:
         """
         Filters the financial data attributes to only include common indices.
-        
+
         Args:
             common_elements (pandas.Index): The common indices for the financial data.
         """
@@ -393,7 +386,7 @@ class FinancialData:
 
     def assert_identical_indecies(self) -> None:
         """
-        Asserts that the financial data has identical indices 
+        Asserts that the financial data has identical indices
             for each of its statements.
         """
         err_msg = "Indecies could not be filtered for common elements"
@@ -408,7 +401,7 @@ class FinancialData:
     def assert_required_length(self, item: list) -> None:
         """
         Asserts that a given item has the required length based on the period.
-        
+
         Args:
             item (pandas.DataFrame): The item to check the length of.
         """
@@ -422,7 +415,7 @@ class FinancialData:
     def assert_valid_server_response(self, response: requests.Response) -> None:
         """
         Asserts that the server response is valid (status code 200).
-        
+
         Args:
             response (requests.Response): The server response.
         """
@@ -433,7 +426,7 @@ class FinancialData:
     def assert_server_response_not_empty(self, response: requests.Response) -> None:
         """
         Asserts that the server response not empty.
-        
+
         Args:
             response (requests.Response): The server response.
         """
@@ -442,7 +435,7 @@ class FinancialData:
     def fetch_stock_price_data_yf(self) -> pd.DataFrame:
         """
         Fetches stock price data from Yahoo Finance.
-        
+
         Returns:
             pandas.DataFrame: The fetched stock price data.
         """
@@ -465,24 +458,24 @@ class FinancialData:
     def generate_empty_df(self, columns: pd.Index) -> pd.DataFrame:
         """
         Generate an empty dataframe with the global frame indices and provided column names.
-    
+
         Args:
             columns (pandas.Index): the provided columns.
 
         Returns:
             pandas.DataFrame: the empty dataframe.
         """
-        data = [[0]*len(columns)]*len(self.balance_sheets)
+        data = [[0] * len(columns)] * len(self.balance_sheets)
         index = self.balance_sheets.index
         return pd.DataFrame(data, index=index, columns=columns)
 
     def periodise(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Periodises the stock price data for each filing period.
-        
+
         Args:
             df (pandas.DataFrame): The stock price data.
-        
+
         Returns:
             pandas.DataFrame: The periodised stock price data.
         """
@@ -523,11 +516,7 @@ class FinancialData:
         Saves the financial data to local parquet files.
         """
         save_path = (
-            Path.cwd()
-            / "data"
-            / "Company_Financial_Data"
-            / self.ticker
-            / self.period
+            Path.cwd() / "data" / "Company_Financial_Data" / self.ticker / self.period
         )
         try:
             os.makedirs(save_path)
@@ -540,9 +529,13 @@ class FinancialData:
         try:
             self.balance_sheets.to_parquet(save_path / "balance_sheets.parquet")
             self.income_statements.to_parquet(save_path / "income_statements.parquet")
-            self.cash_flow_statements.to_parquet(save_path / "cash_flow_statements.parquet")
+            self.cash_flow_statements.to_parquet(
+                save_path / "cash_flow_statements.parquet"
+            )
             self.stock_price_data.to_parquet(save_path / "stock_price_data.parquet")
-            self.reported_key_metrics.to_parquet(save_path / "reported_key_metrics.parquet")
+            self.reported_key_metrics.to_parquet(
+                save_path / "reported_key_metrics.parquet"
+            )
         except pa.ArrowTypeError as e:
             print(f"financial data could not be saved.")
             raise e

@@ -1,5 +1,6 @@
 import unittest
 import sys
+
 sys.path.append("..")
 from investment_tools import Company
 import pandas as pd
@@ -7,7 +8,7 @@ from pathlib import Path
 import itertools
 from unittest.mock import Mock
 
-key_path = Path().home()/'desktop'/'FinancialModellingPrep_API.txt'
+key_path = Path().home() / "desktop" / "FinancialModellingPrep_API.txt"
 with open(key_path) as file:
     api_key = file.read()
 
@@ -25,15 +26,15 @@ with open(key_path) as file:
 
 #         - cls.data : List[str]
 #             List of strings representing the location of data.
-        
+
 #         - cls.period : List[str]
 #             List of strings representing the time period of data.
-        
+
 #         - cls.limit : int
 #             Limit for the number of data rows returned by API.
-        
+
 #         - cls.zipped_args_tdp : List[Tuple[str,str,str]]
-#             List of tuples representing the combination of ticker symbol, data location, 
+#             List of tuples representing the combination of ticker symbol, data location,
 #             and time period.
 #         """
 #         # cls.tickers = ['AAPL', 'MSFT', 'NVDA','VAC', 'WBA', 'ATVI', 'A', 'AMD']
@@ -48,7 +49,7 @@ with open(key_path) as file:
 #         """
 #         Tests the `get_modifier()` method of the `StandardEvaluation` class.
 
-#         For each combination of ticker symbol, data location, and time period, 
+#         For each combination of ticker symbol, data location, and time period,
 #         it creates an instance of the `Company` class, and tests whether the
 #         `get_modifier()` method returns the expected output for various input strings.
 #         """
@@ -58,17 +59,17 @@ with open(key_path) as file:
 #                 expected = 1
 #                 result = instance.eval.get_modifier(string)
 #                 self.assertEqual(expected, result)
-            
+
 #             for string in ['debt', 'DeBt', 'DEBT', 'DEbT']:
 #                 expected = -1
 #                 result = instance.eval.get_modifier(string)
 #                 self.assertEqual(expected, result)
-    
+
 #     def test_get_scoring_metrics(self):
 #         """
 #         Tests the `get_scoring_metrics()` method of the `StandardEvaluation` class.
 
-#         For each combination of ticker symbol, data location, and time period, 
+#         For each combination of ticker symbol, data location, and time period,
 #         it creates an instance of the `Company` class, and tests whether the
 #         `get_scoring_metrics()` method returns the expected output.
 #         """
@@ -80,12 +81,12 @@ with open(key_path) as file:
 #             "debtToTotalCap","totalDebtRatio"
 #             ]
 #             self.assertEqual(expected, result)
-        
+
 #     def test_create_scoring_metrics_results_dict(self):
 #         """
 #         Tests the `create_scoring_metrics_results_dict()` method of the `StandardEvaluation` class.
 
-#         For each combination of ticker symbol, data location, and time period, 
+#         For each combination of ticker symbol, data location, and time period,
 #         it creates an instance of the `Company` class, and tests whether the
 #         `create_scoring_metrics_results_dict()` method returns the expected output.
 #         """
@@ -106,7 +107,7 @@ with open(key_path) as file:
 #         Test that the get_copy_of_df_column method returns a copy of a
 #         DataFrame column with NaN values dropped.
 
-#         For each combination of ticker symbol, data location, and time period, 
+#         For each combination of ticker symbol, data location, and time period,
 #         it creates an instance of the `Company` class, and tests whether the
 #         `get_copy_of_df_column()` method returns the expected output.
 #         """
@@ -117,13 +118,13 @@ with open(key_path) as file:
 #                 fetched = instance.eval.get_copy_of_df_column(string)
 #                 result = expected.equals(fetched)
 #                 self.assertEqual(result, True)
-    
+
 #     def test_get_r2_val(self):
 #         """
 #         Test that the get_r2_val method correctly calculates the R-squared
 #         value of a given series.
 
-#         For each combination of ticker symbol, data location, and time period, 
+#         For each combination of ticker symbol, data location, and time period,
 #         it creates an instance of the `Company` class, and tests whether the
 #         `get_r2_val()` method returns the expected output.
 #         """
@@ -146,14 +147,14 @@ with open(key_path) as file:
 #         Test that the score_mean_growth method returns the correct score for a
 #         given mean growth rate.
 
-#         For each combination of ticker symbol, data location, and time period, 
+#         For each combination of ticker symbol, data location, and time period,
 #         it creates an instance of the `Company` class, and tests whether the
 #         `score_mean_growth()` method returns the expected output.
 #         """
-#         mean_growth_score_tuple = [(0.05, 0), (0.051, 1), (0.099, 1), 
+#         mean_growth_score_tuple = [(0.05, 0), (0.051, 1), (0.099, 1),
 #                                     (0.1001, 2), (0.1499, 2), (0.15001, 3),
 #                                     (0.2, 3), (0.2001, 4)]
-        
+
 #         for ticker, data, period in self.zipped_args_tdp:
 #             instance = Company(ticker, self.api_key, data, period, self.limit)
 
@@ -165,7 +166,7 @@ with open(key_path) as file:
 #         Test that the score_trend_strength method returns the correct score for a
 #         given R-squared value.
 
-#         For each combination of ticker symbol, data location, and time period, 
+#         For each combination of ticker symbol, data location, and time period,
 #         it creates an instance of the `Company` class, and tests whether the
 #         `score_trend_strength()` method returns the expected output.
 #         """
@@ -178,10 +179,10 @@ with open(key_path) as file:
 
 #     def test_get_slope_and_intercept(self):
 #         """
-#         Test that the `get_slope_and_intercept()` method correctly calculates the slope 
+#         Test that the `get_slope_and_intercept()` method correctly calculates the slope
 #         and y-intercept of a linear regression model.
 
-#         For each combination of ticker symbol, data location, and time period, 
+#         For each combination of ticker symbol, data location, and time period,
 #         it creates an instance of the `Company` class, and tests whether the
 #         `get_slope_and_intercept()` method returns the expected output.
 #         """
@@ -194,7 +195,7 @@ with open(key_path) as file:
 #             expected = [(1.6285714285714286, 0.4285714285714288),
 #                         (1.7142857142857144, 0.3809523809523805),
 #                         (2.2857142857142856, -0.3809523809523805)
-#                         ]      
+#                         ]
 #             for array, expected_ in zip(arrays, expected):
 #                 result = instance.eval.get_slope_and_intercept(array)
 #                 self.assertAlmostEqual(expected_[0], result[0], 4)
@@ -202,10 +203,10 @@ with open(key_path) as file:
 
 #     def test_calculate_mean_growth_rate(self):
 #         """
-#         Test that the calculate_mean_growth_rate method correctly calculates the 
+#         Test that the calculate_mean_growth_rate method correctly calculates the
 #         mean growth rate of a given series.
 
-#         For each combination of ticker symbol, data location, and time period, 
+#         For each combination of ticker symbol, data location, and time period,
 #         it creates an instance of the `Company` class, and tests whether the
 #         `calculate_mean_growth_rate()` method returns the expected output.
 #         """
@@ -218,7 +219,7 @@ with open(key_path) as file:
 #             expected = [0.8205642030260802,
 #                         0.880241233365431,
 #                         1.3777309915742477
-#                         ]      
+#                         ]
 #             for array, expected_ in zip(arrays, expected):
 #                 result = instance.eval.calculate_mean_growth_rate(array)
 #                 self.assertAlmostEqual(expected_, result, 2)
@@ -228,7 +229,7 @@ with open(key_path) as file:
 #         """
 #         Test if the function correctly calculates the sum of scores in a dictionary of scoring metrics.
 
-#         For a Company instance, it generates two dictionaries of scoring metrics and tests whether the 
+#         For a Company instance, it generates two dictionaries of scoring metrics and tests whether the
 #         `sum_of_scoring_metric_dict_scores()` method returns the expected output for each of them.
 #         """
 #         instance = Company('AAPL', self.api_key, 'online', 'annual')
@@ -251,13 +252,13 @@ with open(key_path) as file:
 #                 'debtToTotalCap': {'score': 2, 'strength': 1},
 #                 'totalDebtRatio': {'score': 0, 'strength': 0}}
 #         result_2 = instance.eval.sum_of_scoring_metric_dict_scores(dct_2)
-#         expected_2 = 8       
+#         expected_2 = 8
 #         self.assertEqual(expected_2, result_2)
-    
+
 #     def test_total_score_to_bool(self):
 #         """
 #         Test the total_score_to_bool method of the StandardEvaluation class.
-        
+
 #         For the AAPL company instance created for the 'online' data location, and 'annual' time period,
 #         it tests whether the total_score_to_bool method returns the expected output. Note that the default
 #         threshold score is twice the length of the ._scoring_metrics attribute.
@@ -281,7 +282,7 @@ with open(key_path) as file:
 #         Test that the standard evaluation method correctly returns a boolean
 #         value based on a given set of scoring metrics.
 
-#         For each combination of ticker symbol, data location, and time period, 
+#         For each combination of ticker symbol, data location, and time period,
 #         it creates an instance of the `Company` class and sets the standard
 #         scores dict. It then tests whether the `standard_eval()` method returns
 #         the expected output.
@@ -315,29 +316,30 @@ with open(key_path) as file:
 #                 result = instance.eval.standard_eval()
 #                 self.assertEqual(result, expected)
 
+
 def company_instance_generator(api_key, limit) -> Company:
-        # tickers = ['AAPL', 'MSFT', 'NVDA','VAC', 'WBA', 'ATVI', 'A', 'AMD']
-        tickers = ['AAPL']
-        api_key = api_key
-        data =    ['online', 'local']
-        period =  ['annual', 'quarter']
-        limit = 15
-        instance_combinations = list(itertools.product(tickers, data, period))
-        for ticker, data_, period_ in instance_combinations:
-            yield Company(ticker, api_key, data_, period_, limit)
+    # tickers = ['AAPL', 'MSFT', 'NVDA','VAC', 'WBA', 'ATVI', 'A', 'AMD']
+    tickers = ["AAPL"]
+    api_key = api_key
+    data = ["online", "local"]
+    period = ["annual", "quarter"]
+    limit = 15
+    instance_combinations = list(itertools.product(tickers, data, period))
+    for ticker, data_, period_ in instance_combinations:
+        yield Company(ticker, api_key, data_, period_, limit)
 
 
 class TestBuffetEvaluation(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         # cls.tickers = ['AAPL', 'MSFT', 'NVDA','VAC', 'WBA', 'ATVI', 'A', 'AMD']
-        cls.tickers = ['AAPL']
+        cls.tickers = ["AAPL"]
         cls.api_key = api_key
-        cls.data =    ['online', 'local']
-        cls.period =  ['annual', 'quarter']
+        cls.data = ["online", "local"]
+        cls.period = ["annual", "quarter"]
         cls.limit = 15
         cls.zipped_args_tdp = list(itertools.product(cls.tickers, cls.data, cls.period))
-    
+
     # def test_buffet_test_1_is_eps_increasing(self):
     #     score_dicts = [
     #             {'eps': {'score': 3, 'strength': 3},
@@ -367,7 +369,7 @@ class TestBuffetEvaluation(unittest.TestCase):
     #             self.assertEqual(result, expected)
 
     # def test_buffet_test_2_initial_RoR(self):
-    #     for company in company_instance_generator(): 
+    #     for company in company_instance_generator():
     #         eval_buffet = company.eval_buffet
     #         eval_buffet.metrics['eps'][-1] = 25
     #         eval_buffet.get_x_day_mean_stock_price = Mock()
@@ -377,19 +379,19 @@ class TestBuffetEvaluation(unittest.TestCase):
 
     # def test_buffet_test_3_determine_eps_growth(self):
     #      '''
-    #      Note that buffet_test_3_determine_eps_growth calls 
+    #      Note that buffet_test_3_determine_eps_growth calls
     #      self.calculate_mean_growth_from_series_trend, which calculates the mean rate
     #      growth rate of the series trendline, not from the true data values
     #      '''
     #      for company in company_instance_generator(api_key, 10):
     #           eval = company.eval_buffet
-    #           eval.metrics = pd.DataFrame([1, 2, 3, 5, 7, 9, 9, 9, 10, 11, 12, 13, 14], 
+    #           eval.metrics = pd.DataFrame([1, 2, 3, 5, 7, 9, 9, 9, 10, 11, 12, 13, 14],
     #                                       columns=['eps'])
     #           result = eval.buffet_test_3_determine_eps_growth()
     #           expected = (0.08370, 0.092388, 0.07538, 0.12356)
     #           for i, j in zip(result, expected):
     #                self.assertAlmostEqual(i, j, 4)
-        
+
     # def test_buffet_test_4_compare_to_TBonds(self):
     #      for company in company_instance_generator(api_key, 12):
     #         treasury_yield = 0.05
@@ -407,46 +409,69 @@ class TestBuffetEvaluation(unittest.TestCase):
     #             self.assertEqual(result, expected)
 
     def test_buffet_test_5_RoE_projections(self):
-         pass
-    
+        pass
+
     def test_setup_test_5_RoE_projection_df(self):
-         pass
-    
+        for company in company_instance_generator(api_key, 10):
+            eval = company.eval_buffet
+            expected_cols = [
+            "EqPS",
+            "EPS",
+            "DPS",
+            "REPS",
+            "FV_price_PE_high",
+            "FV_price_PE_low",
+            "FV_price_PEq_high",
+            "FV_price_PEq_low",
+            "PV_price_PE_high",
+            "PV_price_PE_low",
+            "PV_price_PEq_high",
+            "PV_price_PEq_low",
+            "RoR_current_price_to_FV_PE_high",
+            "RoR_current_price_to_FV_PE_low",
+            "RoR_current_price_to_FV_PEq_high",
+            "RoR_current_price_to_FV_PEq_low",
+        ]
+            for span in [3, 5, 7, 10]:
+                df = eval.setup_test_5_RoE_projection_df(3)
+                self.assertEqual(len(df), 12)
+                self.assertEqual(df.columns.to_list(), expected_cols)
+                
     def test_calc_test_5_RoE_projection_dataset(self):
-         pass
+        pass
 
     def test_get_current_stock_price(self):
-         pass
-    
+        pass
+
     def test_calculate_trendline_series(self):
-         pass
-    
+        pass
+
     def test_project_future_value(self):
-         pass
-    
+        pass
+
     def test_simple_discount_to_present(self):
-         pass
-    
+        pass
+
     def test_get_x_day_mean_stock_price(self):
-         pass
-    
+        pass
+
     def test_calculate_initial_rate_of_return(self):
-         pass
-    
+        pass
+
     def test_calculate_simple_compound_interest(self):
-         pass
-    
+        pass
+
     def test_get_treasury_yield_api_url(self):
-         '''Do I need to patch datetime here to make the test work?'''
-         pass
-    
+        """Do I need to patch datetime here to make the test work?"""
+        pass
+
     def test_get_5Y_treasury_yield_data(self):
-         '''
-         Get a specific url that covers a couple days
-            Do an api request in jupyter with that url
-            mock the response to be that of the above data
-            check the reurn value'''
-         pass
+        """
+        Get a specific url that covers a couple days
+           Do an api request in jupyter with that url
+           mock the response to be that of the above data
+           check the reurn value"""
+        pass
 
     # def test_calculate_breakeven_vs_treasury(self):
     #     for company in company_instance_generator(api_key, 10):
@@ -470,10 +495,5 @@ class TestBuffetEvaluation(unittest.TestCase):
     #             self.assertEqual(expected, result)
 
 
-
-         
-
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -8,6 +8,7 @@ from .financial_data import FinancialData
 
 yf.pdr_override()
 
+
 class ManualAnalysis:
     """
     Class for performing manual financial analysis.
@@ -43,7 +44,7 @@ class ManualAnalysis:
         analyse() -> pd.DataFrame:
             Returns a dataframe containing all calculated financial metrics and ratios.
         cross_check_metric_calculations() -> pd.DataFrame:
-            Cross-checks reported financial metrics against calculated financial metrics and returns 
+            Cross-checks reported financial metrics against calculated financial metrics and returns
             the fractional errors.
 
     """
@@ -67,7 +68,9 @@ class ManualAnalysis:
             self.fractional_metric_errors = self.cross_check_metric_calculations()
             self.print_metric_errors(self.fractional_metric_errors, 0.05)
 
-    def print_metric_errors(self, metric_errors: pd.DataFrame, tolerance: float = 0.05) -> None:
+    def print_metric_errors(
+        self, metric_errors: pd.DataFrame, tolerance: float = 0.05
+    ) -> None:
         """
         Prints the number of values for each metric that exceed the given tolerance level.
 
@@ -160,10 +163,10 @@ class ManualAnalysis:
         df["cashPerShare"] = (
             1 * (cash_and_equivalents - long_term_debt)
         ) / outstanding_shares
-        df['EqPS'] = total_shareholder_equity/outstanding_shares
-        df["PEq_high"] = stock_price_high / df['EqPS']
-        df["PEq_low"] = stock_price_low / df['EqPS']
-        df["PEq_avg_close"] = stock_price_avg / df['EqPS']
+        df["EqPS"] = total_shareholder_equity / outstanding_shares
+        df["PEq_high"] = stock_price_high / df["EqPS"]
+        df["PEq_low"] = stock_price_low / df["EqPS"]
+        df["PEq_avg_close"] = stock_price_avg / df["EqPS"]
 
         return df
 
@@ -188,7 +191,7 @@ class ManualAnalysis:
 
         All ratios are calculated using financial data from the associated FinancialData object.
         """
-        total_shares = self.data.income_statements['outstandingShares_calc']
+        total_shares = self.data.income_statements["outstandingShares_calc"]
         revenue = self.data.income_statements["revenue"].copy()
         total_assets = self.data.balance_sheets["totalAssets"].copy()
         gross_profit = self.data.income_statements["grossProfit"].copy()
@@ -393,7 +396,7 @@ class ManualAnalysis:
 
     def cross_check_metric_calculations(self) -> pd.DataFrame:
         """
-        Calculates the fractional error between reported metrics and those calculated by the program 
+        Calculates the fractional error between reported metrics and those calculated by the program
         for a selection of key metrics. If verbose is set to False, returns None.
 
         Returns:
@@ -410,7 +413,7 @@ class ManualAnalysis:
             - Interest coverage
             - Dividend payout ratio
 
-        Fractional error is calculated as the absolute value of the difference between the calculated 
+        Fractional error is calculated as the absolute value of the difference between the calculated
         metric and the reported metric, divided by the calculated metric.
         """
         ## add ROE, ROIC, ebitda ratio
@@ -435,7 +438,9 @@ class ManualAnalysis:
                 if sum(reported) == 0 and sum(calculated) == 0:
                     fractional_errors[metric] = calculated
                 else:
-                    fractional_errors[metric] = ((calculated - reported) / calculated).abs()
+                    fractional_errors[metric] = (
+                        (calculated - reported) / calculated
+                    ).abs()
             except TypeError:
                 raise TypeError(f"{metric} series has sunsupported type for sum()")
         return fractional_errors
