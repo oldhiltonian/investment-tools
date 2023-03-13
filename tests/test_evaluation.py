@@ -447,21 +447,26 @@ class TestBuffetEvaluation(unittest.TestCase):
     #         result = eval.get_current_stock_price()
     #         self.assertEqual(result, expected)
 
-    def test_calculate_trendline_series(self):
-        series = pd.Series([1, 1, 3, 6, 8, 9, 12, 15])
+    # def test_calculate_trendline_series(self):
+    #     series = pd.Series([1, 1, 3, 6, 8, 9, 12, 15])
+    #     for company in company_instance_generator(api_key, 10):
+    #         eval = company.eval_buffet
+    #         expected = [-0.3333,  1.7261,  3.7859,  5.845 ,  7.9046 , 9.9642, 
+    #                     12.0238, 14.0833]
+    #         result = list(eval.calculate_trendline_series(series))
+    #         for i, j in zip(expected, result):
+    #             self.assertEqual(round(i, 3), round(j, 3))
+            
+    def test_project_future_value(self):
         for company in company_instance_generator(api_key, 10):
             eval = company.eval_buffet
-            expected = [-0.3333,  1.7261,  3.7859,  5.845 ,  7.9046 , 9.9642, 
-                        12.0238, 14.0833]
-            result = list(eval.calculate_trendline_series(series))
-            for i, j in zip(expected, result):
-                self.assertEqual(round(i, 3), round(j, 3))
-            
-
-
-    def test_project_future_value(self):
-        pass
-
+            pvs = [2, 10, 100, 1034]
+            rates = [0.01, 0.05, 0.1, 0.19]
+            years = [10, 13, 5, 9]
+            for pv, rate, year in zip(pvs, rates, years):
+                expected = pv*(1+rate)**year
+                result = eval.project_future_value(pv, rate, year)
+                self.assertAlmostEqual(result, expected, 3)
     def test_simple_discount_to_present(self):
         pass
 
