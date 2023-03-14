@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>investment_tools.evaluation &mdash; investment-tools  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            investment-tools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">investment_tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">investment-tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">investment_tools.evaluation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for investment_tools.evaluation</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">yfinance</span> <span class="k">as</span> <span class="nn">yf</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">from</span> <span class="nn">pandas_datareader</span> <span class="kn">import</span> <span class="n">data</span> <span class="k">as</span> <span class="n">pdr</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_pdf</span> <span class="kn">import</span> <span class="n">PdfPages</span>
+<span class="kn">from</span> <span class="nn">reportlab.pdfgen</span> <span class="kn">import</span> <span class="n">canvas</span>
+<span class="kn">from</span> <span class="nn">PyPDF2</span> <span class="kn">import</span> <span class="n">PdfReader</span><span class="p">,</span> <span class="n">PdfWriter</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">linregress</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">import</span> <span class="nn">pyarrow</span> <span class="k">as</span> <span class="nn">pa</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">.financial_data</span> <span class="kn">import</span> <span class="n">FinancialData</span>
+<span class="kn">from</span> <span class="nn">.plots</span> <span class="kn">import</span> <span class="n">Plots</span>
+<span class="kn">from</span> <span class="nn">.manual_analysis</span> <span class="kn">import</span> <span class="n">ManualAnalysis</span>
+<span class="kn">from</span> <span class="nn">urllib.request</span> <span class="kn">import</span> <span class="n">urlopen</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="n">yf</span><span class="o">.</span><span class="n">pdr_override</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="StandardEvaluation"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.StandardEvaluation">[docs]</a><span class="k">class</span> <span class="nc">StandardEvaluation</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class to standardize and evaluate the financial data for a given company.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        ticker (str): The stock symbol for the company.</span>
+<span class="sd">        api_key (str): The API key for the financial data provider.</span>
+<span class="sd">        metrics (pd.Series): A Pandas Series of financial data for the company.</span>
+<span class="sd">        _financial_data (pd.DataFrame): A Pandas DataFrame of the financial data for the company.</span>
+<span class="sd">        _scoring_metrics (List[str]): A list of financial metrics used to calculate scores.</span>
+<span class="sd">        standard_scores_dict (Dict[str, dict]): A dictionary containing scores and strengths for each financial metric.</span>
+<span class="sd">        standard_outcome (bool): A boolean indicating whether the company has favorable financial metrics based on the provided scores.</span>
+
+<span class="sd">    Methods:</span>
+<span class="sd">        get_scoring_metrics(self) -&gt; List[str]:</span>
+<span class="sd">            Returns a list of financial metrics used to calculate scores.</span>
+
+<span class="sd">        create_scoring_metrics_results_dict(self, scoring_metrics: List[str]) -&gt; Dict[str, dict]:</span>
+<span class="sd">            Creates a dictionary containing scores and strengths for each financial metric.</span>
+
+<span class="sd">        score_single_metric(self, metric: str) -&gt; Tuple[int, int]:</span>
+<span class="sd">            Calculates the growth score and trend stability score of the given financial metric.</span>
+
+<span class="sd">        get_r2_val(self, metrics: pd.Series) -&gt; float:</span>
+<span class="sd">            Calculates and returns the R-squared value of a linear regression model for the given Pandas series of metrics.</span>
+
+<span class="sd">        get_modifier(self, metric: str) -&gt; int:</span>
+<span class="sd">            Returns a modifier based on the provided metric.</span>
+
+<span class="sd">        get_copy_of_df_column(self, header: str) -&gt; pd.Series:</span>
+<span class="sd">            Returns a copy of a pandas Series for a given column header in the calculated metrics DataFrame.</span>
+
+<span class="sd">        calculate_mean_growth_from_series_trend(self, df: pd.DataFrame, span: int=None) -&gt; float:</span>
+<span class="sd">            Calculates the mean growth rate of a metric over a specified time span.</span>
+
+<span class="sd">        get_slope_and_intercept(self, df: pd.DataFrame) -&gt; Tuple[float, float]:</span>
+<span class="sd">            Calculates and returns the slope and intercept of a linear regression model for the given Pandas DataFrame.</span>
+
+<span class="sd">        score_mean_growth(self, mean_growth: float) -&gt; int:</span>
+<span class="sd">            Scores the mean growth of a metric based on a set of ranges.</span>
+
+<span class="sd">        score_trend_strength(self, r2: float) -&gt; int:</span>
+<span class="sd">            Calculate the trend strength score for a financial metric.</span>
+
+<span class="sd">        sum_of_scoring_metric_dict_scores(self, scores_dict: Dict[str, dict]) -&gt; int:</span>
+<span class="sd">            Calculates the total score for a dictionary of scores and strengths.</span>
+
+<span class="sd">        total_score_to_bool(self, total_score: int, threshold: int=None) -&gt; bool:</span>
+<span class="sd">            Determines whether the total score meets a threshold and returns a boolean.</span>
+
+<span class="sd">        standard_eval(self) -&gt; bool:</span>
+<span class="sd">            Determines if the company has favorable financial metrics based on the provided scores.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ticker</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">metrics</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+        <span class="n">financial_data</span><span class="p">:</span> <span class="n">FinancialData</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes a StandardEvaluation object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ticker (str): A string representing the stock ticker of the company.</span>
+<span class="sd">            api_key (str): A string representing the API key to use for financial data retrieval.</span>
+<span class="sd">            metrics (pd.Series): A Pandas series of financial metrics for the company.</span>
+<span class="sd">            financial_data (pd.DataFrame): A Pandas dataframe of the financial data for the company.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ticker</span> <span class="o">=</span> <span class="n">ticker</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api_key</span> <span class="o">=</span> <span class="n">api_key</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="n">metrics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_financial_data</span> <span class="o">=</span> <span class="n">financial_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scoring_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_scoring_metrics</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">standard_scores_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_scoring_metrics_results_dict</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_scoring_metrics</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">standard_outcome</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">standard_eval</span><span class="p">()</span>
+
+<div class="viewcode-block" id="StandardEvaluation.get_scoring_metrics"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.StandardEvaluation.get_scoring_metrics">[docs]</a>    <span class="k">def</span> <span class="nf">get_scoring_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a list of financial metrics to score.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[str]: A list of strings representing financial metrics.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">scoring_metrics</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;eps&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;returnOnEquity&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ROIC&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;returnOnAssets&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;debtToTotalCap&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;totalDebtRatio&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">scoring_metrics</span></div>
+
+<div class="viewcode-block" id="StandardEvaluation.create_scoring_metrics_results_dict"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.StandardEvaluation.create_scoring_metrics_results_dict">[docs]</a>    <span class="k">def</span> <span class="nf">create_scoring_metrics_results_dict</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">scoring_metrics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates and returns a dictionary of scores and strengths for the provided list of scoring metrics.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">        scoring_metrics (List[str]): A list of the scoring metrics to create the dictionary for.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        Dict[str, dict]: A dictionary of scores and strengths for the provided scoring metrics.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">scores</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">scoring_metrics</span><span class="p">:</span>
+            <span class="n">score</span><span class="p">,</span> <span class="n">strength</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">score_single_metric</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+            <span class="n">scores</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;score&quot;</span><span class="p">:</span> <span class="n">score</span><span class="p">,</span> <span class="s2">&quot;strength&quot;</span><span class="p">:</span> <span class="n">strength</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">scores</span></div>
+
+<div class="viewcode-block" id="StandardEvaluation.score_single_metric"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.StandardEvaluation.score_single_metric">[docs]</a>    <span class="k">def</span> <span class="nf">score_single_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the growth score and the trend stability score of the given financial metric.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">        metric (str): The name of the financial metric to score.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        A tuple containing the growth score and the trend stability score.</span>
+<span class="sd">        The growth score is an integer value between 0 and 4, indicating the mean growth rate of the metric.</span>
+<span class="sd">        The trend stability score is an integer value between 0 and 4, indicating the strength of the trend of the metric.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">modifier</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_modifier</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+        <span class="n">metric_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_copy_of_df_column</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+        <span class="n">mean_growth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_mean_growth_from_series_trend</span><span class="p">(</span><span class="n">metric_</span><span class="p">)</span>
+        <span class="n">r2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_r2_val</span><span class="p">(</span><span class="n">metric_</span><span class="p">)</span>
+        <span class="n">growth_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">score_mean_growth</span><span class="p">(</span><span class="n">modifier</span> <span class="o">*</span> <span class="n">mean_growth</span><span class="p">)</span>
+        <span class="n">stability_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">score_trend_strength</span><span class="p">(</span><span class="n">r2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">growth_score</span><span class="p">,</span> <span class="n">stability_score</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="StandardEvaluation.get_r2_val"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.StandardEvaluation.get_r2_val">[docs]</a>    <span class="k">def</span> <span class="nf">get_r2_val</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metrics</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates and returns the R-squared value of a linear regression model for the given Pandas series of metrics.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">        metrics (pd.Series): A Pandas series containing the metric values.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        float: The R-squared value of the linear regression model.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">slope</span><span class="p">,</span> <span class="n">intercept</span><span class="p">,</span> <span class="n">r_val</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">linregress</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metrics</span><span class="p">)),</span> <span class="n">metrics</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">r_val</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">0.0</span></div>
+
+<div class="viewcode-block" id="StandardEvaluation.get_modifier"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.StandardEvaluation.get_modifier">[docs]</a>    <span class="k">def</span> <span class="nf">get_modifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a modifier based on the provided metric. If the metric name contains</span>
+<span class="sd">        &#39;debt&#39;, the modifier is -1. Otherwise, it is 1.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">        metric (str): The name of the metric.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        int: The modifier to be used in calculations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;debt&quot;</span> <span class="ow">in</span> <span class="n">metric</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="StandardEvaluation.get_copy_of_df_column"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.StandardEvaluation.get_copy_of_df_column">[docs]</a>    <span class="k">def</span> <span class="nf">get_copy_of_df_column</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a copy of a pandas Series for a given column header in the calculated metrics DataFrame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">        header (str): The header of the column to return.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        pd.Series: A copy of the column as a pandas Series with any missing values removed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="n">header</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="StandardEvaluation.calculate_mean_growth_from_series_trend"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.StandardEvaluation.calculate_mean_growth_from_series_trend">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_mean_growth_from_series_trend</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">span</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the mean growth rate of a financial metric over a specified span of time.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): A pandas DataFrame containing the financial metric data.</span>
+<span class="sd">            span (int, optional): The number of periods over which to calculate the growth rate.</span>
+<span class="sd">                If not provided, calculates the growth rate over the full length of the DataFrame.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The mean growth rate of the financial metric over the specified span of time.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df_</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="nb">int</span><span class="p">(</span><span class="n">span</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:]</span> <span class="k">if</span> <span class="n">span</span> <span class="k">else</span> <span class="n">df</span>
+        <span class="n">slope</span><span class="p">,</span> <span class="n">intercept</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_slope_and_intercept</span><span class="p">(</span><span class="n">df_</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df_</span><span class="p">))</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">slope</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">intercept</span>
+        <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">end</span> <span class="o">&lt;=</span> <span class="n">start</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="n">mean_growth</span> <span class="o">=</span> <span class="p">(</span><span class="n">end</span> <span class="o">/</span> <span class="n">start</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">mean_growth</span></div>
+
+<div class="viewcode-block" id="StandardEvaluation.get_slope_and_intercept"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.StandardEvaluation.get_slope_and_intercept">[docs]</a>    <span class="k">def</span> <span class="nf">get_slope_and_intercept</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the slope and intercept of a linear regression line for the given pandas DataFrame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): A pandas DataFrame containing the data to calculate the slope and intercept from.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[float, float]: A tuple containing the calculated slope and intercept as floats with rounding to 4 decimal places.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">slope</span><span class="p">,</span> <span class="n">intercept</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">linregress</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)),</span> <span class="n">df</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">slope</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">intercept</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="StandardEvaluation.score_mean_growth"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.StandardEvaluation.score_mean_growth">[docs]</a>    <span class="k">def</span> <span class="nf">score_mean_growth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mean_growth</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scores the mean growth of a metric based on the following ranges:</span>
+
+<span class="sd">        - 0: &lt;= 0.05</span>
+<span class="sd">        - 1: &lt;= 0.10</span>
+<span class="sd">        - 2: &lt;= 0.15</span>
+<span class="sd">        - 3: &lt;= 0.20</span>
+<span class="sd">        - 4: &gt; 0.20</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mean_growth (float): The mean growth of a financial metric</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: The score for the mean growth of the metric based on the above ranges.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">growth</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">mean_growth</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">growth</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="k">elif</span> <span class="n">growth</span> <span class="o">&lt;=</span> <span class="mf">0.05</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="n">growth</span> <span class="o">&lt;=</span> <span class="mf">0.10</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">growth</span> <span class="o">&lt;=</span> <span class="mf">0.15</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">2</span>
+        <span class="k">elif</span> <span class="n">growth</span> <span class="o">&lt;=</span> <span class="mf">0.2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">3</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">4</span></div>
+
+<div class="viewcode-block" id="StandardEvaluation.score_trend_strength"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.StandardEvaluation.score_trend_strength">[docs]</a>    <span class="k">def</span> <span class="nf">score_trend_strength</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r2</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the trend strength score for a financial metric.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            r2 (float): The coefficient of determination (R^2) of the trend line.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: The trend strength score for the metric, from 0 to 4.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">r2_</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">r2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">r2</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="k">elif</span> <span class="n">r2_</span> <span class="o">&lt;=</span> <span class="mf">0.2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="n">r2_</span> <span class="o">&lt;=</span> <span class="mf">0.3</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">r2_</span> <span class="o">&lt;=</span> <span class="mf">0.5</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">2</span>
+        <span class="k">elif</span> <span class="n">r2_</span> <span class="o">&lt;=</span> <span class="mf">0.75</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">3</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">4</span></div>
+
+<div class="viewcode-block" id="StandardEvaluation.sum_of_scoring_metric_dict_scores"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.StandardEvaluation.sum_of_scoring_metric_dict_scores">[docs]</a>    <span class="k">def</span> <span class="nf">sum_of_scoring_metric_dict_scores</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scores_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sums the scores for each metric in a given dictionary of scores and strengths.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            scores_dict (Dict[str, dict]): A dictionary of scores and strengths for various financial metrics.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: The sum of the scores for each metric in the given dictionary. If a score is NaN, it is treated as 0.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">total_score</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">scores_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">score</span> <span class="o">=</span> <span class="n">scores_dict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;score&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">score</span><span class="p">):</span>
+                <span class="n">total_score</span> <span class="o">+=</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">total_score</span> <span class="o">+=</span> <span class="n">scores_dict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;score&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">total_score</span></div>
+
+<div class="viewcode-block" id="StandardEvaluation.total_score_to_bool"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.StandardEvaluation.total_score_to_bool">[docs]</a>    <span class="k">def</span> <span class="nf">total_score_to_bool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">total_score</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determines if the total score of the scoring metrics meets the threshold.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            total_score (int): The total score of the scoring metrics.</span>
+<span class="sd">            threshold (int, optional): The threshold to meet or exceed. Defaults to 2*len(self._scoring_metrics).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if the total score meets or exceeds the threshold, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">threshold</span> <span class="o">=</span> <span class="n">threshold</span> <span class="k">if</span> <span class="n">threshold</span> <span class="k">else</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_scoring_metrics</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">total_score</span> <span class="o">&gt;=</span> <span class="n">threshold</span> <span class="k">else</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="StandardEvaluation.standard_eval"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.StandardEvaluation.standard_eval">[docs]</a>    <span class="k">def</span> <span class="nf">standard_eval</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determines if the company has favorable financial metrics based on the provided scores.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if the company has favorable financial metrics based on the provided scores, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">total_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sum_of_scoring_metric_dict_scores</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">standard_scores_dict</span><span class="p">)</span>
+        <span class="n">bool_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_score_to_bool</span><span class="p">(</span><span class="n">total_score</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">bool_result</span></div></div>
+
+
+<div class="viewcode-block" id="BuffetEvaluation"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.BuffetEvaluation">[docs]</a><span class="k">class</span> <span class="nc">BuffetEvaluation</span><span class="p">(</span><span class="n">StandardEvaluation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is under active development</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ticker</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">metrics</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+        <span class="n">financial_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ticker</span><span class="p">,</span> <span class="n">api_key</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">financial_data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buffet_outcome</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffet_eval</span><span class="p">()</span>
+
+<div class="viewcode-block" id="BuffetEvaluation.buffet_eval"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.BuffetEvaluation.buffet_eval">[docs]</a>    <span class="k">def</span> <span class="nf">buffet_eval</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Entering Evaluation.buffet_eval()&quot;</span><span class="p">)</span>
+        <span class="c1"># 1. is eps increasing reliably?</span>
+        <span class="n">test_1_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffet_test_1_is_eps_increasing</span><span class="p">()</span>
+
+        <span class="c1"># 2. determine the initial rate of return as the current price over known eps</span>
+        <span class="c1"># higher price == lower initial rate of return</span>
+        <span class="n">test_2_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffet_test_2_initial_RoR</span><span class="p">()</span>
+
+        <span class="c1"># 3. determine the per share growth rate over 5, 7 and 10 years</span>
+        <span class="c1"># compounding from present - probably use the linregress instead</span>
+        <span class="c1">#   of the actual values.</span>
+        <span class="n">test_3_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffet_test_3_determine_eps_growth</span><span class="p">()</span>
+
+        <span class="c1"># 4. determine the value of the compnay relative to government bonds</span>
+        <span class="c1"># maybe get from fmp-economics-treasury rates</span>
+        <span class="n">test_4_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffet_test_4_compare_to_TBonds</span><span class="p">()</span>
+
+        <span class="c1"># 5. Determine projected annual compounding rate of return Part 1</span>
+        <span class="c1"># for lookback windows of 3, 5, 7, 10 years to the following:</span>
+        <span class="c1"># (dont take the trendline growth for EqperShare as buybacks affect it quite heavily!)</span>
+        <span class="c1"># Take mean series values for RoE, payoutRatio, PE_low and PE_high, PEq_low, PEq_high</span>
+        <span class="c1"># Get TRENDLINES for equity per share, EPS and assume current value to be the most recent of those</span>
+        <span class="c1"># from assumed current equity per share, EPS, and payoutRatio, calculate current</span>
+        <span class="c1">#   divedend and retained Earnings</span>
+        <span class="c1"># Populate first row of table (current year) with</span>
+        <span class="c1"># EqPS, EPS, dividend, retained earnings</span>
+        <span class="c1"># Build a table by iteration year by year,  projecting for 10 years the following:</span>
+        <span class="c1"># future EqPS = currentEqPS*RoE*(1-PayoutRatio)</span>
+        <span class="c1"># EPS =  EqPS*(historicalRoE)</span>
+        <span class="c1"># dividend = EPS*payoutRatio</span>
+        <span class="c1"># Retained earnings = EPS- dividend</span>
+        <span class="c1"># future price 1: PE_high*EPS</span>
+        <span class="c1"># future price 2: PE_low * EPS</span>
+        <span class="c1"># future price 3: PEq_high*EPS</span>
+        <span class="c1"># future price 4: PEq_low*EPS</span>
+        <span class="c1"># discount all future prices to current value using 15% discount rate</span>
+        <span class="c1"># Calculate compounding rate of return based on current stock price</span>
+        <span class="c1"># Append each &quot;windowed table&quot; to a self.dict() with keys &quot;3 year&quot;, &quot;5 year&quot;, etc</span>
+        <span class="n">test_5_result_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffet_test_5_RoE_projections</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">RoE_projections</span> <span class="o">=</span> <span class="n">test_5_result_dict</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">test_5_result_dict</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BuffetEvaluation.buffet_test_1_is_eps_increasing"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.BuffetEvaluation.buffet_test_1_is_eps_increasing">[docs]</a>    <span class="k">def</span> <span class="nf">buffet_test_1_is_eps_increasing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">eps_growth_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">standard_scores_dict</span><span class="p">[</span><span class="s2">&quot;eps&quot;</span><span class="p">][</span><span class="s2">&quot;score&quot;</span><span class="p">]</span>
+        <span class="n">eps_growth_trend_strength</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">standard_scores_dict</span><span class="p">[</span><span class="s2">&quot;eps&quot;</span><span class="p">][</span><span class="s2">&quot;strength&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="kc">True</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">eps_growth_score</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">eps_growth_trend_strength</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">)</span>
+            <span class="k">else</span> <span class="kc">False</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="BuffetEvaluation.buffet_test_2_initial_RoR"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.BuffetEvaluation.buffet_test_2_initial_RoR">[docs]</a>    <span class="k">def</span> <span class="nf">buffet_test_2_initial_RoR</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">current_stock_price</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_x_day_mean_stock_price</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+        <span class="n">initial_fractional_return</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_initial_rate_of_return</span><span class="p">(</span>
+            <span class="n">current_stock_price</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">initial_fractional_return</span></div>
+
+<div class="viewcode-block" id="BuffetEvaluation.buffet_test_3_determine_eps_growth"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.BuffetEvaluation.buffet_test_3_determine_eps_growth">[docs]</a>    <span class="k">def</span> <span class="nf">buffet_test_3_determine_eps_growth</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">eps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;eps&quot;</span><span class="p">]</span>
+        <span class="n">eps_growth_3Y</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calculate_mean_growth_from_series_trend</span><span class="p">(</span><span class="n">eps</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">eps_growth_5Y</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calculate_mean_growth_from_series_trend</span><span class="p">(</span><span class="n">eps</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">eps_growth_7Y</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calculate_mean_growth_from_series_trend</span><span class="p">(</span><span class="n">eps</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">eps_growth_10Y</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calculate_mean_growth_from_series_trend</span><span class="p">(</span><span class="n">eps</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;growth_rates for 3, 5, 7, 10 years&quot;</span><span class="p">,</span>
+            <span class="n">eps_growth_3Y</span><span class="p">,</span>
+            <span class="n">eps_growth_5Y</span><span class="p">,</span>
+            <span class="n">eps_growth_7Y</span><span class="p">,</span>
+            <span class="n">eps_growth_10Y</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">eps_growth_3Y</span><span class="p">,</span> <span class="n">eps_growth_5Y</span><span class="p">,</span> <span class="n">eps_growth_7Y</span><span class="p">,</span> <span class="n">eps_growth_10Y</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BuffetEvaluation.buffet_test_4_compare_to_TBonds"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.BuffetEvaluation.buffet_test_4_compare_to_TBonds">[docs]</a>    <span class="k">def</span> <span class="nf">buffet_test_4_compare_to_TBonds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">eps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;eps&quot;</span><span class="p">]</span>
+        <span class="n">current_stock_price</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_current_stock_price</span><span class="p">()</span>
+        <span class="n">treasury_yield_5Y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_5Y_treasury_yield_data</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_treasury_yield_api_url</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Treasury yield 5Y: &quot;</span><span class="p">,</span> <span class="n">treasury_yield_5Y</span><span class="p">)</span>
+        <span class="n">breakeven_price_vs_5Y_treasury</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_breakeven_vs_treasury</span><span class="p">(</span>
+            <span class="n">eps</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">treasury_yield_5Y</span>
+        <span class="p">)</span>
+        <span class="n">bool_better_than_treasury</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">treasury_comparison</span><span class="p">(</span>
+            <span class="n">current_stock_price</span><span class="p">,</span> <span class="n">breakeven_price_vs_5Y_treasury</span><span class="p">,</span> <span class="mf">1.1</span>
+        <span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Is this stock better than holding TBonds?: &quot;</span><span class="p">,</span> <span class="n">bool_better_than_treasury</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">bool_better_than_treasury</span></div>
+
+<div class="viewcode-block" id="BuffetEvaluation.buffet_test_5_RoE_projections"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.BuffetEvaluation.buffet_test_5_RoE_projections">[docs]</a>    <span class="k">def</span> <span class="nf">buffet_test_5_RoE_projections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">all_projection_window_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">current_stock_price</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_current_stock_price</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;current stock price&quot;</span><span class="p">,</span> <span class="n">current_stock_price</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">span</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">]:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_test_5_RoE_projection_df</span><span class="p">(</span><span class="n">span</span><span class="p">)</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_test_5_RoE_projection_dataset</span><span class="p">(</span>
+                <span class="n">df</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">current_stock_price</span>
+            <span class="p">)</span>
+            <span class="n">all_projection_window_data</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">span</span><span class="si">}</span><span class="s2">Y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span>
+        <span class="k">return</span> <span class="n">all_projection_window_data</span></div>
+
+<div class="viewcode-block" id="BuffetEvaluation.setup_test_5_RoE_projection_df"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.BuffetEvaluation.setup_test_5_RoE_projection_df">[docs]</a>    <span class="k">def</span> <span class="nf">setup_test_5_RoE_projection_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">span</span><span class="p">):</span>
+        <span class="n">future_years</span> <span class="o">=</span> <span class="mi">12</span>
+        <span class="n">df_index</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">future_years</span><span class="p">)</span>
+        <span class="n">df_columns</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;EqPS&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;EPS&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;DPS&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;REPS&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FV_price_PE_high&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FV_price_PE_low&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FV_price_PEq_high&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FV_price_PEq_low&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;PV_price_PE_high&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;PV_price_PE_low&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;PV_price_PEq_high&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;PV_price_PEq_low&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;RoR_current_price_to_FV_PE_high&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;RoR_current_price_to_FV_PE_low&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;RoR_current_price_to_FV_PEq_high&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;RoR_current_price_to_FV_PEq_low&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">df_index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">df_columns</span><span class="p">)</span>
+        <span class="n">mean_roe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;returnOnEquity&quot;</span><span class="p">][</span><span class="o">-</span><span class="n">span</span><span class="p">:]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">mean_payout_ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;dividendPayoutRatio&quot;</span><span class="p">][</span><span class="o">-</span><span class="n">span</span><span class="p">:]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">assumed_EPS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_trendline_series</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;eps&quot;</span><span class="p">])[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">assumed_EqPS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_trendline_series</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;EqPS&quot;</span><span class="p">])[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">dividend_per_share</span> <span class="o">=</span> <span class="n">assumed_EPS</span> <span class="o">*</span> <span class="n">mean_payout_ratio</span>
+        <span class="n">retained_per_share</span> <span class="o">=</span> <span class="n">assumed_EPS</span> <span class="o">-</span> <span class="n">dividend_per_share</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;EqPS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">assumed_EqPS</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;EPS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">assumed_EPS</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;DPS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dividend_per_share</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;REPS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">retained_per_share</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;roe&quot;</span><span class="p">,</span> <span class="n">mean_roe</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;payout&quot;</span><span class="p">,</span> <span class="n">mean_payout_ratio</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="BuffetEvaluation.calc_test_5_RoE_projection_dataset"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.BuffetEvaluation.calc_test_5_RoE_projection_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">calc_test_5_RoE_projection_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">span</span><span class="p">,</span> <span class="n">current_stock_price</span><span class="p">):</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">dataset_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Projections based on </span><span class="si">{</span><span class="n">span</span><span class="si">}</span><span class="s2">-year historical averages.&quot;</span>
+        <span class="n">mean_roe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;returnOnEquity&quot;</span><span class="p">][</span><span class="o">-</span><span class="n">span</span><span class="p">:]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">mean_payout_ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;dividendPayoutRatio&quot;</span><span class="p">][</span><span class="o">-</span><span class="n">span</span><span class="p">:]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">PE_high</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;PE_high&quot;</span><span class="p">][</span><span class="o">-</span><span class="n">span</span><span class="p">:]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">PE_low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;PE_low&quot;</span><span class="p">][</span><span class="o">-</span><span class="n">span</span><span class="p">:]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">PEq_low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;PEq_low&quot;</span><span class="p">][</span><span class="o">-</span><span class="n">span</span><span class="p">:]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">PEq_high</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;PEq_high&quot;</span><span class="p">][</span><span class="o">-</span><span class="n">span</span><span class="p">:]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">year</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)):</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">year</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;EqPS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="s2">&quot;EqPS&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">mean_roe</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">mean_payout_ratio</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;EPS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">mean_roe</span><span class="p">)</span> <span class="o">*</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;EqPS&quot;</span><span class="p">]</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;DPS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;EPS&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">mean_payout_ratio</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;REPS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;EPS&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;DPS&quot;</span><span class="p">]</span>
+
+            <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;FV_price_PE_high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;EPS&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">PE_high</span>
+            <span class="n">future_price_PE_high</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;FV_price_PE_high&quot;</span><span class="p">]</span>
+            <span class="n">PV_price_PE_high</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simple_discount_to_present</span><span class="p">(</span>
+                <span class="n">future_price_PE_high</span><span class="p">,</span> <span class="n">year</span>
+            <span class="p">)</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;PV_price_PE_high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">PV_price_PE_high</span>
+            <span class="n">rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_simple_compound_interest</span><span class="p">(</span>
+                <span class="n">current_stock_price</span><span class="p">,</span> <span class="n">future_price_PE_high</span><span class="p">,</span> <span class="n">year</span>
+            <span class="p">)</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;RoR_current_price_to_FV_PE_high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rate</span>
+
+            <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;FV_price_PE_low&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;EPS&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">PE_low</span>
+            <span class="n">future_price_PE_low</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;FV_price_PE_low&quot;</span><span class="p">]</span>
+            <span class="n">PV_price_PE_low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simple_discount_to_present</span><span class="p">(</span><span class="n">future_price_PE_low</span><span class="p">,</span> <span class="n">year</span><span class="p">)</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;PV_price_PE_low&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">PV_price_PE_low</span>
+            <span class="n">rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_simple_compound_interest</span><span class="p">(</span>
+                <span class="n">current_stock_price</span><span class="p">,</span> <span class="n">future_price_PE_low</span><span class="p">,</span> <span class="n">year</span>
+            <span class="p">)</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;RoR_current_price_to_FV_PE_low&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rate</span>
+
+            <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;FV_price_PEq_high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;EPS&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">PEq_high</span>
+            <span class="n">future_price_PEq_high</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;FV_price_PEq_high&quot;</span><span class="p">]</span>
+            <span class="n">PV_price_PEq_high</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simple_discount_to_present</span><span class="p">(</span>
+                <span class="n">future_price_PEq_high</span><span class="p">,</span> <span class="n">year</span>
+            <span class="p">)</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;PV_price_PEq_high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">PV_price_PEq_high</span>
+            <span class="n">rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_simple_compound_interest</span><span class="p">(</span>
+                <span class="n">current_stock_price</span><span class="p">,</span> <span class="n">future_price_PEq_high</span><span class="p">,</span> <span class="n">year</span>
+            <span class="p">)</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;RoR_current_price_to_FV_PEq_high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rate</span>
+
+            <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;FV_price_PEq_low&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;EPS&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">PEq_low</span>
+            <span class="n">future_price_PEq_low</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;FV_price_PEq_low&quot;</span><span class="p">]</span>
+            <span class="n">PV_price_PEq_low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simple_discount_to_present</span><span class="p">(</span>
+                <span class="n">future_price_PEq_low</span><span class="p">,</span> <span class="n">year</span>
+            <span class="p">)</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;PV_price_PEq_low&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">PV_price_PEq_low</span>
+            <span class="n">rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_simple_compound_interest</span><span class="p">(</span>
+                <span class="n">current_stock_price</span><span class="p">,</span> <span class="n">future_price_PEq_low</span><span class="p">,</span> <span class="n">year</span>
+            <span class="p">)</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="s2">&quot;RoR_current_price_to_FV_PEq_low&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rate</span>
+
+            <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset_name</span>
+            <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;Historical RoE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mean_roe</span>
+            <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;Historical Payout Ratio&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mean_payout_ratio</span>
+            <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;PE_high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">PE_high</span>
+            <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;PE_low&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">PE_low</span>
+            <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;PEq_high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">PEq_high</span>
+            <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;PEq_low&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">PEq_low</span>
+            <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;Projection Table&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span>
+        <span class="k">return</span> <span class="n">dataset</span></div>
+
+<div class="viewcode-block" id="BuffetEvaluation.get_current_stock_price"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.BuffetEvaluation.get_current_stock_price">[docs]</a>    <span class="k">def</span> <span class="nf">get_current_stock_price</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">current_stock_price</span> <span class="o">=</span> <span class="n">pdr</span><span class="o">.</span><span class="n">get_data_yahoo</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ticker</span><span class="p">,</span>
+            <span class="n">dt</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span> <span class="o">-</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span>
+            <span class="n">dt</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">(),</span>
+            <span class="n">interval</span><span class="o">=</span><span class="s2">&quot;1d&quot;</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;Close&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">current_stock_price</span></div>
+
+<div class="viewcode-block" id="BuffetEvaluation.calculate_trendline_series"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.BuffetEvaluation.calculate_trendline_series">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_trendline_series</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+        <span class="n">slope</span><span class="p">,</span> <span class="n">intercept</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_slope_and_intercept</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">slope</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">intercept</span></div>
+
+<div class="viewcode-block" id="BuffetEvaluation.project_future_value"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.BuffetEvaluation.project_future_value">[docs]</a>    <span class="k">def</span> <span class="nf">project_future_value</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">current_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">years</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">current_value</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">rate</span><span class="p">)</span> <span class="o">**</span> <span class="n">years</span></div>
+
+<div class="viewcode-block" id="BuffetEvaluation.simple_discount_to_present"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.BuffetEvaluation.simple_discount_to_present">[docs]</a>    <span class="k">def</span> <span class="nf">simple_discount_to_present</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">future</span><span class="p">,</span> <span class="n">years</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="mf">0.15</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">future</span> <span class="o">/</span> <span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">rate</span><span class="p">)</span> <span class="o">**</span> <span class="n">years</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BuffetEvaluation.get_x_day_mean_stock_price"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.BuffetEvaluation.get_x_day_mean_stock_price">[docs]</a>    <span class="k">def</span> <span class="nf">get_x_day_mean_stock_price</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">days</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">start_date</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">days</span><span class="p">))</span>
+        <span class="n">price</span> <span class="o">=</span> <span class="n">pdr</span><span class="o">.</span><span class="n">get_data_yahoo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ticker</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start_date</span><span class="p">)[</span><span class="s2">&quot;Close&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">price</span></div>
+
+<div class="viewcode-block" id="BuffetEvaluation.calculate_initial_rate_of_return"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.BuffetEvaluation.calculate_initial_rate_of_return">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_initial_rate_of_return</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">price</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">latest_eps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;eps&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">latest_eps</span> <span class="o">/</span> <span class="n">price</span></div>
+
+<div class="viewcode-block" id="BuffetEvaluation.calculate_simple_compound_interest"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.BuffetEvaluation.calculate_simple_compound_interest">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_simple_compound_interest</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">PV</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">FV</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">n_years</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">((</span><span class="n">FV</span> <span class="o">/</span> <span class="n">PV</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_years</span><span class="p">)))</span> <span class="o">-</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="BuffetEvaluation.get_treasury_yield_api_url"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.BuffetEvaluation.get_treasury_yield_api_url">[docs]</a>    <span class="k">def</span> <span class="nf">get_treasury_yield_api_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">fmp_template</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;https://financialmodelingprep.com/api/v4/treasury?from=</span><span class="si">{}</span><span class="s2">&amp;to=</span><span class="si">{}</span><span class="s2">&amp;apikey=</span><span class="si">{}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="n">from_</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span> <span class="o">-</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">180</span><span class="p">))</span>
+        <span class="n">to</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">fmp_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">from_</span><span class="p">,</span> <span class="n">to</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_key</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BuffetEvaluation.get_5Y_treasury_yield_data"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.BuffetEvaluation.get_5Y_treasury_yield_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_5Y_treasury_yield_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Receive the content of ``url``, parse it as JSON and return the object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        url : str</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+        <span class="n">yield_</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;year5&quot;</span><span class="p">])</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">yield_</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">yield_</span></div>
+
+<div class="viewcode-block" id="BuffetEvaluation.calculate_breakeven_vs_treasury"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.BuffetEvaluation.calculate_breakeven_vs_treasury">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_breakeven_vs_treasury</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="n">treasury_tield</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;breakeven price&quot;</span><span class="p">,</span> <span class="n">eps</span> <span class="o">/</span> <span class="n">treasury_tield</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">eps</span> <span class="o">/</span> <span class="n">treasury_tield</span></div>
+
+<div class="viewcode-block" id="BuffetEvaluation.treasury_comparison"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.evaluation.BuffetEvaluation.treasury_comparison">[docs]</a>    <span class="k">def</span> <span class="nf">treasury_comparison</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stock_price</span><span class="p">,</span> <span class="n">breakeven_price</span><span class="p">,</span> <span class="n">margin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="c1"># breakeven price neglects the fact that bonds are pre-tax and eps is post-tax</span>
+        <span class="c1"># and it also excludes the growth rate of the stock</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="kc">True</span> <span class="k">if</span> <span class="n">stock_price</span> <span class="o">&lt;=</span> <span class="n">margin</span> <span class="o">*</span> <span class="n">breakeven_price</span> <span class="k">else</span> <span class="kc">False</span>
+        <span class="p">)</span>  <span class="c1"># 1.1 for close calls</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, JFD.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

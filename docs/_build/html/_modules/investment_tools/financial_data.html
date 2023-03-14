@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>investment_tools.financial_data &mdash; investment-tools  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            investment-tools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">investment_tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">investment-tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">investment_tools.financial_data</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for investment_tools.financial_data</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">yfinance</span> <span class="k">as</span> <span class="nn">yf</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">from</span> <span class="nn">pandas_datareader</span> <span class="kn">import</span> <span class="n">data</span> <span class="k">as</span> <span class="n">pdr</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">import</span> <span class="nn">pyarrow</span> <span class="k">as</span> <span class="nn">pa</span>
+
+<span class="n">yf</span><span class="o">.</span><span class="n">pdr_override</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="FinancialData"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.financial_data.FinancialData">[docs]</a><span class="k">class</span> <span class="nc">FinancialData</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class for retrieving and storing financial data for a given stock ticker.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        ticker (str): The stock ticker symbol.</span>
+<span class="sd">        api_key (str, optional): An optional API key to access financial data.</span>
+<span class="sd">        data (str): Specifies whether to retrieve data from an online source or a local data store.</span>
+<span class="sd">        period (str): The time period for which data is retrieved, either &quot;annual&quot; or &quot;quarterly&quot;.</span>
+<span class="sd">        limit (int): The maximum number of financial statements to retrieve.</span>
+<span class="sd">        balance_sheets (pandas.DataFrame): The balance sheet data for the stock.</span>
+<span class="sd">        income_statements (pandas.DataFrame): The income statement data for the stock.</span>
+<span class="sd">        cash_flow_statements (pandas.DataFrame): The cash flow statement data for the stock.</span>
+<span class="sd">        reported_key_metrics (pandas.DataFrame): The reported key metric data for the stock.</span>
+<span class="sd">        stock_price_data (pandas.DataFrame): The stock price data for the stock.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        AssertionError: If invalid input is provided for data or period attributes.</span>
+
+<span class="sd">    Methods:</span>
+<span class="sd">        __init__(self, ticker: str, api_key: str=&#39;&#39;, data: str=&#39;local&#39;,</span>
+<span class="sd">                 period: str=&#39;annual&#39;, limit: int=120)</span>
+<span class="sd">            Initializes a FinancialData object.</span>
+
+<span class="sd">        assert_valid_user_inputs(self)</span>
+<span class="sd">            Asserts that the user input for the data attribute is valid.</span>
+
+<span class="sd">        fetch_raw_data(self, data_type: str) -&gt; pd.DataFrame</span>
+<span class="sd">            Fetches raw financial data from an online source or a local cache.</span>
+
+<span class="sd">        get_load_path(self, data_type: str, ticker: str, period: str) -&gt; Path</span>
+<span class="sd">            Generates a file path for the specified data type.</span>
+
+<span class="sd">        get_frame_indecies(self) -&gt; pd.Index</span>
+<span class="sd">            Retrieves a list of financial data statement indecies.</span>
+
+<span class="sd">        build_dataframe(self, data: dict) -&gt; pd.DataFrame</span>
+<span class="sd">            Builds a pandas dataframe from financial statement data.</span>
+
+<span class="sd">        generate_index(self, date: str) -&gt; str</span>
+<span class="sd">            Generates an index for the dataframe from the filing date.</span>
+
+<span class="sd">        generate_date(self, date_str: str) -&gt; dt.date</span>
+<span class="sd">            Converts a date string to a datetime.date object.</span>
+
+<span class="sd">        check_for_matching_indecies(self) -&gt; bool</span>
+<span class="sd">            Asserts that financial statements have matching indecies.</span>
+
+<span class="sd">        get_common_df_indicies(self) -&gt; pd.Index</span>
+<span class="sd">            Retrieves the common financial statement dataframe indecies.</span>
+
+<span class="sd">        filter_for_common_indecies(self, common_elements: pd.Index)</span>
+<span class="sd">            Filters financial statement dataframes for common indecies.</span>
+
+<span class="sd">        assert_identical_indecies(self)</span>
+<span class="sd">            Asserts that financial statement dataframe indecies are identical.</span>
+
+<span class="sd">        assert_required_length(self, item: list)</span>
+<span class="sd">            Asserts that a given item has the required length based on the period.</span>
+
+<span class="sd">        assert_valid_server_response(Self, response: requests.Response)</span>
+<span class="sd">            Asserts that an API call to fetch financial data was successful.</span>
+
+<span class="sd">        assert_server_response_not_empty(self, response: requests.Response)</span>
+<span class="sd">            Asserts that an API call to fetch financial data returned non-empty results.</span>
+
+<span class="sd">        fetch_stock_price_data_yf(self) -&gt; pd.DataFrame</span>
+<span class="sd">            Fetches stock price data from Yahoo Finance.</span>
+
+<span class="sd">        periodise(self, df: pd.DataFrame) -&gt; pd.DataFrame</span>
+<span class="sd">            Periodises the stock price data for each filing period.</span>
+
+<span class="sd">        save_financial_attributes(self)</span>
+<span class="sd">            Saves the financial data to local parquet files.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ticker</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;local&quot;</span><span class="p">,</span>
+        <span class="n">period</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;annual&quot;</span><span class="p">,</span>
+        <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">120</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes a new instance of the FinancialData class.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ticker (str): The stock ticker symbol.</span>
+<span class="sd">            api_key (str, optional): An optional API key to access financial data.</span>
+<span class="sd">            data (str): Specifies whether to retrieve data from an online source or a local data store.</span>
+<span class="sd">            period (str): The time period for which data is retrieved, either &quot;annual&quot; or &quot;quarterly&quot;.</span>
+<span class="sd">            limit (int): The maximum number of financial statements to retrieve.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ticker</span> <span class="o">=</span> <span class="n">ticker</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api_key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">api_key</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">period</span> <span class="o">=</span> <span class="n">period</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_valid_user_inputs</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">limit</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">limit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">days_in_period</span> <span class="o">=</span> <span class="mi">365</span> <span class="k">if</span> <span class="n">period</span> <span class="o">==</span> <span class="s2">&quot;annual&quot;</span> <span class="k">else</span> <span class="mi">90</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">balance_sheets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fetch_raw_data</span><span class="p">(</span><span class="s2">&quot;bs&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">balance_sheets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">replace_None</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">income_statements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fetch_raw_data</span><span class="p">(</span><span class="s2">&quot;is&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">income_statements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">replace_None</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">income_statements</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cash_flow_statements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fetch_raw_data</span><span class="p">(</span><span class="s2">&quot;cfs&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cash_flow_statements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">replace_None</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cash_flow_statements</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reported_key_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fetch_raw_data</span><span class="p">(</span><span class="s2">&quot;metrics&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reported_key_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">replace_None</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reported_key_metrics</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_for_matching_indecies</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filter_for_common_indecies</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_common_df_indicies</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_required_length</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frame_indecies</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_frame_indecies</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filing_date_objects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stock_price_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetch_stock_price_data_yf</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_required_length</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stock_price_data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_financial_attributes</span><span class="p">()</span>
+
+<div class="viewcode-block" id="FinancialData.replace_None"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.financial_data.FinancialData.replace_None">[docs]</a>    <span class="k">def</span> <span class="nf">replace_None</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Replaces None values in a DataFrame with 0.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pandas.DataFrame): The DataFrame to process.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.DataFrame: The processed DataFrame with None values replaced by 0.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df_</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">to_replace</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df_</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">to_replace</span><span class="o">=</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;None&quot;</span><span class="p">],</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FinancialData.assert_valid_user_inputs"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.financial_data.FinancialData.assert_valid_user_inputs">[docs]</a>    <span class="k">def</span> <span class="nf">assert_valid_user_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Asserts that the user inputs for the FinancialData instance are valid.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AssertionError: If the data or period attributes are invalid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;online&quot;</span><span class="p">,</span> <span class="s2">&quot;local&quot;</span><span class="p">],</span> <span class="s2">&quot;data must be &#39;online&#39; or &#39;local&#39;&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">period</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="s2">&quot;annual&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;quarter&quot;</span><span class="p">,</span>
+        <span class="p">],</span> <span class="s2">&quot;period must be &#39;annual&#39; or &#39;quarter&quot;</span></div>
+
+<div class="viewcode-block" id="FinancialData.generate_request_url"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.financial_data.FinancialData.generate_request_url">[docs]</a>    <span class="k">def</span> <span class="nf">generate_request_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates a URL to fetch data from the Financial Modeling Prep API.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_type (str): The type of financial statement data to fetch. Valid</span>
+<span class="sd">                inputs are &#39;bs&#39;, &#39;is, &#39;cfs&#39;, and &#39;ratios&#39;.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The URL for the requested data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If an invalid data type is provided.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fmp_template</span> <span class="o">=</span> <span class="s2">&quot;https://financialmodelingprep.com/api/v3/</span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2">?period=</span><span class="si">{}</span><span class="s2">&amp;limit=</span><span class="si">{}</span><span class="s2">&amp;apikey=</span><span class="si">{}</span><span class="s2">&quot;</span>
+        <span class="n">ticker</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ticker</span>
+        <span class="n">period</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">period</span>
+        <span class="n">limit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">limit</span>
+        <span class="n">api_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_key</span>
+
+        <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;bs&quot;</span><span class="p">:</span>
+            <span class="n">data_str</span> <span class="o">=</span> <span class="s2">&quot;balance-sheet-statement&quot;</span>
+        <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;is&quot;</span><span class="p">:</span>
+            <span class="n">data_str</span> <span class="o">=</span> <span class="s2">&quot;income-statement&quot;</span>
+        <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;cfs&quot;</span><span class="p">:</span>
+            <span class="n">data_str</span> <span class="o">=</span> <span class="s2">&quot;cash-flow-statement&quot;</span>
+        <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;metrics&quot;</span><span class="p">:</span>
+            <span class="n">data_str</span> <span class="o">=</span> <span class="s2">&quot;ratios&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">data_type</span><span class="si">}</span><span class="s2"> is not a valid API call&quot;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">fmp_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data_str</span><span class="p">,</span> <span class="n">ticker</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">limit</span><span class="p">,</span> <span class="n">api_key</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FinancialData.fetch_raw_data"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.financial_data.FinancialData.fetch_raw_data">[docs]</a>    <span class="k">def</span> <span class="nf">fetch_raw_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fetches raw financial data from either the Financial Modeling Prep API</span>
+<span class="sd">          or a local file, based on the self.data attribute.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_type (str): The type of data to fetch.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.DataFrame if the data is fetched locally, otherwise requests.Response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="s2">&quot;online&quot;</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_request_url</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span>
+            <span class="n">raw_data</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_valid_server_response</span><span class="p">(</span><span class="n">raw_data</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_server_response_not_empty</span><span class="p">(</span><span class="n">raw_data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="s2">&quot;local&quot;</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_load_path</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ticker</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">period</span><span class="p">)</span>
+            <span class="n">raw_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">raw_data</span></div>
+
+<div class="viewcode-block" id="FinancialData.get_load_path"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.financial_data.FinancialData.get_load_path">[docs]</a>    <span class="k">def</span> <span class="nf">get_load_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ticker</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the file path to load a local financial data file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_type (str): The type of financial data to fetch. Acceptable values are &#39;bs&#39;, &#39;is&#39;, &#39;cfs&#39;, and &#39;ratios&#39;.</span>
+<span class="sd">            ticker (str): The ticker symbol for the stock.</span>
+<span class="sd">            period (str): The period of the data, either &#39;annual&#39; or &#39;quarter&#39;.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pathlib.Path: The file path for the requested data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;bs&quot;</span><span class="p">:</span>
+            <span class="n">file</span> <span class="o">=</span> <span class="s2">&quot;balance_sheets.parquet&quot;</span>
+        <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;is&quot;</span><span class="p">:</span>
+            <span class="n">file</span> <span class="o">=</span> <span class="s2">&quot;income_statements.parquet&quot;</span>
+        <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;cfs&quot;</span><span class="p">:</span>
+            <span class="n">file</span> <span class="o">=</span> <span class="s2">&quot;cash_flow_statements.parquet&quot;</span>
+        <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;metrics&quot;</span><span class="p">:</span>
+            <span class="n">file</span> <span class="o">=</span> <span class="s2">&quot;reported_key_metrics.parquet&quot;</span>
+        <span class="k">elif</span> <span class="n">data_type</span> <span class="o">==</span> <span class="s2">&quot;price&quot;</span><span class="p">:</span>
+            <span class="n">file</span> <span class="o">=</span> <span class="s2">&quot;stock_price_data.parquet&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">data_type</span><span class="si">}</span><span class="s2"> is not a valid API call&quot;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;Company_Financial_Data&quot;</span> <span class="o">/</span> <span class="n">ticker</span> <span class="o">/</span> <span class="n">period</span> <span class="o">/</span> <span class="n">file</span></div>
+
+<div class="viewcode-block" id="FinancialData.get_frame_indecies"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.financial_data.FinancialData.get_frame_indecies">[docs]</a>    <span class="k">def</span> <span class="nf">get_frame_indecies</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the index for the financial data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.Index: The index for the financial data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_sheets</span><span class="o">.</span><span class="n">index</span></div>
+
+<div class="viewcode-block" id="FinancialData.set_frame_index"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.financial_data.FinancialData.set_frame_index">[docs]</a>    <span class="k">def</span> <span class="nf">set_frame_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the index of another dataframe to be equal to the index of the balance sheet dataframe.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">        other (pd.DataFrame): A dataframe whose index is to be set to that of the balance sheet dataframe.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        pd.DataFrame: A copy of the other dataframe with its index set to that of the balance sheet dataframe.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">other</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_indecies</span>
+        <span class="k">return</span> <span class="n">other</span></div>
+
+<div class="viewcode-block" id="FinancialData.build_dataframe"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.financial_data.FinancialData.build_dataframe">[docs]</a>    <span class="k">def</span> <span class="nf">build_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Builds a pandas.DataFrame from provided raw data. If the raw data</span>
+<span class="sd">            is already a DataFrame then it is returned immediately.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data (dict): The raw data to build the DataFrame from.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.DataFrame: The built DataFrame.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="s2">&quot;local&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="n">working_array</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">statement</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+            <span class="n">working_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">statement</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">working_array</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;index&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_index</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_date</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;index&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;netIncome&quot;</span> <span class="ow">and</span> <span class="s2">&quot;eps&quot;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">&quot;outstandingShares_calc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;netIncome&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;eps&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="FinancialData.generate_index"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.financial_data.FinancialData.generate_index">[docs]</a>    <span class="k">def</span> <span class="nf">generate_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">date</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates an index for the financial data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            date (str): The date in &#39;YYYY-MM-DD&#39; format.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The generated index string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">date</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">period</span> <span class="o">==</span> <span class="s2">&quot;annual&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ticker</span><span class="si">}</span><span class="s2">-FY-</span><span class="si">{</span><span class="n">year</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="k">if</span> <span class="n">month</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+            <span class="n">quarter</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">month</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span>
+            <span class="n">quarter</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">elif</span> <span class="n">month</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">):</span>
+            <span class="n">quarter</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="k">elif</span> <span class="n">month</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">):</span>
+            <span class="n">quarter</span> <span class="o">=</span> <span class="mi">4</span>
+
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ticker</span><span class="si">}</span><span class="s2">-Q</span><span class="si">{</span><span class="n">quarter</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">year</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+<div class="viewcode-block" id="FinancialData.generate_date"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.financial_data.FinancialData.generate_date">[docs]</a>    <span class="k">def</span> <span class="nf">generate_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">date_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">dt</span><span class="o">.</span><span class="n">date</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates a datetime.date object from a date string.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            date_str (str): The date in &#39;YYYY-MM-DD&#39; format.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            datetime.date: The generated date object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">date_str</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">dt</span><span class="o">.</span><span class="n">date</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FinancialData.check_for_matching_indecies"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.financial_data.FinancialData.check_for_matching_indecies">[docs]</a>    <span class="k">def</span> <span class="nf">check_for_matching_indecies</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks whether the financial data has matching indices.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if the financial data has matching indices, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Checking matching frame indecies&quot;</span><span class="p">)</span>
+        <span class="n">len_bs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">)</span>
+        <span class="n">len_is</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">income_statements</span><span class="p">)</span>
+        <span class="n">len_cfs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cash_flow_statements</span><span class="p">)</span>
+        <span class="n">len_ratios</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reported_key_metrics</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Financial statement lengths are BS: </span><span class="si">{</span><span class="n">len_bs</span><span class="si">}</span><span class="s2">, IS:</span><span class="si">{</span><span class="n">len_is</span><span class="si">}</span><span class="s2">, CFS:</span><span class="si">{</span><span class="n">len_cfs</span><span class="si">}</span><span class="s2">, Ratios:</span><span class="si">{</span><span class="n">len_ratios</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="c1"># Logical checks for matching indecies</span>
+        <span class="n">matching_index_1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">income_statements</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">matching_index_2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cash_flow_statements</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">matching_index_3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reported_key_metrics</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">matching_indecies</span> <span class="o">=</span> <span class="n">matching_index_1</span> <span class="ow">and</span> <span class="n">matching_index_2</span> <span class="ow">and</span> <span class="n">matching_index_3</span>
+        <span class="k">return</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">matching_indecies</span> <span class="k">else</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="FinancialData.get_common_df_indicies"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.financial_data.FinancialData.get_common_df_indicies">[docs]</a>    <span class="k">def</span> <span class="nf">get_common_df_indicies</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the common indices for the financial data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.Index: The common indices for the financial data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">idx1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_sheets</span><span class="o">.</span><span class="n">index</span>
+        <span class="n">idx2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">income_statements</span><span class="o">.</span><span class="n">index</span>
+        <span class="n">idx3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cash_flow_statements</span><span class="o">.</span><span class="n">index</span>
+        <span class="n">idx4</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reported_key_metrics</span><span class="o">.</span><span class="n">index</span>
+        <span class="n">common_elements</span> <span class="o">=</span> <span class="n">idx1</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">idx2</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">idx3</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">idx4</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">common_elements</span></div>
+
+<div class="viewcode-block" id="FinancialData.filter_for_common_indecies"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.financial_data.FinancialData.filter_for_common_indecies">[docs]</a>    <span class="k">def</span> <span class="nf">filter_for_common_indecies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">common_elements</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Filters the financial data attributes to only include common indices.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            common_elements (pandas.Index): The common indices for the financial data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">balance_sheets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_sheets</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">common_elements</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">income_statements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">income_statements</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">common_elements</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cash_flow_statements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cash_flow_statements</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">common_elements</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reported_key_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reported_key_metrics</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">common_elements</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_identical_indecies</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Financial statement lengths are now each: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FinancialData.assert_identical_indecies"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.financial_data.FinancialData.assert_identical_indecies">[docs]</a>    <span class="k">def</span> <span class="nf">assert_identical_indecies</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Asserts that the financial data has identical indices</span>
+<span class="sd">            for each of its statements.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Indecies could not be filtered for common elements&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">cash_flow_statements</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">balance_sheets</span><span class="o">.</span><span class="n">index</span>
+        <span class="p">),</span> <span class="n">err_msg</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">income_statements</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">balance_sheets</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="n">err_msg</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">reported_key_metrics</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">balance_sheets</span><span class="o">.</span><span class="n">index</span>
+        <span class="p">),</span> <span class="n">err_msg</span></div>
+
+<div class="viewcode-block" id="FinancialData.assert_required_length"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.financial_data.FinancialData.assert_required_length">[docs]</a>    <span class="k">def</span> <span class="nf">assert_required_length</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Asserts that a given item has the required length based on the period.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            item (pandas.DataFrame): The item to check the length of.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">period</span> <span class="o">==</span> <span class="s2">&quot;annual&quot;</span><span class="p">:</span>
+            <span class="n">required_length</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">required_length</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Financial statements are shorter than the required length of </span><span class="si">{</span><span class="n">required_length</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">required_length</span><span class="p">,</span> <span class="n">err_msg</span></div>
+
+<div class="viewcode-block" id="FinancialData.assert_valid_server_response"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.financial_data.FinancialData.assert_valid_server_response">[docs]</a>    <span class="k">def</span> <span class="nf">assert_valid_server_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Asserts that the server response is valid (status code 200).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            response (requests.Response): The server response.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+        <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;API call failed. Code &lt;</span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2">&gt;&quot;</span></div>
+
+<div class="viewcode-block" id="FinancialData.assert_server_response_not_empty"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.financial_data.FinancialData.assert_server_response_not_empty">[docs]</a>    <span class="k">def</span> <span class="nf">assert_server_response_not_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Asserts that the server response not empty.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            response (requests.Response): The server response.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">())</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Server response successful but empty&quot;</span></div>
+
+<div class="viewcode-block" id="FinancialData.fetch_stock_price_data_yf"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.financial_data.FinancialData.fetch_stock_price_data_yf">[docs]</a>    <span class="k">def</span> <span class="nf">fetch_stock_price_data_yf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fetches stock price data from Yahoo Finance.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.DataFrame: The fetched stock price data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">start_date</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">date</span><span class="p">(</span>
+            <span class="o">*</span><span class="p">[</span>
+                <span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filing_date_objects</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">)</span> <span class="o">-</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">370</span><span class="p">)</span>
+        <span class="n">end_date</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+        <span class="n">price_interval</span> <span class="o">=</span> <span class="s2">&quot;1d&quot;</span>
+        <span class="n">raw_data</span> <span class="o">=</span> <span class="n">pdr</span><span class="o">.</span><span class="n">get_data_yahoo</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ticker</span><span class="p">,</span> <span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="n">price_interval</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_empty_df</span><span class="p">([</span><span class="s2">&quot;high&quot;</span><span class="p">,</span> <span class="s2">&quot;low&quot;</span><span class="p">,</span> <span class="s2">&quot;avg_close&quot;</span><span class="p">])</span>
+        <span class="n">raw_data</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">date</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">periodise</span><span class="p">(</span><span class="n">raw_data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FinancialData.generate_empty_df"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.financial_data.FinancialData.generate_empty_df">[docs]</a>    <span class="k">def</span> <span class="nf">generate_empty_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate an empty dataframe with the global frame indices and provided column names.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            columns (pandas.Index): the provided columns.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.DataFrame: the empty dataframe.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">columns</span><span class="p">)]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">)</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_sheets</span><span class="o">.</span><span class="n">index</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FinancialData.periodise"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.financial_data.FinancialData.periodise">[docs]</a>    <span class="k">def</span> <span class="nf">periodise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Periodises the stock price data for each filing period.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pandas.DataFrame): The stock price data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.DataFrame: The periodised stock price data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">working_array</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">days</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">days_in_period</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filing_date_objects</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">i</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filing_date_objects</span><span class="p">):</span>
+                <span class="n">filter_date_end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filing_date_objects</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">filter_date_start</span> <span class="o">=</span> <span class="n">filter_date_end</span> <span class="o">-</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">days</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">filter_date_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filing_date_objects</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="n">filter_date_end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filing_date_objects</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="n">period_data</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span>
+                <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">filter_date_start</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">filter_date_end</span><span class="p">)</span>
+            <span class="p">]</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">max_price</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">period_data</span><span class="p">[</span><span class="s2">&quot;High&quot;</span><span class="p">])</span>
+                <span class="n">min_price</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">period_data</span><span class="p">[</span><span class="s2">&quot;Low&quot;</span><span class="p">])</span>
+                <span class="n">avg_close</span> <span class="o">=</span> <span class="n">period_data</span><span class="p">[</span><span class="s2">&quot;Close&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">working_array</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">working_array</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">max_price</span><span class="p">,</span> <span class="n">min_price</span><span class="p">,</span> <span class="n">avg_close</span><span class="p">])</span>
+
+        <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;high&quot;</span><span class="p">,</span> <span class="s2">&quot;low&quot;</span><span class="p">,</span> <span class="s2">&quot;avg_close&quot;</span><span class="p">]</span>
+        <span class="n">periodised</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="n">working_array</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frame_indecies</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">cols</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="nb">sum</span><span class="p">(</span><span class="n">periodised</span><span class="p">[</span><span class="s2">&quot;high&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">periodised</span><span class="p">[</span><span class="s2">&quot;low&quot;</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">1</span>
+        <span class="p">),</span> <span class="s2">&quot;Stock highs and lows not consistent&quot;</span>
+        <span class="k">return</span> <span class="n">periodised</span></div>
+
+<div class="viewcode-block" id="FinancialData.save_financial_attributes"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.financial_data.FinancialData.save_financial_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">save_financial_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Saves the financial data to local parquet files.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">save_path</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;Company_Financial_Data&quot;</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">ticker</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">period</span>
+        <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">save_path</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Path already exists. Overwriting saved data.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Could not create directory </span><span class="si">{</span><span class="n">save_path</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">balance_sheets</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">save_path</span> <span class="o">/</span> <span class="s2">&quot;balance_sheets.parquet&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">income_statements</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">save_path</span> <span class="o">/</span> <span class="s2">&quot;income_statements.parquet&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cash_flow_statements</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span>
+                <span class="n">save_path</span> <span class="o">/</span> <span class="s2">&quot;cash_flow_statements.parquet&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stock_price_data</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">save_path</span> <span class="o">/</span> <span class="s2">&quot;stock_price_data.parquet&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reported_key_metrics</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span>
+                <span class="n">save_path</span> <span class="o">/</span> <span class="s2">&quot;reported_key_metrics.parquet&quot;</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">pa</span><span class="o">.</span><span class="n">ArrowTypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;financial data could not be saved.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">e</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, JFD.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

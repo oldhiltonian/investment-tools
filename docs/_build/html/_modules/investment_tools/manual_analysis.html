@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>investment_tools.manual_analysis &mdash; investment-tools  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            investment-tools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">investment_tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">investment-tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">investment_tools.manual_analysis</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for investment_tools.manual_analysis</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">yfinance</span> <span class="k">as</span> <span class="nn">yf</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">.financial_data</span> <span class="kn">import</span> <span class="n">FinancialData</span>
+
+<span class="n">yf</span><span class="o">.</span><span class="n">pdr_override</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="ManualAnalysis"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.manual_analysis.ManualAnalysis">[docs]</a><span class="k">class</span> <span class="nc">ManualAnalysis</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for performing manual financial analysis.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        financial_data (FinancialData): Object containing all financial data.</span>
+<span class="sd">        verbose (bool, optional): Whether to print verbose messages during analysis. Defaults to False.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        data (FinancialData): Object containing all financial data.</span>
+<span class="sd">        verbose (bool): Whether to print verbose messages during analysis.</span>
+<span class="sd">        calculated_metrics (pd.DataFrame): Contains all calculated financial metrics and ratios.</span>
+<span class="sd">        calculation_error_dict (Dict): Contains the error count and message for each financial metric.</span>
+<span class="sd">        fractional_metric_errors (pd.DataFrame): Contains fractional errors for each financial metric.</span>
+
+<span class="sd">    Methods:</span>
+<span class="sd">        print_metric_errors(metric_errors, tolerance=0.05):</span>
+<span class="sd">            Prints the number of values for each metric that exceed the given tolerance level.</span>
+<span class="sd">        assert_non_null_frame(df):</span>
+<span class="sd">            Asserts that a given dataframe is not null. Raises an AssertionError if the dataframe is null.</span>
+<span class="sd">        concat_stock_eval_ratios(df):</span>
+<span class="sd">            Concatenates and returns a dataframe containing stock evaluation ratios.</span>
+<span class="sd">        concat_profitability_ratios(df):</span>
+<span class="sd">            Concatenates and returns a dataframe containing profitability ratios.</span>
+<span class="sd">        concat_debt_interest_ratios(df):</span>
+<span class="sd">            Concatenates and returns a dataframe containing debt and interest ratios.</span>
+<span class="sd">        concat_liquidity_ratios(df):</span>
+<span class="sd">            Concatenates and returns a dataframe containing liquidity ratios.</span>
+<span class="sd">        concat_efficiency_ratios(df):</span>
+<span class="sd">            Concatenates and returns a dataframe containing efficiency ratios.</span>
+<span class="sd">        concat_metric_growth(df):</span>
+<span class="sd">            Concatenates and returns a dataframe containing the growth rate for each financial metric.</span>
+<span class="sd">        analyse() -&gt; pd.DataFrame:</span>
+<span class="sd">            Returns a dataframe containing all calculated financial metrics and ratios.</span>
+<span class="sd">        cross_check_metric_calculations() -&gt; pd.DataFrame:</span>
+<span class="sd">            Cross-checks reported financial metrics against calculated financial metrics and returns</span>
+<span class="sd">            the fractional errors.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">financial_data</span><span class="p">:</span> <span class="n">FinancialData</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the ManualAnalysis object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            financial_data (FinancialData): Object containing all financial data.</span>
+<span class="sd">            verbose (bool, optional): Whether to print verbose messages during analysis. Defaults to False.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AssertionError: If any of the calculated metrics are null.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">financial_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculated_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">analyse</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculation_error_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fractional_metric_errors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_check_metric_calculations</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">print_metric_errors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fractional_metric_errors</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ManualAnalysis.print_metric_errors"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.manual_analysis.ManualAnalysis.print_metric_errors">[docs]</a>    <span class="k">def</span> <span class="nf">print_metric_errors</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">metric_errors</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prints the number of values for each metric that exceed the given tolerance level.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            metric_errors (pd.DataFrame): Contains the fractional errors for each financial metric.</span>
+<span class="sd">            tolerance (float, optional): The tolerance level for the error fraction. Defaults to 0.05.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">line_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric_errors</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">header</span> <span class="ow">in</span> <span class="n">metric_errors</span><span class="p">:</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">metric_errors</span><span class="p">[</span><span class="n">header</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">tolerance</span><span class="p">)</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;There were </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">line_count</span><span class="si">}</span><span class="s2"> values in </span><span class="si">{</span><span class="n">header</span><span class="si">}</span><span class="s2"> that exceed the </span><span class="si">{</span><span class="n">tolerance</span><span class="si">}</span><span class="s2"> error tolerance.&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">calculation_error_dict</span><span class="p">[</span><span class="n">header</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ManualAnalysis.assert_non_null_frame"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.manual_analysis.ManualAnalysis.assert_non_null_frame">[docs]</a>    <span class="k">def</span> <span class="nf">assert_non_null_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Raises an AssertionError if any column in the input DataFrame is completely null.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pandas.DataFrame): A pandas DataFrame.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AssertionError: If any column in `df` is completely null.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Metric error calculations returned a null dataframe. Unreliable calculations.&quot;</span>
+        <span class="k">for</span> <span class="n">header</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="n">df</span><span class="p">[</span><span class="n">header</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span> <span class="sa">f</span><span class="s2">&quot;&lt;</span><span class="si">{</span><span class="n">header</span><span class="si">}</span><span class="s2">&gt; -- </span><span class="si">{</span><span class="n">err_msg</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+<div class="viewcode-block" id="ManualAnalysis.concat_stock_eval_ratios"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.manual_analysis.ManualAnalysis.concat_stock_eval_ratios">[docs]</a>    <span class="k">def</span> <span class="nf">concat_stock_eval_ratios</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate and concatenate stock evaluation ratios to the given DataFrame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pandas.DataFrame): The DataFrame to concatenate the calculated metrics to.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.DataFrame: The resulting DataFrame containing the calculated metrics.</span>
+
+<span class="sd">        Calculates the following stock evaluation ratios:</span>
+<span class="sd">            - Earnings per share (EPS)</span>
+<span class="sd">            - Diluted earnings per share (EPSDiluted)</span>
+<span class="sd">            - Price to earnings ratio (PE) for high, low, and average closing stock prices</span>
+<span class="sd">            - Book value per share</span>
+<span class="sd">            - Dividend payout ratio</span>
+<span class="sd">            - Dividend yield for low, high, and average closing stock prices</span>
+<span class="sd">            - EBITDA ratio</span>
+<span class="sd">            - Cash per share</span>
+<span class="sd">            - shareholderEquityPerShare</span>
+
+
+<span class="sd">        All ratios are calculated using financial data from the associated FinancialData object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">total_assets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span><span class="s2">&quot;totalAssets&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">total_liabilities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span><span class="s2">&quot;totalLiabilities&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">long_term_debt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span><span class="s2">&quot;longTermDebt&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">dividends_paid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">cash_flow_statements</span><span class="p">[</span><span class="s2">&quot;dividendsPaid&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">outstanding_shares</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">income_statements</span><span class="p">[</span>
+            <span class="s2">&quot;outstandingShares_calc&quot;</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">total_shareholder_equity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span>
+            <span class="s2">&quot;totalStockholdersEquity&quot;</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">cash_and_equivalents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span><span class="s2">&quot;cashAndCashEquivalents&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">eps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">income_statements</span><span class="p">[</span><span class="s2">&quot;eps&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">stock_price_high</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">stock_price_data</span><span class="p">[</span><span class="s2">&quot;high&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">stock_price_avg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">stock_price_data</span><span class="p">[</span><span class="s2">&quot;avg_close&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">stock_price_low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">stock_price_data</span><span class="p">[</span><span class="s2">&quot;low&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;eps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">eps</span>  <span class="c1"># authorized stock!!!</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;eps_diluted&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">income_statements</span><span class="p">[</span><span class="s2">&quot;epsdiluted&quot;</span><span class="p">]</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;PE_high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stock_price_high</span> <span class="o">/</span> <span class="n">eps</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;PE_low&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stock_price_low</span> <span class="o">/</span> <span class="n">eps</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;PE_avg_close&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stock_price_avg</span> <span class="o">/</span> <span class="n">eps</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;bookValuePerShare&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">total_assets</span> <span class="o">-</span> <span class="n">total_liabilities</span>
+        <span class="p">)</span> <span class="o">/</span> <span class="n">outstanding_shares</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;dividendPayoutRatio&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">dividends_paid</span> <span class="o">/</span> <span class="n">outstanding_shares</span><span class="p">)</span> <span class="o">/</span> <span class="n">eps</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;dividendYield_low&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="o">-</span><span class="n">dividends_paid</span> <span class="o">/</span> <span class="n">outstanding_shares</span>
+        <span class="p">)</span> <span class="o">/</span> <span class="n">stock_price_high</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;dividendYield_high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="o">-</span><span class="n">dividends_paid</span> <span class="o">/</span> <span class="n">outstanding_shares</span>
+        <span class="p">)</span> <span class="o">/</span> <span class="n">stock_price_low</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;dividendYield_avg_close&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="o">-</span><span class="n">dividends_paid</span> <span class="o">/</span> <span class="n">outstanding_shares</span>
+        <span class="p">)</span> <span class="o">/</span> <span class="n">stock_price_avg</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;ebitdaratio&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">income_statements</span><span class="p">[</span><span class="s2">&quot;ebitdaratio&quot;</span><span class="p">]</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;cashPerShare&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="mi">1</span> <span class="o">*</span> <span class="p">(</span><span class="n">cash_and_equivalents</span> <span class="o">-</span> <span class="n">long_term_debt</span><span class="p">)</span>
+        <span class="p">)</span> <span class="o">/</span> <span class="n">outstanding_shares</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;EqPS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">total_shareholder_equity</span> <span class="o">/</span> <span class="n">outstanding_shares</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;PEq_high&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stock_price_high</span> <span class="o">/</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;EqPS&quot;</span><span class="p">]</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;PEq_low&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stock_price_low</span> <span class="o">/</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;EqPS&quot;</span><span class="p">]</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;PEq_avg_close&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stock_price_avg</span> <span class="o">/</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;EqPS&quot;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ManualAnalysis.concat_profitability_ratios"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.manual_analysis.ManualAnalysis.concat_profitability_ratios">[docs]</a>    <span class="k">def</span> <span class="nf">concat_profitability_ratios</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Concatenates profitability ratios to the given DataFrame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): DataFrame to which profitability ratios will be added.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: DataFrame with added profitability ratios.</span>
+
+<span class="sd">        Calculates the following profitability ratios:</span>
+<span class="sd">            - Gross profit margin</span>
+<span class="sd">            - Operating profit margin</span>
+<span class="sd">            - Pretax profit margin</span>
+<span class="sd">            - Net profit margin</span>
+<span class="sd">            - Return on invested capital (ROIC)</span>
+<span class="sd">            - Return on equity (ROE)</span>
+<span class="sd">            - Return on Assets (ROA)</span>
+
+<span class="sd">        All ratios are calculated using financial data from the associated FinancialData object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">total_shares</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">income_statements</span><span class="p">[</span><span class="s2">&quot;outstandingShares_calc&quot;</span><span class="p">]</span>
+        <span class="n">revenue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">income_statements</span><span class="p">[</span><span class="s2">&quot;revenue&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">total_assets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span><span class="s2">&quot;totalAssets&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">gross_profit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">income_statements</span><span class="p">[</span><span class="s2">&quot;grossProfit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">operating_income</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">income_statements</span><span class="p">[</span><span class="s2">&quot;operatingIncome&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">income_before_tax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">income_statements</span><span class="p">[</span><span class="s2">&quot;incomeBeforeTax&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">total_capitalization</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span><span class="s2">&quot;totalEquity&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span><span class="s2">&quot;longTermDebt&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="n">total_shareholder_equity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span>
+            <span class="s2">&quot;totalStockholdersEquity&quot;</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">net_income</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">income_statements</span><span class="p">[</span><span class="s2">&quot;netIncome&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;grossProfitMargin&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gross_profit</span> <span class="o">/</span> <span class="n">revenue</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;operatingProfitMargin&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">operating_income</span> <span class="o">/</span> <span class="n">revenue</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;pretaxProfitMargin&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">income_before_tax</span> <span class="o">/</span> <span class="n">revenue</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;netProfitMargin&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">net_income</span> <span class="o">/</span> <span class="n">revenue</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;ROIC&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">net_income</span> <span class="o">/</span> <span class="n">total_capitalization</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;returnOnEquity&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">net_income</span> <span class="o">/</span> <span class="n">total_shareholder_equity</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;returnOnAssets&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">net_income</span> <span class="o">/</span> <span class="n">total_assets</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ManualAnalysis.concat_debt_interest_ratios"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.manual_analysis.ManualAnalysis.concat_debt_interest_ratios">[docs]</a>    <span class="k">def</span> <span class="nf">concat_debt_interest_ratios</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Concatenates debt and interest ratios to the given DataFrame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): DataFrame to which debt and interest ratios will be added.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: DataFrame with added debt and interest ratios.</span>
+
+<span class="sd">        Calculates the following debt and interest ratios:</span>
+<span class="sd">            - Interest coverage</span>
+<span class="sd">            - Fixed charge coverage</span>
+<span class="sd">            - Debt to total capitalization ratio</span>
+<span class="sd">            - Total debt ratio</span>
+
+<span class="sd">        All ratios are calculated using financial data from the associated FinancialData object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">operating_income</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">income_statements</span><span class="p">[</span><span class="s2">&quot;operatingIncome&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">total_assets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span><span class="s2">&quot;totalAssets&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">long_term_debt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span><span class="s2">&quot;longTermDebt&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">total_capitalization</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span><span class="s2">&quot;totalEquity&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span><span class="s2">&quot;longTermDebt&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="n">interest_expense</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">income_statements</span><span class="p">[</span><span class="s2">&quot;interestExpense&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="c1"># The fixed_charges calculation below is likely incomplete</span>
+        <span class="n">fixed_charges</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">income_statements</span><span class="p">[</span><span class="s2">&quot;interestExpense&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span><span class="s2">&quot;capitalLeaseObligations&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="n">ebitda</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">income_statements</span><span class="p">[</span><span class="s2">&quot;ebitda&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">total_equity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span><span class="s2">&quot;totalEquity&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">total_debt</span> <span class="o">=</span> <span class="n">total_assets</span> <span class="o">-</span> <span class="n">total_equity</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;interestCoverage&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">operating_income</span> <span class="o">/</span> <span class="n">interest_expense</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;fixedChargeCoverage&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ebitda</span> <span class="o">/</span> <span class="n">fixed_charges</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;debtToTotalCap&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">long_term_debt</span> <span class="o">/</span> <span class="n">total_capitalization</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;totalDebtRatio&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">total_debt</span> <span class="o">/</span> <span class="n">total_assets</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ManualAnalysis.concat_liquidity_ratios"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.manual_analysis.ManualAnalysis.concat_liquidity_ratios">[docs]</a>    <span class="k">def</span> <span class="nf">concat_liquidity_ratios</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Concatenates liquidity ratios to the given DataFrame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): DataFrame to which liquidity ratios will be added.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: DataFrame with added liquidity ratios.</span>
+
+<span class="sd">        Calculates the following liquidity ratios:</span>
+<span class="sd">            - Current ratio</span>
+<span class="sd">            - Quick ratio</span>
+<span class="sd">            - Cash ratio</span>
+
+<span class="sd">        All ratios are calculated using financial data from the associated FinancialData object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">current_assets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span><span class="s2">&quot;totalCurrentAssets&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">current_liabilities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span><span class="s2">&quot;totalCurrentLiabilities&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">inventory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span><span class="s2">&quot;inventory&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">cash_and_equivalents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span><span class="s2">&quot;cashAndCashEquivalents&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">quick_assets</span> <span class="o">=</span> <span class="n">current_assets</span> <span class="o">-</span> <span class="n">inventory</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;currentRatio&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_assets</span> <span class="o">/</span> <span class="n">current_liabilities</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;quickRatio&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">quick_assets</span> <span class="o">/</span> <span class="n">current_liabilities</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;cashRatio&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cash_and_equivalents</span> <span class="o">/</span> <span class="n">current_liabilities</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ManualAnalysis.concat_efficiency_ratios"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.manual_analysis.ManualAnalysis.concat_efficiency_ratios">[docs]</a>    <span class="k">def</span> <span class="nf">concat_efficiency_ratios</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Concatenates efficiency ratios to the given DataFrame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): DataFrame to which efficiency ratios will be added.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: DataFrame with added efficiency ratios.</span>
+
+<span class="sd">        Calculates the following efficiency ratios:</span>
+<span class="sd">            - Total asset turnover</span>
+<span class="sd">            - Inventory to sales ratio</span>
+<span class="sd">            - Inventory turnover ratio</span>
+<span class="sd">            - Inventory turnover in days</span>
+<span class="sd">            - Accounts receivable to sales ratio</span>
+<span class="sd">            - Receivables turnover</span>
+<span class="sd">            - Receivables turnover in days</span>
+
+<span class="sd">        All ratios are calculated using financial data from the associated FinancialData object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">inventory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span><span class="s2">&quot;inventory&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">revenue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">income_statements</span><span class="p">[</span><span class="s2">&quot;revenue&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">total_assets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span><span class="s2">&quot;totalAssets&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">net_receivables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span><span class="s2">&quot;netReceivables&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;totalAssetTurnover&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">revenue</span> <span class="o">/</span> <span class="n">total_assets</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;inventoryToSalesRatio&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inventory</span> <span class="o">/</span> <span class="n">revenue</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;inventoryTurnoverRatio&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;inventoryToSalesRatio&quot;</span><span class="p">]</span>
+        <span class="n">days</span> <span class="o">=</span> <span class="mi">365</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">period</span> <span class="o">==</span> <span class="s2">&quot;annual&quot;</span> <span class="k">else</span> <span class="mi">90</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;inventoryTurnoverInDays&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">days</span> <span class="o">/</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;inventoryTurnoverRatio&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">accounts_receivable_to_sales_ratio</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">balance_sheets</span><span class="p">[</span><span class="s2">&quot;netReceivables&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="o">/</span> <span class="n">revenue</span>
+        <span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;accountsReceivableToSalesRatio&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">accounts_receivable_to_sales_ratio</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;receivablesTurnover&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">revenue</span> <span class="o">/</span> <span class="n">net_receivables</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;receivablesTurnoverInDays&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">days</span> <span class="o">/</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;receivablesTurnover&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ManualAnalysis.concat_metric_growth"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.manual_analysis.ManualAnalysis.concat_metric_growth">[docs]</a>    <span class="k">def</span> <span class="nf">concat_metric_growth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Concatenates growth rates for specified metrics to the given DataFrame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): DataFrame to which growth rates will be added.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: DataFrame with added growth rates.</span>
+
+<span class="sd">        Calculates the percentage growth rate for the following metrics over a one year or four quarter period:</span>
+<span class="sd">            - Earnings per share (EPS)</span>
+<span class="sd">            - Return on equity (ROE)</span>
+<span class="sd">            - Cash per share</span>
+<span class="sd">            - Price-to-earnings (P/E) ratio (average close)</span>
+<span class="sd">            - Earnings before interest, taxes, depreciation, and amortization (EBITDA) ratio</span>
+<span class="sd">            - Return on invested capital (ROIC)</span>
+<span class="sd">            - Net profit margin</span>
+<span class="sd">            - Return on assets (ROA)</span>
+<span class="sd">            - Debt to total capitalization ratio</span>
+<span class="sd">            - Total debt ratio</span>
+
+<span class="sd">        All growth rates are calculated using financial data from the associated FinancialData object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">growth_metrics</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;eps&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;returnOnEquity&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;cashPerShare&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;PE_avg_close&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ebitdaratio&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ROIC&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;netProfitMargin&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;returnOnAssets&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;debtToTotalCap&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;totalDebtRatio&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">span</span><span class="p">,</span> <span class="n">init_idx</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">period</span> <span class="o">==</span> <span class="s2">&quot;annual&quot;</span> <span class="k">else</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">growth_metrics</span><span class="p">:</span>
+            <span class="n">series</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span>
+            <span class="n">col_header</span> <span class="o">=</span> <span class="n">metric</span> <span class="o">+</span> <span class="s2">&quot;_growth&quot;</span>
+            <span class="n">col_data</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">series</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="n">init_idx</span><span class="p">:</span>
+                    <span class="n">col_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">col_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">(</span><span class="n">value</span> <span class="o">-</span> <span class="n">series</span><span class="p">[</span><span class="n">idx</span> <span class="o">-</span> <span class="n">span</span><span class="p">])</span> <span class="o">/</span> <span class="nb">abs</span><span class="p">(</span><span class="n">series</span><span class="p">[</span><span class="n">idx</span> <span class="o">-</span> <span class="n">span</span><span class="p">])</span>
+                    <span class="p">)</span>
+            <span class="n">df</span><span class="p">[</span><span class="n">col_header</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">col_data</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">frame_indecies</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ManualAnalysis.analyse"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.manual_analysis.ManualAnalysis.analyse">[docs]</a>    <span class="k">def</span> <span class="nf">analyse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Analyzes the financial data and calculates a variety of financial ratios.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: A DataFrame containing the calculated financial ratios.</span>
+
+<span class="sd">        The following ratio types are calculated using financial data from the associated FinancialData object:</span>
+<span class="sd">            - Stock evaluation ratios</span>
+<span class="sd">            - Profitability ratios</span>
+<span class="sd">            - Debt and interest ratios</span>
+<span class="sd">            - Liquidity ratios</span>
+<span class="sd">            - Efficiency ratios</span>
+<span class="sd">            - Metric growth</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">frame_indecies</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">concat_stock_eval_ratios</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">concat_profitability_ratios</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">concat_debt_interest_ratios</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">concat_liquidity_ratios</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">concat_efficiency_ratios</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">concat_metric_growth</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ManualAnalysis.cross_check_metric_calculations"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.manual_analysis.ManualAnalysis.cross_check_metric_calculations">[docs]</a>    <span class="k">def</span> <span class="nf">cross_check_metric_calculations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the fractional error between reported metrics and those calculated by the program</span>
+<span class="sd">        for a selection of key metrics. If verbose is set to False, returns None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: DataFrame containing the fractional errors for each metric.</span>
+
+<span class="sd">        Metrics that are cross-checked:</span>
+<span class="sd">            - Gross profit margin</span>
+<span class="sd">            - Operating profit margin</span>
+<span class="sd">            - Net profit margin</span>
+<span class="sd">            - Current ratio</span>
+<span class="sd">            - Return on equity (ROE)</span>
+<span class="sd">            - Return on assets (ROA)</span>
+<span class="sd">            - Cash per share</span>
+<span class="sd">            - Interest coverage</span>
+<span class="sd">            - Dividend payout ratio</span>
+
+<span class="sd">        Fractional error is calculated as the absolute value of the difference between the calculated</span>
+<span class="sd">        metric and the reported metric, divided by the calculated metric.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">## add ROE, ROIC, ebitda ratio</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">fractional_errors</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">frame_indecies</span><span class="p">)</span>
+        <span class="n">metrics_to_check</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;grossProfitMargin&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;operatingProfitMargin&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;netProfitMargin&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;currentRatio&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;returnOnEquity&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;returnOnAssets&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;cashPerShare&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;interestCoverage&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dividendPayoutRatio&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics_to_check</span><span class="p">:</span>
+            <span class="n">reported</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">reported_key_metrics</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span>
+            <span class="n">calculated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculated_metrics</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">reported</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">sum</span><span class="p">(</span><span class="n">calculated</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">fractional_errors</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="n">calculated</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">fractional_errors</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="p">(</span><span class="n">calculated</span> <span class="o">-</span> <span class="n">reported</span><span class="p">)</span> <span class="o">/</span> <span class="n">calculated</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2"> series has sunsupported type for sum()&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fractional_errors</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, JFD.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
