@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>investment_tools.company &mdash; investment-tools v1.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            investment-tools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">investment_tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">investment-tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">investment_tools.company</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for investment_tools.company</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">yfinance</span> <span class="k">as</span> <span class="nn">yf</span>
+<span class="kn">from</span> <span class="nn">.financial_data</span> <span class="kn">import</span> <span class="n">FinancialData</span>
+<span class="kn">from</span> <span class="nn">.plots</span> <span class="kn">import</span> <span class="n">Plots</span>
+<span class="kn">from</span> <span class="nn">.manual_analysis</span> <span class="kn">import</span> <span class="n">ManualAnalysis</span>
+<span class="kn">from</span> <span class="nn">.evaluation</span> <span class="kn">import</span> <span class="n">StandardEvaluation</span><span class="p">,</span> <span class="n">BuffetEvaluation</span>
+
+<span class="n">yf</span><span class="o">.</span><span class="n">pdr_override</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="Company"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.company.Company">[docs]</a><span class="k">class</span> <span class="nc">Company</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class representing a company and its financial analysis</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ticker (str): The stock symbol representing the company</span>
+<span class="sd">        api_key (str): API key for accessing financial data from a data source</span>
+<span class="sd">        data (str, optional): Source of data either from &#39;online&#39; (default) or &#39;offline&#39;</span>
+<span class="sd">        period (str, optional): Financial period to use for the analysis either &#39;annual&#39; (default) or &#39;quarterly&#39;</span>
+<span class="sd">        limit (int, optional): The number of financial periods to include in the analysis (default is 20)</span>
+<span class="sd">        verbose (bool, optional): If True, verbose output will be printed during analysis (default is False)</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        ticker (str): The stock symbol representing the company</span>
+<span class="sd">        period (str): Financial period used for the analysis</span>
+<span class="sd">        metrics (dict): Dictionary of financial metrics for the company</span>
+<span class="sd">        trends (list of plot objects): List of plots showing the trend of the financial metrics over time</span>
+
+<span class="sd">    Methods:</span>
+<span class="sd">    __init__(self, ticker, api_key, data=&#39;online&#39;, period=&#39;annual&#39;, limit=20, verbose=False):</span>
+<span class="sd">        Initializes a new instance of the `Company` class.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        ticker (str): The stock symbol representing the company</span>
+<span class="sd">        api_key (str): API key for accessing financial data from a data source</span>
+<span class="sd">        data (str, optional): Source of data either from &#39;online&#39; (default) or &#39;offline&#39;</span>
+<span class="sd">        period (str, optional): Financial period to use for the analysis either &#39;annual&#39; (default) or &#39;quarterly&#39;</span>
+<span class="sd">        limit (int, optional): The number of financial periods to include in the analysis (default is 20)</span>
+<span class="sd">        verbose (bool, optional): If True, verbose output will be printed during analysis (default is False)</span>
+
+<span class="sd">    recommendation(self) -&gt; Dict[str, dict]:</span>
+<span class="sd">        Builds a recommendation for the company based on its financial metrics.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        A dictionary with the keys being the metrics and the values being another dictionary with &#39;score&#39;</span>
+<span class="sd">             and &#39;strength&#39; keys.</span>
+
+<span class="sd">    get_modifier(self, metric: str) -&gt; int:</span>
+<span class="sd">        Returns a modifier based on whether the metric is related to debt.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        metric (str): The name of the financial metric.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        1 if the metric is not related to debt, -1 otherwise.</span>
+
+<span class="sd">    get_copy_of_df_column(self, header: str) -&gt; pd.Series:</span>
+<span class="sd">        Returns a copy of a column of data for a given metric.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        header (str): The name of the financial metric.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        A copy of the column of data for the given metric.</span>
+
+<span class="sd">    get_r2_val(metrics: pd.Series) -&gt; float:</span>
+<span class="sd">        Returns the R-squared value for a given series of metrics.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        metrics (pd.Series): A series of metrics.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        The R-squared value for the given series of metrics.</span>
+
+<span class="sd">    score(self, metric: str) -&gt; Tuple[int, int]:</span>
+<span class="sd">        Computes the score for a given metric.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        metric (str): The name of the financial metric.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        A tuple containing the growth score and the stability score for the given metric.</span>
+
+<span class="sd">    score_mean_growth(self, mean_growth: float) -&gt; int:</span>
+<span class="sd">        Computes the growth score for a given mean growth rate.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        mean_growth (float): The mean growth rate.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        The growth score for the given mean growth rate.</span>
+
+<span class="sd">    score_trend_strength(r2: float) -&gt; int:</span>
+<span class="sd">        Calculates the trend strength score based on the R^2 value of a metric.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">        r2 (float): The R^2 value of a metric.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        int: The trend strength score.</span>
+
+<span class="sd">    eval_(scores: Dict[str, dict]) -&gt; bool:</span>
+<span class="sd">        Evaluates the overall recommendation for the company based on the scores for each metric.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">        scores (Dict[str, dict]): A dictionary of scores for each metric.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        bool: True if the recommendation is positive, False otherwise.</span>
+
+<span class="sd">    print_charts() -&gt; None:</span>
+<span class="sd">        Prints the trend charts for each metric.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    export() -&gt; None:</span>
+<span class="sd">        Exports the financial trend charts to disk as a pdf file. Also exports key findings based on the analysis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ticker</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;online&quot;</span><span class="p">,</span>
+        <span class="n">period</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;annual&quot;</span><span class="p">,</span>
+        <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize a new instance of the Company class.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ticker (str): The stock symbol representing the company.</span>
+<span class="sd">            api_key (str): API key for accessing financial data from a data source.</span>
+<span class="sd">            data (str, optional): Source of data either from &#39;online&#39; (default) or &#39;offline&#39;.</span>
+<span class="sd">            period (str, optional): Financial period to use for the analysis either &#39;annual&#39; (default) or &#39;quarterly&#39;.</span>
+<span class="sd">            limit (int, optional): The number of financial periods to include in the analysis (default is 20).</span>
+<span class="sd">            verbose (bool, optional): Set to True to enable additional console output (default is False).</span>
+
+<span class="sd">        Attributes:</span>
+<span class="sd">            ticker (str): The stock symbol representing the company.</span>
+<span class="sd">            period (str): Financial period used for the analysis.</span>
+<span class="sd">            metrics (dict): Dictionary of financial metrics for the company.</span>
+<span class="sd">            trends (list of plot objects): List of plots showing the trend of the financial metrics over time.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ticker</span> <span class="o">=</span> <span class="n">ticker</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">period</span> <span class="o">=</span> <span class="n">period</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">limit</span> <span class="o">=</span> <span class="n">limit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_financial_data</span> <span class="o">=</span> <span class="n">FinancialData</span><span class="p">(</span><span class="n">ticker</span><span class="p">,</span> <span class="n">api_key</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filing_dates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_financial_data</span><span class="o">.</span><span class="n">filing_date_objects</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_analysis</span> <span class="o">=</span> <span class="n">ManualAnalysis</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_financial_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_analysis</span><span class="o">.</span><span class="n">calculated_metrics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_charts_printed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">print_charts</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval</span> <span class="o">=</span> <span class="n">StandardEvaluation</span><span class="p">(</span>
+            <span class="n">ticker</span><span class="p">,</span> <span class="n">api_key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_financial_data</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval_buffet</span> <span class="o">=</span> <span class="n">BuffetEvaluation</span><span class="p">(</span>
+            <span class="n">ticker</span><span class="p">,</span> <span class="n">api_key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_financial_data</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">standard_outcome</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval</span><span class="o">.</span><span class="n">standard_outcome</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">standard_outcome</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">print_charts</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">export</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Company.print_charts"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.company.Company.print_charts">[docs]</a>    <span class="k">def</span> <span class="nf">print_charts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prints the trend charts for the company&#39;s financial metrics.</span>
+
+<span class="sd">        If the charts have already been printed, this method does nothing.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_charts_printed</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plots</span> <span class="o">=</span> <span class="n">Plots</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ticker</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">period</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">limit</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filing_dates</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trends</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plots</span><span class="o">.</span><span class="n">plots</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_charts_printed</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="Company.export"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.company.Company.export">[docs]</a>    <span class="k">def</span> <span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The export() method exports the financial trend charts to a PDF file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plots</span><span class="o">.</span><span class="n">_export_charts_pdf</span><span class="p">()</span></div></div>
+        <span class="c1"># also export key findings based on the analyis</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, JFD.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

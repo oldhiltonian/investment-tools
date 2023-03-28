@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>investment_tools.plots &mdash; investment-tools v1.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            investment-tools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">investment_tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">investment-tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">investment_tools.plots</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for investment_tools.plots</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">yfinance</span> <span class="k">as</span> <span class="nn">yf</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_pdf</span> <span class="kn">import</span> <span class="n">PdfPages</span>
+<span class="kn">from</span> <span class="nn">reportlab.pdfgen</span> <span class="kn">import</span> <span class="n">canvas</span>
+<span class="kn">from</span> <span class="nn">PyPDF2</span> <span class="kn">import</span> <span class="n">PdfReader</span><span class="p">,</span> <span class="n">PdfWriter</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">linregress</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
+
+
+<span class="n">yf</span><span class="o">.</span><span class="n">pdr_override</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="Plots"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.plots.Plots">[docs]</a><span class="k">class</span> <span class="nc">Plots</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class to create trend plots and export them as a PDF.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        ticker (str): The stock ticker of the company to analyse.</span>
+<span class="sd">        period (str): The period of data to analyse.</span>
+<span class="sd">        metrics (pd.DataFrame): A DataFrame containing financial metrics to plot.</span>
+<span class="sd">        limit (int): The maximum number of metrics to plot.</span>
+<span class="sd">        filing_dates (list): A list of dates associated with the financial filings for the company.</span>
+
+<span class="sd">    Methods:</span>
+<span class="sd">        set_limit(limit: int) -&gt; int:</span>
+<span class="sd">            Set the limit to the maximum number of metrics to plot.</span>
+<span class="sd">        get_spacing() -&gt; int:</span>
+<span class="sd">            Get the spacing for the x-axis labels.</span>
+<span class="sd">        filter_x_labels(x_labels, spacing) -&gt; list:</span>
+<span class="sd">            Filter the x-axis labels to maintain a clean plot.</span>
+<span class="sd">        generate_x_labels() -&gt; list:</span>
+<span class="sd">            Generate the x-axis labels for the plot.</span>
+<span class="sd">        calculate_subplots_shape(metrics_container) -&gt; Tuple[int, int]:</span>
+<span class="sd">            Calculate the subplot shape for each metric.</span>
+<span class="sd">        select_subplot(counter: int, subplots: plt.subplots) -&gt; plt.subplot:</span>
+<span class="sd">            Select the appropriate subplot.</span>
+<span class="sd">        get_y_data(metric) -&gt; pd.Series:</span>
+<span class="sd">            Get the y-axis data for the plot.</span>
+<span class="sd">        get_y_units(metric_type, metric) -&gt; str:</span>
+<span class="sd">            Get the units for the metric to label the y-axis.</span>
+<span class="sd">        plot_data_on_axis(axis, data) -&gt; plt.axis:</span>
+<span class="sd">            Plot the data on the specified axis.</span>
+<span class="sd">        get_linear_coeffs(x, y) -&gt; Tuple[float, float, float]:</span>
+<span class="sd">            Calculate the slope, intercept, and R-squared value for the linear trendline.</span>
+<span class="sd">        generate_linear_series(x, slope, intercept) -&gt; np.ndarray:</span>
+<span class="sd">            Generate the linear trendline series.</span>
+<span class="sd">        plot_linear_trend(axis, x, y, r2) -&gt; plt.axis:</span>
+<span class="sd">            Plot the linear trendline and R-squared value.</span>
+<span class="sd">        plot_metrics():</span>
+<span class="sd">            Plot the financial metrics and trendlines.</span>
+<span class="sd">        generate_save_path_object(file=False) -&gt; Path:</span>
+<span class="sd">            Generate the file path object for the exported PDF.</span>
+<span class="sd">        create_path_from_object(path_object):</span>
+<span class="sd">            Create the path specified in the path object.</span>
+<span class="sd">        make_bin_folder():</span>
+<span class="sd">            Create a bin folder to store temporary files.</span>
+<span class="sd">        make_pdf_title_page():</span>
+<span class="sd">            Create the title page of the PDF.</span>
+<span class="sd">        make_pdf_charts():</span>
+<span class="sd">            Create the trend plot pages of the PDF.</span>
+<span class="sd">        combine_and_export_pdfs(export_path):</span>
+<span class="sd">            Combine the title page and trend plot pages and export the PDF.</span>
+<span class="sd">        _export_charts_pdf():</span>
+<span class="sd">            Export the trend plots as a PDF.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ticker</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">period</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">metrics</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">limit</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">filing_dates</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates an instance of the `Plots` class.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ticker (str): The ticker symbol of the company.</span>
+<span class="sd">            period (str): The reporting period of the financial data.</span>
+<span class="sd">            metrics (pd.DataFrame): The financial metrics of the company.</span>
+<span class="sd">            limit (int): The maximum number of metrics to display.</span>
+<span class="sd">            filing_dates (List[str]): The filing dates of the financial data.</span>
+
+<span class="sd">        Attributes:</span>
+<span class="sd">            ticker (str): The ticker symbol of the company.</span>
+<span class="sd">            period (str): The reporting period of the financial data.</span>
+<span class="sd">            metrics (pd.DataFrame): The financial metrics of the company.</span>
+<span class="sd">            filing_dates (List[str]): The filing dates of the financial data.</span>
+<span class="sd">            limit (int): The maximum number of metrics to display.</span>
+<span class="sd">            metric_units_dict (dict): A dictionary containing the units for each metric.</span>
+<span class="sd">            plots (List[matplotlib.figure.Figure]): A list containing the plotted charts.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ticker</span> <span class="o">=</span> <span class="n">ticker</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">period</span> <span class="o">=</span> <span class="n">period</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="n">metrics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filing_dates</span> <span class="o">=</span> <span class="n">filing_dates</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">limit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_limit</span><span class="p">(</span><span class="n">limit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metric_units_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_metric_units_dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plots</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_metrics</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Plots.get_metric_units_dict"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.plots.Plots.get_metric_units_dict">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_metric_units_dict</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the dictionary that maps the financial metric with its corresponding unit.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dict: the mapping dictionary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">metric_units_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;Stock Evaluation Ratios&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;eps&quot;</span><span class="p">:</span> <span class="s2">&quot;$/share&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;eps_diluted&quot;</span><span class="p">:</span> <span class="s2">&quot;$/share&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;PE_high&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;PE_low&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;bookValuePerShare&quot;</span><span class="p">:</span> <span class="s2">&quot;$/share&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;dividendPayoutRatio&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;cashPerShare&quot;</span><span class="p">:</span> <span class="s2">&quot;$/share&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;ebitdaratio&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;Profitability Ratios&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;grossProfitMargin&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;operatingProfitMargin&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;pretaxProfitMargin&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;netProfitMargin&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;ROIC&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;returnOnEquity&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;returnOnAssets&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;Debt &amp; Interest Ratios&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;interestCoverage&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;fixedChargeCoverage&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;debtToTotalCap&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;totalDebtRatio&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;Liquidity Ratios&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;currentRatio&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;quickRatio&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;cashRatio&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;Efficiency Ratios&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;totalAssetTurnover&quot;</span><span class="p">:</span> <span class="s2">&quot;YYY&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;inventoryToSalesRatio&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;inventoryTurnoverRatio&quot;</span><span class="p">:</span> <span class="s2">&quot;YYY&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;inventoryTurnoverInDays&quot;</span><span class="p">:</span> <span class="s2">&quot;YYY&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;accountsReceivableToSalesRatio&quot;</span><span class="p">:</span> <span class="s2">&quot;YYY&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;receivablesTurnover&quot;</span><span class="p">:</span> <span class="s2">&quot;YYY&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;receivablesTurnoverInDays&quot;</span><span class="p">:</span> <span class="s2">&quot;YYY&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">metric_units_dict</span></div>
+
+<div class="viewcode-block" id="Plots.set_limit"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.plots.Plots.set_limit">[docs]</a>    <span class="k">def</span> <span class="nf">set_limit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the maximum number of metrics to display in the plots.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            limit (int): The maximum number of metrics to display.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: The maximum number of metrics to display.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">limit</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">limit</span></div>
+
+<div class="viewcode-block" id="Plots.get_spacing"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.plots.Plots.get_spacing">[docs]</a>    <span class="k">def</span> <span class="nf">get_spacing</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determines the spacing between x-tick labels for the plots, based on the number of metrics plotted.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: The spacing between x-tick labels.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">limit</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">2</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">limit</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">4</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">6</span></div>
+
+<div class="viewcode-block" id="Plots.filter_x_labels"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.plots.Plots.filter_x_labels">[docs]</a>    <span class="k">def</span> <span class="nf">filter_x_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_labels</span><span class="p">,</span> <span class="n">spacing</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Filters the x-tick labels for the plots, based on the specified spacing.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x_labels (list): The list of x-tick labels to be filtered.</span>
+<span class="sd">            spacing (int): The spacing between x-tick labels.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: The filtered list of x-tick labels.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">x_labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="n">spacing</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot; &quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_labels</span><span class="p">))]</span></div>
+
+<div class="viewcode-block" id="Plots.generate_x_labels"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.plots.Plots.generate_x_labels">[docs]</a>    <span class="k">def</span> <span class="nf">generate_x_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates the x-tick labels for the plots, based on the metrics data and the specified period.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: The list of x-tick labels for the plots.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="s2">&quot;-&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">limit</span> <span class="p">:]</span>
+        <span class="p">]</span></div>
+
+<div class="viewcode-block" id="Plots.calculate_subplots_shape"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.plots.Plots.calculate_subplots_shape">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_subplots_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metrics_container</span><span class="p">:</span> <span class="n">List</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the number of rows and columns required for the subplot grid, based on the number of</span>
+<span class="sd">            metrics to be plotted.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            metrics_container (list): The list of metrics to be plotted.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple: A tuple containing the number of rows and columns required for the subplot grid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nplots</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">metrics_container</span><span class="p">)</span>
+        <span class="n">nrows</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="o">-</span><span class="n">nplots</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">ncols</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span></div>
+
+<div class="viewcode-block" id="Plots.select_subplot"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.plots.Plots.select_subplot">[docs]</a>    <span class="k">def</span> <span class="nf">select_subplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">counter</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">subplots</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Selects a subplot from the grid of subplots, based on the current counter and the subplots grid.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            counter (int): The current counter value.</span>
+<span class="sd">            subplots (matplotlib.figure.Subplot): The grid of subplots.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            plt.subplot: The selected subplot.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">counter</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">counter</span> <span class="o">%</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="n">subplots</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Plots.get_y_data"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.plots.Plots.get_y_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_y_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts the y-axis data for the specified metric.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            metric (str): The name of the metric.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.Series: The y-axis data for the specified metric.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">limit</span> <span class="p">:]</span></div>
+
+<div class="viewcode-block" id="Plots.get_y_units"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.plots.Plots.get_y_units">[docs]</a>    <span class="k">def</span> <span class="nf">get_y_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts the unit of measure for the y-axis for the specified metric.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            metric_type (str): The category of the metric.</span>
+<span class="sd">            metric (str): The name of the metric.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The unit of measure for the y-axis for the specified metric.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric_units_dict</span><span class="p">[</span><span class="n">metric_type</span><span class="p">][</span><span class="n">metric</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Plots.plot_data_on_axis"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.plots.Plots.plot_data_on_axis">[docs]</a>    <span class="k">def</span> <span class="nf">plot_data_on_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plots the data trend for the specified metric on the specified axis.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            axis (plt.subplot): The axis on which to plot the data.</span>
+<span class="sd">            data (dict): A dictionary containing the plotting data, including the metric data, labels,</span>
+<span class="sd">                and units of measure.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">)</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;metric&quot;</span><span class="p">])</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;x_true&quot;</span><span class="p">])</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;x_labels&quot;</span><span class="p">])</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;y_label&quot;</span><span class="p">])</span>
+        <span class="n">axis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale_y_axis</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;metric&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">axis</span></div>
+
+<div class="viewcode-block" id="Plots.scale_y_axis"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.plots.Plots.scale_y_axis">[docs]</a>    <span class="k">def</span> <span class="nf">scale_y_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">,</span> <span class="n">data_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scales the y-axis of a given axis object based on the value of the</span>
+<span class="sd">        data_str parameter.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            axis (plt.axis): The axis to modify.</span>
+<span class="sd">            data_str (str): A string indicating which type of data is plotted on the y-axis.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            plt.axis: The modified axis object, with the y-axis limits set according to the data_str parameter.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">data_str</span> <span class="o">==</span> <span class="s2">&quot;PE_high&quot;</span><span class="p">:</span>
+            <span class="n">y_bounds</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">40</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">data_str</span> <span class="o">==</span> <span class="s2">&quot;PE_low&quot;</span><span class="p">:</span>
+            <span class="n">y_bounds</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">40</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">data_str</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="s2">&quot;dividendPayoutRatio&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ebitdaratio&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;debtToTotalCap&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;totalDebtRatio&quot;</span><span class="p">,</span>
+        <span class="p">]:</span>
+            <span class="n">y_bounds</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">axis</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">y_bounds</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">axis</span></div>
+
+<div class="viewcode-block" id="Plots.get_linear_coeffs"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.plots.Plots.get_linear_coeffs">[docs]</a>    <span class="k">def</span> <span class="nf">get_linear_coeffs</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the linear regression coefficients and coefficient of determination (R-squared)</span>
+<span class="sd">        for the given x and y data points.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (List[float]): List of x data points.</span>
+<span class="sd">            y (List[float]): List of y data points.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[float, float, float]: A tuple containing the slope, intercept, and R-squared value.</span>
+
+<span class="sd">        Calculates the linear regression coefficients for the given x and y data points using the</span>
+<span class="sd">        `linregress` function from the `scipy.stats` module. The slope, intercept, and R-squared</span>
+<span class="sd">        value are returned as a tuple.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">slope</span><span class="p">,</span> <span class="n">intercept</span><span class="p">,</span> <span class="n">r_value</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">linregress</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">slope</span><span class="p">,</span> <span class="n">intercept</span><span class="p">,</span> <span class="n">r_value</span> <span class="o">**</span> <span class="mi">2</span></div>
+
+<div class="viewcode-block" id="Plots.generate_linear_series"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.plots.Plots.generate_linear_series">[docs]</a>    <span class="k">def</span> <span class="nf">generate_linear_series</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">slope</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">intercept</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a pandas Series containing the y-values of a linear series with the given x-values,</span>
+<span class="sd">        slope, and intercept.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (pandas.Series): The x-values of the linear series.</span>
+<span class="sd">            slope (float): The slope of the linear series.</span>
+<span class="sd">            intercept (float): The intercept of the linear series.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pandas.Series: The y-values of the linear series.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">slope</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">intercept</span></div>
+
+<div class="viewcode-block" id="Plots.plot_linear_trend"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.plots.Plots.plot_linear_trend">[docs]</a>    <span class="k">def</span> <span class="nf">plot_linear_trend</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">r2</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plots linear regression line on given axis with r-squared value in legend.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            axis (matplotlib axis): axis object on which the line will be plotted.</span>
+<span class="sd">            x (np.ndarray): x-values for the data.</span>
+<span class="sd">            y (np.ndarray): y-values for the data.</span>
+<span class="sd">            r2 (float): r-squared value for the linear regression.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            matplotlib axis: axis object with the plotted line.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;linear trend&quot;</span><span class="p">)</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">([],</span> <span class="p">[],</span> <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;R2: </span><span class="si">{</span><span class="n">r2</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># Adding R2 value to legend</span>
+        <span class="k">return</span> <span class="n">axis</span></div>
+
+<div class="viewcode-block" id="Plots.plot_metrics"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.plots.Plots.plot_metrics">[docs]</a>    <span class="k">def</span> <span class="nf">plot_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The plot_metrics method generates plots of financial metrics for a given company. The method first</span>
+<span class="sd">            generates the necessary subplots to hold each metric type. Each metric type is then plotted on</span>
+<span class="sd">            an individual axis within the metric type&#39;s subplot. Each metric&#39;s trend data is gathered, and</span>
+<span class="sd">            its trend is plotted on the selected axis. A linear trendline is also plotted along with its</span>
+<span class="sd">            corresponding R2 value. Finally, each metric type&#39;s subplot is given a title and added to the</span>
+<span class="sd">            list of plots.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">        self (Plots): The Plots instance.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        None. The method appends the generated plots to the Plots instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">spacing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_spacing</span><span class="p">()</span>
+        <span class="n">x_labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_x_labels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">generate_x_labels</span><span class="p">(),</span> <span class="n">spacing</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">metric_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric_units_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="c1"># creating subplot axes to hold all metrics of each metric type</span>
+            <span class="n">metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric_units_dict</span><span class="p">[</span><span class="n">metric_type</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_subplots_shape</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">11.7</span><span class="p">,</span> <span class="mf">8.3</span><span class="p">))</span>
+
+            <span class="c1"># plotting each metric trend on an axis</span>
+            <span class="k">for</span> <span class="n">counter</span><span class="p">,</span> <span class="n">metric</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">metrics</span><span class="p">):</span>
+                <span class="c1"># axis selection</span>
+                <span class="n">axis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">select_subplot</span><span class="p">(</span><span class="n">counter</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
+                <span class="c1"># gathering data trend for each metric</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_y_data</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+                <span class="n">y_label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_y_units</span><span class="p">(</span><span class="n">metric_type</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+                <span class="n">x_true</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">index</span>
+                <span class="n">x_dummy</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+
+                <span class="c1"># plotting the data</span>
+                <span class="n">plotting_data</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;metric&quot;</span><span class="p">:</span> <span class="n">metric</span><span class="p">,</span>
+                    <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span>
+                    <span class="s2">&quot;y_label&quot;</span><span class="p">:</span> <span class="n">y_label</span><span class="p">,</span>
+                    <span class="s2">&quot;x_true&quot;</span><span class="p">:</span> <span class="n">x_true</span><span class="p">,</span>
+                    <span class="s2">&quot;x_dummy&quot;</span><span class="p">:</span> <span class="n">x_dummy</span><span class="p">,</span>
+                    <span class="s2">&quot;x_labels&quot;</span><span class="p">:</span> <span class="n">x_labels</span><span class="p">,</span>
+                <span class="p">}</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">plot_data_on_axis</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="n">plotting_data</span><span class="p">)</span>
+
+                <span class="c1"># plotting the linear trendline and R2</span>
+                <span class="n">slope</span><span class="p">,</span> <span class="n">intercept</span><span class="p">,</span> <span class="n">r2_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_linear_coeffs</span><span class="p">(</span><span class="n">x_dummy</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+                <span class="n">y_linear</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_linear_series</span><span class="p">(</span><span class="n">x_dummy</span><span class="p">,</span> <span class="n">slope</span><span class="p">,</span> <span class="n">intercept</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">plot_linear_trend</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="n">x_dummy</span><span class="p">,</span> <span class="n">y_linear</span><span class="p">,</span> <span class="n">r2_value</span><span class="p">)</span>
+                <span class="n">axis</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper right&quot;</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+
+            <span class="c1"># formatting and appending the figure</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="n">metric_type</span><span class="p">)</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Plots.generate_save_path_object"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.plots.Plots.generate_save_path_object">[docs]</a>    <span class="k">def</span> <span class="nf">generate_save_path_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates the path to the PDF file where the charts will be saved.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            file (bool, optional): Determines whether or not the filename should be appended to the file path.</span>
+<span class="sd">                Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            PosixPath: The file path object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">date</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">end_date</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filing_dates</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">start_date</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filing_dates</span><span class="p">[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">limit</span><span class="p">]</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ticker</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">period</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span><span class="si">}</span><span class="s2">_to_</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span><span class="si">}</span><span class="s2">.pdf&quot;</span>
+        <span class="p">)</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;Company_Analysis&quot;</span> <span class="o">/</span> <span class="n">date</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">ticker</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">period</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">file_path</span> <span class="o">/</span> <span class="n">file_name</span> <span class="k">if</span> <span class="n">file</span> <span class="k">else</span> <span class="n">file_path</span></div>
+
+<div class="viewcode-block" id="Plots.create_path_from_object"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.plots.Plots.create_path_from_object">[docs]</a>    <span class="k">def</span> <span class="nf">create_path_from_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_object</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a directory at the given path if it does not already exist.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path_object (Path): The path to create the directory.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">path_object</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Plots.make_bin_folder"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.plots.Plots.make_bin_folder">[docs]</a>    <span class="k">def</span> <span class="nf">make_bin_folder</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a &#39;bin&#39; folder if it does not already exist.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="s2">&quot;bin&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Plots.make_pdf_title_page"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.plots.Plots.make_pdf_title_page">[docs]</a>    <span class="k">def</span> <span class="nf">make_pdf_title_page</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates a PDF title page using the ticker and period of the company, and saves it in the &#39;bin&#39; folder.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">title_path</span> <span class="o">=</span> <span class="s2">&quot;bin/title.pdf&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">charts_path</span> <span class="o">=</span> <span class="s2">&quot;bin/charts.pdf&quot;</span>
+        <span class="n">title_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Financial Ratio Trends for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ticker</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">title_page</span> <span class="o">=</span> <span class="n">canvas</span><span class="o">.</span><span class="n">Canvas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">title_path</span><span class="p">)</span>
+        <span class="n">title_page</span><span class="o">.</span><span class="n">drawString</span><span class="p">(</span><span class="mi">210</span><span class="p">,</span> <span class="mi">520</span><span class="p">,</span> <span class="n">title_message</span><span class="p">)</span>
+        <span class="n">title_page</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Plots.make_pdf_charts"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.plots.Plots.make_pdf_charts">[docs]</a>    <span class="k">def</span> <span class="nf">make_pdf_charts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates individual PDFs for each figure in self.plots, and saves them in the &#39;bin&#39; folder.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">charts_path</span> <span class="o">=</span> <span class="s2">&quot;bin/charts.pdf&quot;</span>
+        <span class="k">with</span> <span class="n">PdfPages</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">charts_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">pdf</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">figure</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plots</span><span class="p">:</span>
+                <span class="n">pdf</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">figure</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Plots.combine_and_export_pdfs"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.plots.Plots.combine_and_export_pdfs">[docs]</a>    <span class="k">def</span> <span class="nf">combine_and_export_pdfs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">export_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Combines the PDFs generated in make_pdf_title_page and make_pdf_charts, and exports them to the given path.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            export_path (str): The file path to export the combined PDF to.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">title_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f1</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">charts_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f2</span><span class="p">:</span>
+                <span class="n">pdf1</span> <span class="o">=</span> <span class="n">PdfReader</span><span class="p">(</span><span class="n">f1</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+                <span class="n">pdf2</span> <span class="o">=</span> <span class="n">PdfReader</span><span class="p">(</span><span class="n">f2</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+                <span class="n">pdf_output</span> <span class="o">=</span> <span class="n">PdfWriter</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">page_num</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pdf1</span><span class="o">.</span><span class="n">pages</span><span class="p">)):</span>
+                    <span class="n">pdf_output</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">pdf1</span><span class="o">.</span><span class="n">pages</span><span class="p">[</span><span class="n">page_num</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">page_num</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pdf2</span><span class="o">.</span><span class="n">pages</span><span class="p">)):</span>
+                    <span class="n">pdf_output</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">pdf2</span><span class="o">.</span><span class="n">pages</span><span class="p">[</span><span class="n">page_num</span><span class="p">])</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">export_path</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">output_file</span><span class="p">:</span>
+                    <span class="n">pdf_output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Plots._export_charts_pdf"><a class="viewcode-back" href="../../investment_tools.html#investment_tools.plots.Plots._export_charts_pdf">[docs]</a>    <span class="k">def</span> <span class="nf">_export_charts_pdf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates and exports a combined PDF file of the financial ratio trend plots to a file path</span>
+<span class="sd">        specified by generate_save_path_object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path_object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_save_path_object</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_path_from_object</span><span class="p">(</span><span class="n">path_object</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">make_bin_folder</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">make_pdf_title_page</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">make_pdf_charts</span><span class="p">()</span>
+        <span class="n">path_object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_save_path_object</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">combine_and_export_pdfs</span><span class="p">(</span><span class="n">path_object</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, JFD.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

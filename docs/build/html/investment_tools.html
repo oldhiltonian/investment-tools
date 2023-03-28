@@ -1,0 +1,2232 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>investment_tools package &mdash; investment-tools v1.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="investment_tools" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            investment-tools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">investment_tools</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">investment_tools package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-investment_tools.company">investment_tools.company module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-investment_tools.evaluation">investment_tools.evaluation module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-investment_tools.financial_data">investment_tools.financial_data module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-investment_tools.manual_analysis">investment_tools.manual_analysis module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-investment_tools.plots">investment_tools.plots module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-investment_tools">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">investment-tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">investment_tools</a></li>
+      <li class="breadcrumb-item active">investment_tools package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/investment_tools.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="investment-tools-package">
+<h1>investment_tools package<a class="headerlink" href="#investment-tools-package" title="Permalink to this headline"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-investment_tools.company">
+<span id="investment-tools-company-module"></span><h2>investment_tools.company module<a class="headerlink" href="#module-investment_tools.company" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="investment_tools.company.Company">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">investment_tools.company.</span></span><span class="sig-name descname"><span class="pre">Company</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ticker</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'online'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'annual'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/company.html#Company"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.company.Company" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class representing a company and its financial analysis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ticker</strong> (<em>str</em>) – The stock symbol representing the company</p></li>
+<li><p><strong>api_key</strong> (<em>str</em>) – API key for accessing financial data from a data source</p></li>
+<li><p><strong>data</strong> (<em>str</em><em>, </em><em>optional</em>) – Source of data either from ‘online’ (default) or ‘offline’</p></li>
+<li><p><strong>period</strong> (<em>str</em><em>, </em><em>optional</em>) – Financial period to use for the analysis either ‘annual’ (default) or ‘quarterly’</p></li>
+<li><p><strong>limit</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of financial periods to include in the analysis (default is 20)</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, verbose output will be printed during analysis (default is False)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.company.Company.ticker">
+<span class="sig-name descname"><span class="pre">ticker</span></span><a class="headerlink" href="#investment_tools.company.Company.ticker" title="Permalink to this definition"></a></dt>
+<dd><p>The stock symbol representing the company</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.company.Company.period">
+<span class="sig-name descname"><span class="pre">period</span></span><a class="headerlink" href="#investment_tools.company.Company.period" title="Permalink to this definition"></a></dt>
+<dd><p>Financial period used for the analysis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.company.Company.metrics">
+<span class="sig-name descname"><span class="pre">metrics</span></span><a class="headerlink" href="#investment_tools.company.Company.metrics" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary of financial metrics for the company</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.company.Company.trends">
+<span class="sig-name descname"><span class="pre">trends</span></span><a class="headerlink" href="#investment_tools.company.Company.trends" title="Permalink to this definition"></a></dt>
+<dd><p>List of plots showing the trend of the financial metrics over time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list of plot objects</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Methods:
+__init__(self, ticker, api_key, data=’online’, period=’annual’, limit=20, verbose=False):</p>
+<blockquote>
+<div><p>Initializes a new instance of the <cite>Company</cite> class.</p>
+<p>Parameters:
+ticker (str): The stock symbol representing the company
+api_key (str): API key for accessing financial data from a data source
+data (str, optional): Source of data either from ‘online’ (default) or ‘offline’
+period (str, optional): Financial period to use for the analysis either ‘annual’ (default) or ‘quarterly’
+limit (int, optional): The number of financial periods to include in the analysis (default is 20)
+verbose (bool, optional): If True, verbose output will be printed during analysis (default is False)</p>
+</div></blockquote>
+<dl>
+<dt>recommendation(self) -&gt; Dict[str, dict]:</dt><dd><p>Builds a recommendation for the company based on its financial metrics.</p>
+<p>Returns:
+A dictionary with the keys being the metrics and the values being another dictionary with ‘score’</p>
+<blockquote>
+<div><p>and ‘strength’ keys.</p>
+</div></blockquote>
+</dd>
+<dt>get_modifier(self, metric: str) -&gt; int:</dt><dd><p>Returns a modifier based on whether the metric is related to debt.</p>
+<p>Parameters:
+metric (str): The name of the financial metric.</p>
+<p>Returns:
+1 if the metric is not related to debt, -1 otherwise.</p>
+</dd>
+<dt>get_copy_of_df_column(self, header: str) -&gt; pd.Series:</dt><dd><p>Returns a copy of a column of data for a given metric.</p>
+<p>Parameters:
+header (str): The name of the financial metric.</p>
+<p>Returns:
+A copy of the column of data for the given metric.</p>
+</dd>
+<dt>get_r2_val(metrics: pd.Series) -&gt; float:</dt><dd><p>Returns the R-squared value for a given series of metrics.</p>
+<p>Parameters:
+metrics (pd.Series): A series of metrics.</p>
+<p>Returns:
+The R-squared value for the given series of metrics.</p>
+</dd>
+<dt>score(self, metric: str) -&gt; Tuple[int, int]:</dt><dd><p>Computes the score for a given metric.</p>
+<p>Parameters:
+metric (str): The name of the financial metric.</p>
+<p>Returns:
+A tuple containing the growth score and the stability score for the given metric.</p>
+</dd>
+<dt>score_mean_growth(self, mean_growth: float) -&gt; int:</dt><dd><p>Computes the growth score for a given mean growth rate.</p>
+<p>Parameters:
+mean_growth (float): The mean growth rate.</p>
+<p>Returns:
+The growth score for the given mean growth rate.</p>
+</dd>
+<dt>score_trend_strength(r2: float) -&gt; int:</dt><dd><p>Calculates the trend strength score based on the R^2 value of a metric.</p>
+<p>Args:
+r2 (float): The R^2 value of a metric.</p>
+<p>Returns:
+int: The trend strength score.</p>
+</dd>
+<dt>eval_(scores: Dict[str, dict]) -&gt; bool:</dt><dd><p>Evaluates the overall recommendation for the company based on the scores for each metric.</p>
+<p>Args:
+scores (Dict[str, dict]): A dictionary of scores for each metric.</p>
+<p>Returns:
+bool: True if the recommendation is positive, False otherwise.</p>
+</dd>
+<dt>print_charts() -&gt; None:</dt><dd><p>Prints the trend charts for each metric.</p>
+<p>Returns:
+None</p>
+</dd>
+<dt>export() -&gt; None:</dt><dd><p>Exports the financial trend charts to disk as a pdf file. Also exports key findings based on the analysis.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.company.Company.export">
+<span class="sig-name descname"><span class="pre">export</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/investment_tools/company.html#Company.export"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.company.Company.export" title="Permalink to this definition"></a></dt>
+<dd><p>The export() method exports the financial trend charts to a PDF file.</p>
+<p>Returns:
+None.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.company.Company.print_charts">
+<span class="sig-name descname"><span class="pre">print_charts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/investment_tools/company.html#Company.print_charts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.company.Company.print_charts" title="Permalink to this definition"></a></dt>
+<dd><p>Prints the trend charts for the company’s financial metrics.</p>
+<p>If the charts have already been printed, this method does nothing.</p>
+<p>Returns:
+None</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-investment_tools.evaluation">
+<span id="investment-tools-evaluation-module"></span><h2>investment_tools.evaluation module<a class="headerlink" href="#module-investment_tools.evaluation" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="investment_tools.evaluation.BuffetEvaluation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">investment_tools.evaluation.</span></span><span class="sig-name descname"><span class="pre">BuffetEvaluation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ticker</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.series.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">financial_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/evaluation.html#BuffetEvaluation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.BuffetEvaluation" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#investment_tools.evaluation.StandardEvaluation" title="investment_tools.evaluation.StandardEvaluation"><code class="xref py py-class docutils literal notranslate"><span class="pre">investment_tools.evaluation.StandardEvaluation</span></code></a></p>
+<p>This class is under active development</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.BuffetEvaluation.buffet_eval">
+<span class="sig-name descname"><span class="pre">buffet_eval</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/investment_tools/evaluation.html#BuffetEvaluation.buffet_eval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.BuffetEvaluation.buffet_eval" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.BuffetEvaluation.buffet_test_1_is_eps_increasing">
+<span class="sig-name descname"><span class="pre">buffet_test_1_is_eps_increasing</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/evaluation.html#BuffetEvaluation.buffet_test_1_is_eps_increasing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.BuffetEvaluation.buffet_test_1_is_eps_increasing" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.BuffetEvaluation.buffet_test_2_initial_RoR">
+<span class="sig-name descname"><span class="pre">buffet_test_2_initial_RoR</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/evaluation.html#BuffetEvaluation.buffet_test_2_initial_RoR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.BuffetEvaluation.buffet_test_2_initial_RoR" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.BuffetEvaluation.buffet_test_3_determine_eps_growth">
+<span class="sig-name descname"><span class="pre">buffet_test_3_determine_eps_growth</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/evaluation.html#BuffetEvaluation.buffet_test_3_determine_eps_growth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.BuffetEvaluation.buffet_test_3_determine_eps_growth" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.BuffetEvaluation.buffet_test_4_compare_to_TBonds">
+<span class="sig-name descname"><span class="pre">buffet_test_4_compare_to_TBonds</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/evaluation.html#BuffetEvaluation.buffet_test_4_compare_to_TBonds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.BuffetEvaluation.buffet_test_4_compare_to_TBonds" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.BuffetEvaluation.buffet_test_5_RoE_projections">
+<span class="sig-name descname"><span class="pre">buffet_test_5_RoE_projections</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/evaluation.html#BuffetEvaluation.buffet_test_5_RoE_projections"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.BuffetEvaluation.buffet_test_5_RoE_projections" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.BuffetEvaluation.calc_test_5_RoE_projection_dataset">
+<span class="sig-name descname"><span class="pre">calc_test_5_RoE_projection_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">span</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">current_stock_price</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/evaluation.html#BuffetEvaluation.calc_test_5_RoE_projection_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.BuffetEvaluation.calc_test_5_RoE_projection_dataset" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.BuffetEvaluation.calculate_breakeven_vs_treasury">
+<span class="sig-name descname"><span class="pre">calculate_breakeven_vs_treasury</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">treasury_tield</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/evaluation.html#BuffetEvaluation.calculate_breakeven_vs_treasury"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.BuffetEvaluation.calculate_breakeven_vs_treasury" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.BuffetEvaluation.calculate_initial_rate_of_return">
+<span class="sig-name descname"><span class="pre">calculate_initial_rate_of_return</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/investment_tools/evaluation.html#BuffetEvaluation.calculate_initial_rate_of_return"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.BuffetEvaluation.calculate_initial_rate_of_return" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.BuffetEvaluation.calculate_simple_compound_interest">
+<span class="sig-name descname"><span class="pre">calculate_simple_compound_interest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PV</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FV</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_years</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/investment_tools/evaluation.html#BuffetEvaluation.calculate_simple_compound_interest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.BuffetEvaluation.calculate_simple_compound_interest" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.BuffetEvaluation.calculate_trendline_series">
+<span class="sig-name descname"><span class="pre">calculate_trendline_series</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.series.Series</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/evaluation.html#BuffetEvaluation.calculate_trendline_series"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.BuffetEvaluation.calculate_trendline_series" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.BuffetEvaluation.get_5Y_treasury_yield_data">
+<span class="sig-name descname"><span class="pre">get_5Y_treasury_yield_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/evaluation.html#BuffetEvaluation.get_5Y_treasury_yield_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.BuffetEvaluation.get_5Y_treasury_yield_data" title="Permalink to this definition"></a></dt>
+<dd><p>Receive the content of <code class="docutils literal notranslate"><span class="pre">url</span></code>, parse it as JSON and return the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>url</strong> (<em>str</em>) – </p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.BuffetEvaluation.get_current_stock_price">
+<span class="sig-name descname"><span class="pre">get_current_stock_price</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/evaluation.html#BuffetEvaluation.get_current_stock_price"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.BuffetEvaluation.get_current_stock_price" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.BuffetEvaluation.get_treasury_yield_api_url">
+<span class="sig-name descname"><span class="pre">get_treasury_yield_api_url</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/evaluation.html#BuffetEvaluation.get_treasury_yield_api_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.BuffetEvaluation.get_treasury_yield_api_url" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.BuffetEvaluation.get_x_day_mean_stock_price">
+<span class="sig-name descname"><span class="pre">get_x_day_mean_stock_price</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">days</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/investment_tools/evaluation.html#BuffetEvaluation.get_x_day_mean_stock_price"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.BuffetEvaluation.get_x_day_mean_stock_price" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.BuffetEvaluation.project_future_value">
+<span class="sig-name descname"><span class="pre">project_future_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">years</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/investment_tools/evaluation.html#BuffetEvaluation.project_future_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.BuffetEvaluation.project_future_value" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.BuffetEvaluation.setup_test_5_RoE_projection_df">
+<span class="sig-name descname"><span class="pre">setup_test_5_RoE_projection_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">span</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/evaluation.html#BuffetEvaluation.setup_test_5_RoE_projection_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.BuffetEvaluation.setup_test_5_RoE_projection_df" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.BuffetEvaluation.simple_discount_to_present">
+<span class="sig-name descname"><span class="pre">simple_discount_to_present</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">future</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">years</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.15</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/evaluation.html#BuffetEvaluation.simple_discount_to_present"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.BuffetEvaluation.simple_discount_to_present" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.BuffetEvaluation.treasury_comparison">
+<span class="sig-name descname"><span class="pre">treasury_comparison</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stock_price</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">breakeven_price</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">margin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/evaluation.html#BuffetEvaluation.treasury_comparison"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.BuffetEvaluation.treasury_comparison" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="investment_tools.evaluation.StandardEvaluation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">investment_tools.evaluation.</span></span><span class="sig-name descname"><span class="pre">StandardEvaluation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ticker</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.series.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">financial_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#investment_tools.financial_data.FinancialData" title="investment_tools.financial_data.FinancialData"><span class="pre">investment_tools.financial_data.FinancialData</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/evaluation.html#StandardEvaluation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.StandardEvaluation" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class to standardize and evaluate the financial data for a given company.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.evaluation.StandardEvaluation.ticker">
+<span class="sig-name descname"><span class="pre">ticker</span></span><a class="headerlink" href="#investment_tools.evaluation.StandardEvaluation.ticker" title="Permalink to this definition"></a></dt>
+<dd><p>The stock symbol for the company.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.evaluation.StandardEvaluation.api_key">
+<span class="sig-name descname"><span class="pre">api_key</span></span><a class="headerlink" href="#investment_tools.evaluation.StandardEvaluation.api_key" title="Permalink to this definition"></a></dt>
+<dd><p>The API key for the financial data provider.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.evaluation.StandardEvaluation.metrics">
+<span class="sig-name descname"><span class="pre">metrics</span></span><a class="headerlink" href="#investment_tools.evaluation.StandardEvaluation.metrics" title="Permalink to this definition"></a></dt>
+<dd><p>A Pandas Series of financial data for the company.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>pd.Series</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.evaluation.StandardEvaluation._financial_data">
+<span class="sig-name descname"><span class="pre">_financial_data</span></span><a class="headerlink" href="#investment_tools.evaluation.StandardEvaluation._financial_data" title="Permalink to this definition"></a></dt>
+<dd><p>A Pandas DataFrame of the financial data for the company.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.evaluation.StandardEvaluation._scoring_metrics">
+<span class="sig-name descname"><span class="pre">_scoring_metrics</span></span><a class="headerlink" href="#investment_tools.evaluation.StandardEvaluation._scoring_metrics" title="Permalink to this definition"></a></dt>
+<dd><p>A list of financial metrics used to calculate scores.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>List[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.evaluation.StandardEvaluation.standard_scores_dict">
+<span class="sig-name descname"><span class="pre">standard_scores_dict</span></span><a class="headerlink" href="#investment_tools.evaluation.StandardEvaluation.standard_scores_dict" title="Permalink to this definition"></a></dt>
+<dd><p>A dictionary containing scores and strengths for each financial metric.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Dict[str, dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.evaluation.StandardEvaluation.standard_outcome">
+<span class="sig-name descname"><span class="pre">standard_outcome</span></span><a class="headerlink" href="#investment_tools.evaluation.StandardEvaluation.standard_outcome" title="Permalink to this definition"></a></dt>
+<dd><p>A boolean indicating whether the company has favorable financial metrics based on the provided scores.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.StandardEvaluation.get_scoring_metrics">
+<span class="sig-name descname"><span class="pre">get_scoring_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/investment_tools/evaluation.html#StandardEvaluation.get_scoring_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.StandardEvaluation.get_scoring_metrics" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a list of financial metrics used to calculate scores.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">create_scoring_metrics_results_dict(self,</span> <span class="pre">scoring_metrics</span></span></dt>
+<dd><p>List[str]) -&gt; Dict[str, dict]:
+Creates a dictionary containing scores and strengths for each financial metric.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">score_single_metric(self,</span> <span class="pre">metric</span></span></dt>
+<dd><p>str) -&gt; Tuple[int, int]:
+Calculates the growth score and trend stability score of the given financial metric.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">get_r2_val(self,</span> <span class="pre">metrics</span></span></dt>
+<dd><p>pd.Series) -&gt; float:
+Calculates and returns the R-squared value of a linear regression model for the given Pandas series of metrics.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">get_modifier(self,</span> <span class="pre">metric</span></span></dt>
+<dd><p>str) -&gt; int:
+Returns a modifier based on the provided metric.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">get_copy_of_df_column(self,</span> <span class="pre">header</span></span></dt>
+<dd><p>str) -&gt; pd.Series:
+Returns a copy of a pandas Series for a given column header in the calculated metrics DataFrame.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">calculate_mean_growth_from_series_trend(self,</span> <span class="pre">df</span></span></dt>
+<dd><p>pd.DataFrame, span: int=None) -&gt; float:
+Calculates the mean growth rate of a metric over a specified time span.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">get_slope_and_intercept(self,</span> <span class="pre">df</span></span></dt>
+<dd><p>pd.DataFrame) -&gt; Tuple[float, float]:
+Calculates and returns the slope and intercept of a linear regression model for the given Pandas DataFrame.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">score_mean_growth(self,</span> <span class="pre">mean_growth</span></span></dt>
+<dd><p>float) -&gt; int:
+Scores the mean growth of a metric based on a set of ranges.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">score_trend_strength(self,</span> <span class="pre">r2</span></span></dt>
+<dd><p>float) -&gt; int:
+Calculate the trend strength score for a financial metric.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">sum_of_scoring_metric_dict_scores(self,</span> <span class="pre">scores_dict</span></span></dt>
+<dd><p>Dict[str, dict]) -&gt; int:
+Calculates the total score for a dictionary of scores and strengths.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">total_score_to_bool(self,</span> <span class="pre">total_score</span></span></dt>
+<dd><p>int, threshold: int=None) -&gt; bool:
+Determines whether the total score meets a threshold and returns a boolean.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.StandardEvaluation.standard_eval">
+<span class="sig-name descname"><span class="pre">standard_eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/investment_tools/evaluation.html#StandardEvaluation.standard_eval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.StandardEvaluation.standard_eval" title="Permalink to this definition"></a></dt>
+<dd><p>Determines if the company has favorable financial metrics based on the provided scores.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.StandardEvaluation.calculate_mean_growth_from_series_trend">
+<span class="sig-name descname"><span class="pre">calculate_mean_growth_from_series_trend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">span</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/investment_tools/evaluation.html#StandardEvaluation.calculate_mean_growth_from_series_trend"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.StandardEvaluation.calculate_mean_growth_from_series_trend" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the mean growth rate of a financial metric over a specified span of time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – A pandas DataFrame containing the financial metric data.</p></li>
+<li><p><strong>span</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of periods over which to calculate the growth rate.
+If not provided, calculates the growth rate over the full length of the DataFrame.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The mean growth rate of the financial metric over the specified span of time.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.StandardEvaluation.create_scoring_metrics_results_dict">
+<span class="sig-name descname"><span class="pre">create_scoring_metrics_results_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scoring_metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/investment_tools/evaluation.html#StandardEvaluation.create_scoring_metrics_results_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.StandardEvaluation.create_scoring_metrics_results_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Creates and returns a dictionary of scores and strengths for the provided list of scoring metrics.</p>
+<p>Args:
+scoring_metrics (List[str]): A list of the scoring metrics to create the dictionary for.</p>
+<p>Returns:
+Dict[str, dict]: A dictionary of scores and strengths for the provided scoring metrics.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.StandardEvaluation.get_copy_of_df_column">
+<span class="sig-name descname"><span class="pre">get_copy_of_df_column</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.series.Series</span></span></span><a class="reference internal" href="_modules/investment_tools/evaluation.html#StandardEvaluation.get_copy_of_df_column"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.StandardEvaluation.get_copy_of_df_column" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a copy of a pandas Series for a given column header in the calculated metrics DataFrame.</p>
+<p>Args:
+header (str): The header of the column to return.</p>
+<p>Returns:
+pd.Series: A copy of the column as a pandas Series with any missing values removed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.StandardEvaluation.get_modifier">
+<span class="sig-name descname"><span class="pre">get_modifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/investment_tools/evaluation.html#StandardEvaluation.get_modifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.StandardEvaluation.get_modifier" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a modifier based on the provided metric. If the metric name contains
+‘debt’, the modifier is -1. Otherwise, it is 1.</p>
+<p>Args:
+metric (str): The name of the metric.</p>
+<p>Returns:
+int: The modifier to be used in calculations.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.StandardEvaluation.get_r2_val">
+<span class="sig-name descname"><span class="pre">get_r2_val</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.series.Series</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/investment_tools/evaluation.html#StandardEvaluation.get_r2_val"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.StandardEvaluation.get_r2_val" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates and returns the R-squared value of a linear regression model for the given Pandas series of metrics.</p>
+<p>Args:
+metrics (pd.Series): A Pandas series containing the metric values.</p>
+<p>Returns:
+float: The R-squared value of the linear regression model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">get_scoring_metrics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/investment_tools/evaluation.html#StandardEvaluation.get_scoring_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a list of financial metrics to score.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of strings representing financial metrics.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>List[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.StandardEvaluation.get_slope_and_intercept">
+<span class="sig-name descname"><span class="pre">get_slope_and_intercept</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/investment_tools/evaluation.html#StandardEvaluation.get_slope_and_intercept"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.StandardEvaluation.get_slope_and_intercept" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the slope and intercept of a linear regression line for the given pandas DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pd.DataFrame</em>) – A pandas DataFrame containing the data to calculate the slope and intercept from.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A tuple containing the calculated slope and intercept as floats with rounding to 4 decimal places.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tuple[float, float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.StandardEvaluation.score_mean_growth">
+<span class="sig-name descname"><span class="pre">score_mean_growth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mean_growth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/investment_tools/evaluation.html#StandardEvaluation.score_mean_growth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.StandardEvaluation.score_mean_growth" title="Permalink to this definition"></a></dt>
+<dd><p>Scores the mean growth of a metric based on the following ranges:</p>
+<ul class="simple">
+<li><p>0: &lt;= 0.05</p></li>
+<li><p>1: &lt;= 0.10</p></li>
+<li><p>2: &lt;= 0.15</p></li>
+<li><p>3: &lt;= 0.20</p></li>
+<li><p>4: &gt; 0.20</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>mean_growth</strong> (<em>float</em>) – The mean growth of a financial metric</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The score for the mean growth of the metric based on the above ranges.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.StandardEvaluation.score_single_metric">
+<span class="sig-name descname"><span class="pre">score_single_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/investment_tools/evaluation.html#StandardEvaluation.score_single_metric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.StandardEvaluation.score_single_metric" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the growth score and the trend stability score of the given financial metric.</p>
+<p>Args:
+metric (str): The name of the financial metric to score.</p>
+<p>Returns:
+A tuple containing the growth score and the trend stability score.
+The growth score is an integer value between 0 and 4, indicating the mean growth rate of the metric.
+The trend stability score is an integer value between 0 and 4, indicating the strength of the trend of the metric.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.StandardEvaluation.score_trend_strength">
+<span class="sig-name descname"><span class="pre">score_trend_strength</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/investment_tools/evaluation.html#StandardEvaluation.score_trend_strength"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.StandardEvaluation.score_trend_strength" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the trend strength score for a financial metric.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>r2</strong> (<em>float</em>) – The coefficient of determination (R^2) of the trend line.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The trend strength score for the metric, from 0 to 4.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">standard_eval</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/investment_tools/evaluation.html#StandardEvaluation.standard_eval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id1" title="Permalink to this definition"></a></dt>
+<dd><p>Determines if the company has favorable financial metrics based on the provided scores.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>None</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if the company has favorable financial metrics based on the provided scores, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.StandardEvaluation.sum_of_scoring_metric_dict_scores">
+<span class="sig-name descname"><span class="pre">sum_of_scoring_metric_dict_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scores_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/investment_tools/evaluation.html#StandardEvaluation.sum_of_scoring_metric_dict_scores"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.StandardEvaluation.sum_of_scoring_metric_dict_scores" title="Permalink to this definition"></a></dt>
+<dd><p>Sums the scores for each metric in a given dictionary of scores and strengths.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>scores_dict</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>dict</em><em>]</em>) – A dictionary of scores and strengths for various financial metrics.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The sum of the scores for each metric in the given dictionary. If a score is NaN, it is treated as 0.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.evaluation.StandardEvaluation.total_score_to_bool">
+<span class="sig-name descname"><span class="pre">total_score_to_bool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">total_score</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/investment_tools/evaluation.html#StandardEvaluation.total_score_to_bool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.evaluation.StandardEvaluation.total_score_to_bool" title="Permalink to this definition"></a></dt>
+<dd><p>Determines if the total score of the scoring metrics meets the threshold.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>total_score</strong> (<em>int</em>) – The total score of the scoring metrics.</p></li>
+<li><p><strong>threshold</strong> (<em>int</em><em>, </em><em>optional</em>) – The threshold to meet or exceed. Defaults to 2*len(self._scoring_metrics).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if the total score meets or exceeds the threshold, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-investment_tools.financial_data">
+<span id="investment-tools-financial-data-module"></span><h2>investment_tools.financial_data module<a class="headerlink" href="#module-investment_tools.financial_data" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">investment_tools.financial_data.</span></span><span class="sig-name descname"><span class="pre">FinancialData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ticker</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'local'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'annual'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">120</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.financial_data.FinancialData" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class for retrieving and storing financial data for a given stock ticker.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.ticker">
+<span class="sig-name descname"><span class="pre">ticker</span></span><a class="headerlink" href="#investment_tools.financial_data.FinancialData.ticker" title="Permalink to this definition"></a></dt>
+<dd><p>The stock ticker symbol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.api_key">
+<span class="sig-name descname"><span class="pre">api_key</span></span><a class="headerlink" href="#investment_tools.financial_data.FinancialData.api_key" title="Permalink to this definition"></a></dt>
+<dd><p>An optional API key to access financial data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.data">
+<span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#investment_tools.financial_data.FinancialData.data" title="Permalink to this definition"></a></dt>
+<dd><p>Specifies whether to retrieve data from an online source or a local data store.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.period">
+<span class="sig-name descname"><span class="pre">period</span></span><a class="headerlink" href="#investment_tools.financial_data.FinancialData.period" title="Permalink to this definition"></a></dt>
+<dd><p>The time period for which data is retrieved, either “annual” or “quarterly”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.limit">
+<span class="sig-name descname"><span class="pre">limit</span></span><a class="headerlink" href="#investment_tools.financial_data.FinancialData.limit" title="Permalink to this definition"></a></dt>
+<dd><p>The maximum number of financial statements to retrieve.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.balance_sheets">
+<span class="sig-name descname"><span class="pre">balance_sheets</span></span><a class="headerlink" href="#investment_tools.financial_data.FinancialData.balance_sheets" title="Permalink to this definition"></a></dt>
+<dd><p>The balance sheet data for the stock.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.income_statements">
+<span class="sig-name descname"><span class="pre">income_statements</span></span><a class="headerlink" href="#investment_tools.financial_data.FinancialData.income_statements" title="Permalink to this definition"></a></dt>
+<dd><p>The income statement data for the stock.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.cash_flow_statements">
+<span class="sig-name descname"><span class="pre">cash_flow_statements</span></span><a class="headerlink" href="#investment_tools.financial_data.FinancialData.cash_flow_statements" title="Permalink to this definition"></a></dt>
+<dd><p>The cash flow statement data for the stock.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.reported_key_metrics">
+<span class="sig-name descname"><span class="pre">reported_key_metrics</span></span><a class="headerlink" href="#investment_tools.financial_data.FinancialData.reported_key_metrics" title="Permalink to this definition"></a></dt>
+<dd><p>The reported key metric data for the stock.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.stock_price_data">
+<span class="sig-name descname"><span class="pre">stock_price_data</span></span><a class="headerlink" href="#investment_tools.financial_data.FinancialData.stock_price_data" title="Permalink to this definition"></a></dt>
+<dd><p>The stock price data for the stock.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>AssertionError</strong> – If invalid input is provided for data or period attributes.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">__init__(self,</span> <span class="pre">ticker</span></span></dt>
+<dd><dl class="simple">
+<dt>str, api_key: str=’’, data: str=’local’,</dt><dd><p>period: str=’annual’, limit: int=120)</p>
+</dd>
+</dl>
+<p>Initializes a FinancialData object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.assert_valid_user_inputs">
+<span class="sig-name descname"><span class="pre">assert_valid_user_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.assert_valid_user_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.financial_data.FinancialData.assert_valid_user_inputs" title="Permalink to this definition"></a></dt>
+<dd><p>Asserts that the user input for the data attribute is valid.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">fetch_raw_data(self,</span> <span class="pre">data_type</span></span></dt>
+<dd><p>str) -&gt; pd.DataFrame
+Fetches raw financial data from an online source or a local cache.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">get_load_path(self,</span> <span class="pre">data_type</span></span></dt>
+<dd><p>str, ticker: str, period: str) -&gt; Path
+Generates a file path for the specified data type.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.get_frame_indecies">
+<span class="sig-name descname"><span class="pre">get_frame_indecies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pd.Index</span></span></span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.get_frame_indecies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.financial_data.FinancialData.get_frame_indecies" title="Permalink to this definition"></a></dt>
+<dd><p>Retrieves a list of financial data statement indecies.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">build_dataframe(self,</span> <span class="pre">data</span></span></dt>
+<dd><p>dict) -&gt; pd.DataFrame
+Builds a pandas dataframe from financial statement data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">generate_index(self,</span> <span class="pre">date</span></span></dt>
+<dd><p>str) -&gt; str
+Generates an index for the dataframe from the filing date.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">generate_date(self,</span> <span class="pre">date_str</span></span></dt>
+<dd><p>str) -&gt; dt.date
+Converts a date string to a datetime.date object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.check_for_matching_indecies">
+<span class="sig-name descname"><span class="pre">check_for_matching_indecies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.check_for_matching_indecies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.financial_data.FinancialData.check_for_matching_indecies" title="Permalink to this definition"></a></dt>
+<dd><p>Asserts that financial statements have matching indecies.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.get_common_df_indicies">
+<span class="sig-name descname"><span class="pre">get_common_df_indicies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pd.Index</span></span></span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.get_common_df_indicies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.financial_data.FinancialData.get_common_df_indicies" title="Permalink to this definition"></a></dt>
+<dd><p>Retrieves the common financial statement dataframe indecies.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">filter_for_common_indecies(self,</span> <span class="pre">common_elements</span></span></dt>
+<dd><p>pd.Index)
+Filters financial statement dataframes for common indecies.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.assert_identical_indecies">
+<span class="sig-name descname"><span class="pre">assert_identical_indecies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.assert_identical_indecies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.financial_data.FinancialData.assert_identical_indecies" title="Permalink to this definition"></a></dt>
+<dd><p>Asserts that financial statement dataframe indecies are identical.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">assert_required_length(self,</span> <span class="pre">item</span></span></dt>
+<dd><p>list)
+Asserts that a given item has the required length based on the period.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">assert_valid_server_response(Self,</span> <span class="pre">response</span></span></dt>
+<dd><p>requests.Response)
+Asserts that an API call to fetch financial data was successful.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">assert_server_response_not_empty(self,</span> <span class="pre">response</span></span></dt>
+<dd><p>requests.Response)
+Asserts that an API call to fetch financial data returned non-empty results.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.fetch_stock_price_data_yf">
+<span class="sig-name descname"><span class="pre">fetch_stock_price_data_yf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pd.DataFrame</span></span></span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.fetch_stock_price_data_yf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.financial_data.FinancialData.fetch_stock_price_data_yf" title="Permalink to this definition"></a></dt>
+<dd><p>Fetches stock price data from Yahoo Finance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">periodise(self,</span> <span class="pre">df</span></span></dt>
+<dd><p>pd.DataFrame) -&gt; pd.DataFrame
+Periodises the stock price data for each filing period.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.save_financial_attributes">
+<span class="sig-name descname"><span class="pre">save_financial_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.save_financial_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.financial_data.FinancialData.save_financial_attributes" title="Permalink to this definition"></a></dt>
+<dd><p>Saves the financial data to local parquet files.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">assert_identical_indecies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.assert_identical_indecies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id2" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Asserts that the financial data has identical indices</dt><dd><p>for each of its statements.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.assert_required_length">
+<span class="sig-name descname"><span class="pre">assert_required_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.assert_required_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.financial_data.FinancialData.assert_required_length" title="Permalink to this definition"></a></dt>
+<dd><p>Asserts that a given item has the required length based on the period.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>item</strong> (<em>pandas.DataFrame</em>) – The item to check the length of.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.assert_server_response_not_empty">
+<span class="sig-name descname"><span class="pre">assert_server_response_not_empty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">requests.models.Response</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.assert_server_response_not_empty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.financial_data.FinancialData.assert_server_response_not_empty" title="Permalink to this definition"></a></dt>
+<dd><p>Asserts that the server response not empty.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>response</strong> (<em>requests.Response</em>) – The server response.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.assert_valid_server_response">
+<span class="sig-name descname"><span class="pre">assert_valid_server_response</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">requests.models.Response</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.assert_valid_server_response"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.financial_data.FinancialData.assert_valid_server_response" title="Permalink to this definition"></a></dt>
+<dd><p>Asserts that the server response is valid (status code 200).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>response</strong> (<em>requests.Response</em>) – The server response.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">assert_valid_user_inputs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.assert_valid_user_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id3" title="Permalink to this definition"></a></dt>
+<dd><p>Asserts that the user inputs for the FinancialData instance are valid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>AssertionError</strong> – If the data or period attributes are invalid.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.build_dataframe">
+<span class="sig-name descname"><span class="pre">build_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.build_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.financial_data.FinancialData.build_dataframe" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Builds a pandas.DataFrame from provided raw data. If the raw data</dt><dd><p>is already a DataFrame then it is returned immediately.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>dict</em>) – The raw data to build the DataFrame from.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The built DataFrame.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">check_for_matching_indecies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.check_for_matching_indecies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id4" title="Permalink to this definition"></a></dt>
+<dd><p>Checks whether the financial data has matching indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the financial data has matching indices, False otherwise.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.fetch_raw_data">
+<span class="sig-name descname"><span class="pre">fetch_raw_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.fetch_raw_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.financial_data.FinancialData.fetch_raw_data" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Fetches raw financial data from either the Financial Modeling Prep API</dt><dd><p>or a local file, based on the self.data attribute.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data_type</strong> (<em>str</em>) – The type of data to fetch.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>pandas.DataFrame if the data is fetched locally, otherwise requests.Response</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id5">
+<span class="sig-name descname"><span class="pre">fetch_stock_price_data_yf</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.fetch_stock_price_data_yf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id5" title="Permalink to this definition"></a></dt>
+<dd><p>Fetches stock price data from Yahoo Finance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The fetched stock price data.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.filter_for_common_indecies">
+<span class="sig-name descname"><span class="pre">filter_for_common_indecies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">common_elements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.indexes.base.Index</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.filter_for_common_indecies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.financial_data.FinancialData.filter_for_common_indecies" title="Permalink to this definition"></a></dt>
+<dd><p>Filters the financial data attributes to only include common indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>common_elements</strong> (<em>pandas.Index</em>) – The common indices for the financial data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.generate_date">
+<span class="sig-name descname"><span class="pre">generate_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">datetime.date</span></span></span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.generate_date"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.financial_data.FinancialData.generate_date" title="Permalink to this definition"></a></dt>
+<dd><p>Generates a datetime.date object from a date string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>date_str</strong> (<em>str</em>) – The date in ‘YYYY-MM-DD’ format.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The generated date object.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>datetime.date</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.generate_empty_df">
+<span class="sig-name descname"><span class="pre">generate_empty_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.indexes.base.Index</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.generate_empty_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.financial_data.FinancialData.generate_empty_df" title="Permalink to this definition"></a></dt>
+<dd><p>Generate an empty dataframe with the global frame indices and provided column names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>columns</strong> (<em>pandas.Index</em>) – the provided columns.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the empty dataframe.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.generate_index">
+<span class="sig-name descname"><span class="pre">generate_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.generate_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.financial_data.FinancialData.generate_index" title="Permalink to this definition"></a></dt>
+<dd><p>Generates an index for the financial data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>date</strong> (<em>str</em>) – The date in ‘YYYY-MM-DD’ format.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The generated index string.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.generate_request_url">
+<span class="sig-name descname"><span class="pre">generate_request_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.generate_request_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.financial_data.FinancialData.generate_request_url" title="Permalink to this definition"></a></dt>
+<dd><p>Generates a URL to fetch data from the Financial Modeling Prep API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data_type</strong> (<em>str</em>) – The type of financial statement data to fetch. Valid
+inputs are ‘bs’, ‘is, ‘cfs’, and ‘ratios’.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The URL for the requested data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If an invalid data type is provided.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id6">
+<span class="sig-name descname"><span class="pre">get_common_df_indicies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.indexes.base.Index</span></span></span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.get_common_df_indicies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id6" title="Permalink to this definition"></a></dt>
+<dd><p>Gets the common indices for the financial data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The common indices for the financial data.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>pandas.Index</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id7">
+<span class="sig-name descname"><span class="pre">get_frame_indecies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.indexes.base.Index</span></span></span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.get_frame_indecies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id7" title="Permalink to this definition"></a></dt>
+<dd><p>Gets the index for the financial data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The index for the financial data.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>pandas.Index</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.get_load_path">
+<span class="sig-name descname"><span class="pre">get_load_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ticker</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pathlib.Path</span></span></span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.get_load_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.financial_data.FinancialData.get_load_path" title="Permalink to this definition"></a></dt>
+<dd><p>Gets the file path to load a local financial data file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_type</strong> (<em>str</em>) – The type of financial data to fetch. Acceptable values are ‘bs’, ‘is’, ‘cfs’, and ‘ratios’.</p></li>
+<li><p><strong>ticker</strong> (<em>str</em>) – The ticker symbol for the stock.</p></li>
+<li><p><strong>period</strong> (<em>str</em>) – The period of the data, either ‘annual’ or ‘quarter’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The file path for the requested data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pathlib.Path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.periodise">
+<span class="sig-name descname"><span class="pre">periodise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.periodise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.financial_data.FinancialData.periodise" title="Permalink to this definition"></a></dt>
+<dd><p>Periodises the stock price data for each filing period.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pandas.DataFrame</em>) – The stock price data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The periodised stock price data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.replace_None">
+<span class="sig-name descname"><span class="pre">replace_None</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.replace_None"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.financial_data.FinancialData.replace_None" title="Permalink to this definition"></a></dt>
+<dd><p>Replaces None values in a DataFrame with 0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pandas.DataFrame</em>) – The DataFrame to process.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The processed DataFrame with None values replaced by 0.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id8">
+<span class="sig-name descname"><span class="pre">save_financial_attributes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.save_financial_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id8" title="Permalink to this definition"></a></dt>
+<dd><p>Saves the financial data to local parquet files.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.financial_data.FinancialData.set_frame_index">
+<span class="sig-name descname"><span class="pre">set_frame_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="_modules/investment_tools/financial_data.html#FinancialData.set_frame_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.financial_data.FinancialData.set_frame_index" title="Permalink to this definition"></a></dt>
+<dd><p>Set the index of another dataframe to be equal to the index of the balance sheet dataframe.</p>
+<p>Args:
+other (pd.DataFrame): A dataframe whose index is to be set to that of the balance sheet dataframe.</p>
+<p>Returns:
+pd.DataFrame: A copy of the other dataframe with its index set to that of the balance sheet dataframe.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-investment_tools.manual_analysis">
+<span id="investment-tools-manual-analysis-module"></span><h2>investment_tools.manual_analysis module<a class="headerlink" href="#module-investment_tools.manual_analysis" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="investment_tools.manual_analysis.ManualAnalysis">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">investment_tools.manual_analysis.</span></span><span class="sig-name descname"><span class="pre">ManualAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">financial_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#investment_tools.financial_data.FinancialData" title="investment_tools.financial_data.FinancialData"><span class="pre">investment_tools.financial_data.FinancialData</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/manual_analysis.html#ManualAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.manual_analysis.ManualAnalysis" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class for performing manual financial analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>financial_data</strong> (<a class="reference internal" href="#investment_tools.financial_data.FinancialData" title="investment_tools.financial_data.FinancialData"><em>FinancialData</em></a>) – Object containing all financial data.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to print verbose messages during analysis. Defaults to False.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.manual_analysis.ManualAnalysis.data">
+<span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#investment_tools.manual_analysis.ManualAnalysis.data" title="Permalink to this definition"></a></dt>
+<dd><p>Object containing all financial data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#investment_tools.financial_data.FinancialData" title="investment_tools.financial_data.FinancialData">FinancialData</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.manual_analysis.ManualAnalysis.verbose">
+<span class="sig-name descname"><span class="pre">verbose</span></span><a class="headerlink" href="#investment_tools.manual_analysis.ManualAnalysis.verbose" title="Permalink to this definition"></a></dt>
+<dd><p>Whether to print verbose messages during analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.manual_analysis.ManualAnalysis.calculated_metrics">
+<span class="sig-name descname"><span class="pre">calculated_metrics</span></span><a class="headerlink" href="#investment_tools.manual_analysis.ManualAnalysis.calculated_metrics" title="Permalink to this definition"></a></dt>
+<dd><p>Contains all calculated financial metrics and ratios.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.manual_analysis.ManualAnalysis.calculation_error_dict">
+<span class="sig-name descname"><span class="pre">calculation_error_dict</span></span><a class="headerlink" href="#investment_tools.manual_analysis.ManualAnalysis.calculation_error_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Contains the error count and message for each financial metric.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.manual_analysis.ManualAnalysis.fractional_metric_errors">
+<span class="sig-name descname"><span class="pre">fractional_metric_errors</span></span><a class="headerlink" href="#investment_tools.manual_analysis.ManualAnalysis.fractional_metric_errors" title="Permalink to this definition"></a></dt>
+<dd><p>Contains fractional errors for each financial metric.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.manual_analysis.ManualAnalysis.print_metric_errors">
+<span class="sig-name descname"><span class="pre">print_metric_errors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_errors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/manual_analysis.html#ManualAnalysis.print_metric_errors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.manual_analysis.ManualAnalysis.print_metric_errors" title="Permalink to this definition"></a></dt>
+<dd><p>Prints the number of values for each metric that exceed the given tolerance level.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.manual_analysis.ManualAnalysis.assert_non_null_frame">
+<span class="sig-name descname"><span class="pre">assert_non_null_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/manual_analysis.html#ManualAnalysis.assert_non_null_frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.manual_analysis.ManualAnalysis.assert_non_null_frame" title="Permalink to this definition"></a></dt>
+<dd><p>Asserts that a given dataframe is not null. Raises an AssertionError if the dataframe is null.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.manual_analysis.ManualAnalysis.concat_stock_eval_ratios">
+<span class="sig-name descname"><span class="pre">concat_stock_eval_ratios</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/manual_analysis.html#ManualAnalysis.concat_stock_eval_ratios"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.manual_analysis.ManualAnalysis.concat_stock_eval_ratios" title="Permalink to this definition"></a></dt>
+<dd><p>Concatenates and returns a dataframe containing stock evaluation ratios.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.manual_analysis.ManualAnalysis.concat_profitability_ratios">
+<span class="sig-name descname"><span class="pre">concat_profitability_ratios</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/manual_analysis.html#ManualAnalysis.concat_profitability_ratios"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.manual_analysis.ManualAnalysis.concat_profitability_ratios" title="Permalink to this definition"></a></dt>
+<dd><p>Concatenates and returns a dataframe containing profitability ratios.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.manual_analysis.ManualAnalysis.concat_debt_interest_ratios">
+<span class="sig-name descname"><span class="pre">concat_debt_interest_ratios</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/manual_analysis.html#ManualAnalysis.concat_debt_interest_ratios"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.manual_analysis.ManualAnalysis.concat_debt_interest_ratios" title="Permalink to this definition"></a></dt>
+<dd><p>Concatenates and returns a dataframe containing debt and interest ratios.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.manual_analysis.ManualAnalysis.concat_liquidity_ratios">
+<span class="sig-name descname"><span class="pre">concat_liquidity_ratios</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/manual_analysis.html#ManualAnalysis.concat_liquidity_ratios"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.manual_analysis.ManualAnalysis.concat_liquidity_ratios" title="Permalink to this definition"></a></dt>
+<dd><p>Concatenates and returns a dataframe containing liquidity ratios.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.manual_analysis.ManualAnalysis.concat_efficiency_ratios">
+<span class="sig-name descname"><span class="pre">concat_efficiency_ratios</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/manual_analysis.html#ManualAnalysis.concat_efficiency_ratios"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.manual_analysis.ManualAnalysis.concat_efficiency_ratios" title="Permalink to this definition"></a></dt>
+<dd><p>Concatenates and returns a dataframe containing efficiency ratios.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.manual_analysis.ManualAnalysis.concat_metric_growth">
+<span class="sig-name descname"><span class="pre">concat_metric_growth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/manual_analysis.html#ManualAnalysis.concat_metric_growth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.manual_analysis.ManualAnalysis.concat_metric_growth" title="Permalink to this definition"></a></dt>
+<dd><p>Concatenates and returns a dataframe containing the growth rate for each financial metric.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.manual_analysis.ManualAnalysis.analyse">
+<span class="sig-name descname"><span class="pre">analyse</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pd.DataFrame</span></span></span><a class="reference internal" href="_modules/investment_tools/manual_analysis.html#ManualAnalysis.analyse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.manual_analysis.ManualAnalysis.analyse" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a dataframe containing all calculated financial metrics and ratios.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.manual_analysis.ManualAnalysis.cross_check_metric_calculations">
+<span class="sig-name descname"><span class="pre">cross_check_metric_calculations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pd.DataFrame</span></span></span><a class="reference internal" href="_modules/investment_tools/manual_analysis.html#ManualAnalysis.cross_check_metric_calculations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.manual_analysis.ManualAnalysis.cross_check_metric_calculations" title="Permalink to this definition"></a></dt>
+<dd><p>Cross-checks reported financial metrics against calculated financial metrics and returns
+the fractional errors.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id9">
+<span class="sig-name descname"><span class="pre">analyse</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="_modules/investment_tools/manual_analysis.html#ManualAnalysis.analyse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id9" title="Permalink to this definition"></a></dt>
+<dd><p>Analyzes the financial data and calculates a variety of financial ratios.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A DataFrame containing the calculated financial ratios.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>The following ratio types are calculated using financial data from the associated FinancialData object:</dt><dd><ul class="simple">
+<li><p>Stock evaluation ratios</p></li>
+<li><p>Profitability ratios</p></li>
+<li><p>Debt and interest ratios</p></li>
+<li><p>Liquidity ratios</p></li>
+<li><p>Efficiency ratios</p></li>
+<li><p>Metric growth</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id10">
+<span class="sig-name descname"><span class="pre">assert_non_null_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/investment_tools/manual_analysis.html#ManualAnalysis.assert_non_null_frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id10" title="Permalink to this definition"></a></dt>
+<dd><p>Raises an AssertionError if any column in the input DataFrame is completely null.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pandas.DataFrame</em>) – A pandas DataFrame.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>AssertionError</strong> – If any column in <cite>df</cite> is completely null.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id11">
+<span class="sig-name descname"><span class="pre">concat_debt_interest_ratios</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="_modules/investment_tools/manual_analysis.html#ManualAnalysis.concat_debt_interest_ratios"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id11" title="Permalink to this definition"></a></dt>
+<dd><p>Concatenates debt and interest ratios to the given DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pd.DataFrame</em>) – DataFrame to which debt and interest ratios will be added.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>DataFrame with added debt and interest ratios.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Calculates the following debt and interest ratios:</dt><dd><ul class="simple">
+<li><p>Interest coverage</p></li>
+<li><p>Fixed charge coverage</p></li>
+<li><p>Debt to total capitalization ratio</p></li>
+<li><p>Total debt ratio</p></li>
+</ul>
+</dd>
+</dl>
+<p>All ratios are calculated using financial data from the associated FinancialData object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id12">
+<span class="sig-name descname"><span class="pre">concat_efficiency_ratios</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="_modules/investment_tools/manual_analysis.html#ManualAnalysis.concat_efficiency_ratios"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id12" title="Permalink to this definition"></a></dt>
+<dd><p>Concatenates efficiency ratios to the given DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pd.DataFrame</em>) – DataFrame to which efficiency ratios will be added.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>DataFrame with added efficiency ratios.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Calculates the following efficiency ratios:</dt><dd><ul class="simple">
+<li><p>Total asset turnover</p></li>
+<li><p>Inventory to sales ratio</p></li>
+<li><p>Inventory turnover ratio</p></li>
+<li><p>Inventory turnover in days</p></li>
+<li><p>Accounts receivable to sales ratio</p></li>
+<li><p>Receivables turnover</p></li>
+<li><p>Receivables turnover in days</p></li>
+</ul>
+</dd>
+</dl>
+<p>All ratios are calculated using financial data from the associated FinancialData object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id13">
+<span class="sig-name descname"><span class="pre">concat_liquidity_ratios</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="_modules/investment_tools/manual_analysis.html#ManualAnalysis.concat_liquidity_ratios"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id13" title="Permalink to this definition"></a></dt>
+<dd><p>Concatenates liquidity ratios to the given DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pd.DataFrame</em>) – DataFrame to which liquidity ratios will be added.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>DataFrame with added liquidity ratios.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Calculates the following liquidity ratios:</dt><dd><ul class="simple">
+<li><p>Current ratio</p></li>
+<li><p>Quick ratio</p></li>
+<li><p>Cash ratio</p></li>
+</ul>
+</dd>
+</dl>
+<p>All ratios are calculated using financial data from the associated FinancialData object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id14">
+<span class="sig-name descname"><span class="pre">concat_metric_growth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="_modules/investment_tools/manual_analysis.html#ManualAnalysis.concat_metric_growth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id14" title="Permalink to this definition"></a></dt>
+<dd><p>Concatenates growth rates for specified metrics to the given DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pd.DataFrame</em>) – DataFrame to which growth rates will be added.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>DataFrame with added growth rates.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Calculates the percentage growth rate for the following metrics over a one year or four quarter period:</dt><dd><ul class="simple">
+<li><p>Earnings per share (EPS)</p></li>
+<li><p>Return on equity (ROE)</p></li>
+<li><p>Cash per share</p></li>
+<li><p>Price-to-earnings (P/E) ratio (average close)</p></li>
+<li><p>Earnings before interest, taxes, depreciation, and amortization (EBITDA) ratio</p></li>
+<li><p>Return on invested capital (ROIC)</p></li>
+<li><p>Net profit margin</p></li>
+<li><p>Return on assets (ROA)</p></li>
+<li><p>Debt to total capitalization ratio</p></li>
+<li><p>Total debt ratio</p></li>
+</ul>
+</dd>
+</dl>
+<p>All growth rates are calculated using financial data from the associated FinancialData object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id15">
+<span class="sig-name descname"><span class="pre">concat_profitability_ratios</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="_modules/investment_tools/manual_analysis.html#ManualAnalysis.concat_profitability_ratios"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id15" title="Permalink to this definition"></a></dt>
+<dd><p>Concatenates profitability ratios to the given DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pd.DataFrame</em>) – DataFrame to which profitability ratios will be added.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>DataFrame with added profitability ratios.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Calculates the following profitability ratios:</dt><dd><ul class="simple">
+<li><p>Gross profit margin</p></li>
+<li><p>Operating profit margin</p></li>
+<li><p>Pretax profit margin</p></li>
+<li><p>Net profit margin</p></li>
+<li><p>Return on invested capital (ROIC)</p></li>
+<li><p>Return on equity (ROE)</p></li>
+<li><p>Return on Assets (ROA)</p></li>
+</ul>
+</dd>
+</dl>
+<p>All ratios are calculated using financial data from the associated FinancialData object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id16">
+<span class="sig-name descname"><span class="pre">concat_stock_eval_ratios</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="_modules/investment_tools/manual_analysis.html#ManualAnalysis.concat_stock_eval_ratios"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id16" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate and concatenate stock evaluation ratios to the given DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pandas.DataFrame</em>) – The DataFrame to concatenate the calculated metrics to.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The resulting DataFrame containing the calculated metrics.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Calculates the following stock evaluation ratios:</dt><dd><ul class="simple">
+<li><p>Earnings per share (EPS)</p></li>
+<li><p>Diluted earnings per share (EPSDiluted)</p></li>
+<li><p>Price to earnings ratio (PE) for high, low, and average closing stock prices</p></li>
+<li><p>Book value per share</p></li>
+<li><p>Dividend payout ratio</p></li>
+<li><p>Dividend yield for low, high, and average closing stock prices</p></li>
+<li><p>EBITDA ratio</p></li>
+<li><p>Cash per share</p></li>
+<li><p>shareholderEquityPerShare</p></li>
+</ul>
+</dd>
+</dl>
+<p>All ratios are calculated using financial data from the associated FinancialData object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id17">
+<span class="sig-name descname"><span class="pre">cross_check_metric_calculations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="_modules/investment_tools/manual_analysis.html#ManualAnalysis.cross_check_metric_calculations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id17" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the fractional error between reported metrics and those calculated by the program
+for a selection of key metrics. If verbose is set to False, returns None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>DataFrame containing the fractional errors for each metric.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Metrics that are cross-checked:</dt><dd><ul class="simple">
+<li><p>Gross profit margin</p></li>
+<li><p>Operating profit margin</p></li>
+<li><p>Net profit margin</p></li>
+<li><p>Current ratio</p></li>
+<li><p>Return on equity (ROE)</p></li>
+<li><p>Return on assets (ROA)</p></li>
+<li><p>Cash per share</p></li>
+<li><p>Interest coverage</p></li>
+<li><p>Dividend payout ratio</p></li>
+</ul>
+</dd>
+</dl>
+<p>Fractional error is calculated as the absolute value of the difference between the calculated
+metric and the reported metric, divided by the calculated metric.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id18">
+<span class="sig-name descname"><span class="pre">print_metric_errors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_errors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/investment_tools/manual_analysis.html#ManualAnalysis.print_metric_errors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id18" title="Permalink to this definition"></a></dt>
+<dd><p>Prints the number of values for each metric that exceed the given tolerance level.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metric_errors</strong> (<em>pd.DataFrame</em>) – Contains the fractional errors for each financial metric.</p></li>
+<li><p><strong>tolerance</strong> (<em>float</em><em>, </em><em>optional</em>) – The tolerance level for the error fraction. Defaults to 0.05.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-investment_tools.plots">
+<span id="investment-tools-plots-module"></span><h2>investment_tools.plots module<a class="headerlink" href="#module-investment_tools.plots" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">investment_tools.plots.</span></span><span class="sig-name descname"><span class="pre">Plots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ticker</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filing_dates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.indexes.base.Index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.plots.Plots" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class to create trend plots and export them as a PDF.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.ticker">
+<span class="sig-name descname"><span class="pre">ticker</span></span><a class="headerlink" href="#investment_tools.plots.Plots.ticker" title="Permalink to this definition"></a></dt>
+<dd><p>The stock ticker of the company to analyse.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.period">
+<span class="sig-name descname"><span class="pre">period</span></span><a class="headerlink" href="#investment_tools.plots.Plots.period" title="Permalink to this definition"></a></dt>
+<dd><p>The period of data to analyse.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.metrics">
+<span class="sig-name descname"><span class="pre">metrics</span></span><a class="headerlink" href="#investment_tools.plots.Plots.metrics" title="Permalink to this definition"></a></dt>
+<dd><p>A DataFrame containing financial metrics to plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.limit">
+<span class="sig-name descname"><span class="pre">limit</span></span><a class="headerlink" href="#investment_tools.plots.Plots.limit" title="Permalink to this definition"></a></dt>
+<dd><p>The maximum number of metrics to plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.filing_dates">
+<span class="sig-name descname"><span class="pre">filing_dates</span></span><a class="headerlink" href="#investment_tools.plots.Plots.filing_dates" title="Permalink to this definition"></a></dt>
+<dd><p>A list of dates associated with the financial filings for the company.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">set_limit(limit</span></span></dt>
+<dd><p>int) -&gt; int:
+Set the limit to the maximum number of metrics to plot.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.get_spacing">
+<span class="sig-name descname"><span class="pre">get_spacing</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.get_spacing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.plots.Plots.get_spacing" title="Permalink to this definition"></a></dt>
+<dd><p>Get the spacing for the x-axis labels.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.filter_x_labels">
+<span class="sig-name descname"><span class="pre">filter_x_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacing</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.filter_x_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.plots.Plots.filter_x_labels" title="Permalink to this definition"></a></dt>
+<dd><p>Filter the x-axis labels to maintain a clean plot.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.generate_x_labels">
+<span class="sig-name descname"><span class="pre">generate_x_labels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.generate_x_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.plots.Plots.generate_x_labels" title="Permalink to this definition"></a></dt>
+<dd><p>Generate the x-axis labels for the plot.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.calculate_subplots_shape">
+<span class="sig-name descname"><span class="pre">calculate_subplots_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics_container</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.calculate_subplots_shape"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.plots.Plots.calculate_subplots_shape" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the subplot shape for each metric.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">select_subplot(counter</span></span></dt>
+<dd><p>int, subplots: plt.subplots) -&gt; plt.subplot:
+Select the appropriate subplot.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.get_y_data">
+<span class="sig-name descname"><span class="pre">get_y_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pd.Series</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.get_y_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.plots.Plots.get_y_data" title="Permalink to this definition"></a></dt>
+<dd><p>Get the y-axis data for the plot.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.get_y_units">
+<span class="sig-name descname"><span class="pre">get_y_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.get_y_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.plots.Plots.get_y_units" title="Permalink to this definition"></a></dt>
+<dd><p>Get the units for the metric to label the y-axis.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.plot_data_on_axis">
+<span class="sig-name descname"><span class="pre">plot_data_on_axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">plt.axis</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.plot_data_on_axis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.plots.Plots.plot_data_on_axis" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the data on the specified axis.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.get_linear_coeffs">
+<span class="sig-name descname"><span class="pre">get_linear_coeffs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.get_linear_coeffs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.plots.Plots.get_linear_coeffs" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the slope, intercept, and R-squared value for the linear trendline.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.generate_linear_series">
+<span class="sig-name descname"><span class="pre">generate_linear_series</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slope</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intercept</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">np.ndarray</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.generate_linear_series"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.plots.Plots.generate_linear_series" title="Permalink to this definition"></a></dt>
+<dd><p>Generate the linear trendline series.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.plot_linear_trend">
+<span class="sig-name descname"><span class="pre">plot_linear_trend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">plt.axis</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.plot_linear_trend"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.plots.Plots.plot_linear_trend" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the linear trendline and R-squared value.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.plot_metrics">
+<span class="sig-name descname"><span class="pre">plot_metrics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.plot_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.plots.Plots.plot_metrics" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the financial metrics and trendlines.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.generate_save_path_object">
+<span class="sig-name descname"><span class="pre">generate_save_path_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.generate_save_path_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.plots.Plots.generate_save_path_object" title="Permalink to this definition"></a></dt>
+<dd><p>Generate the file path object for the exported PDF.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.create_path_from_object">
+<span class="sig-name descname"><span class="pre">create_path_from_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_object</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.create_path_from_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.plots.Plots.create_path_from_object" title="Permalink to this definition"></a></dt>
+<dd><p>Create the path specified in the path object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.make_bin_folder">
+<span class="sig-name descname"><span class="pre">make_bin_folder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.make_bin_folder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.plots.Plots.make_bin_folder" title="Permalink to this definition"></a></dt>
+<dd><p>Create a bin folder to store temporary files.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.make_pdf_title_page">
+<span class="sig-name descname"><span class="pre">make_pdf_title_page</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.make_pdf_title_page"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.plots.Plots.make_pdf_title_page" title="Permalink to this definition"></a></dt>
+<dd><p>Create the title page of the PDF.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.make_pdf_charts">
+<span class="sig-name descname"><span class="pre">make_pdf_charts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.make_pdf_charts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.plots.Plots.make_pdf_charts" title="Permalink to this definition"></a></dt>
+<dd><p>Create the trend plot pages of the PDF.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.combine_and_export_pdfs">
+<span class="sig-name descname"><span class="pre">combine_and_export_pdfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">export_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.combine_and_export_pdfs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.plots.Plots.combine_and_export_pdfs" title="Permalink to this definition"></a></dt>
+<dd><p>Combine the title page and trend plot pages and export the PDF.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots._export_charts_pdf">
+<span class="sig-name descname"><span class="pre">_export_charts_pdf</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots._export_charts_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.plots.Plots._export_charts_pdf" title="Permalink to this definition"></a></dt>
+<dd><p>Export the trend plots as a PDF.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id19">
+<span class="sig-name descname"><span class="pre">calculate_subplots_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics_container</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.calculate_subplots_shape"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id19" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Calculates the number of rows and columns required for the subplot grid, based on the number of</dt><dd><p>metrics to be plotted.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>metrics_container</strong> (<em>list</em>) – The list of metrics to be plotted.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A tuple containing the number of rows and columns required for the subplot grid.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id20">
+<span class="sig-name descname"><span class="pre">combine_and_export_pdfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">export_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.combine_and_export_pdfs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id20" title="Permalink to this definition"></a></dt>
+<dd><p>Combines the PDFs generated in make_pdf_title_page and make_pdf_charts, and exports them to the given path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>export_path</strong> (<em>str</em>) – The file path to export the combined PDF to.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id21">
+<span class="sig-name descname"><span class="pre">create_path_from_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_object</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pathlib.Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.create_path_from_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id21" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a directory at the given path if it does not already exist.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path_object</strong> (<em>Path</em>) – The path to create the directory.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id22">
+<span class="sig-name descname"><span class="pre">filter_x_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacing</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.filter_x_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id22" title="Permalink to this definition"></a></dt>
+<dd><p>Filters the x-tick labels for the plots, based on the specified spacing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x_labels</strong> (<em>list</em>) – The list of x-tick labels to be filtered.</p></li>
+<li><p><strong>spacing</strong> (<em>int</em>) – The spacing between x-tick labels.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The filtered list of x-tick labels.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id23">
+<span class="sig-name descname"><span class="pre">generate_linear_series</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.series.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slope</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intercept</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.series.Series</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.generate_linear_series"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id23" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a pandas Series containing the y-values of a linear series with the given x-values,
+slope, and intercept.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>pandas.Series</em>) – The x-values of the linear series.</p></li>
+<li><p><strong>slope</strong> (<em>float</em>) – The slope of the linear series.</p></li>
+<li><p><strong>intercept</strong> (<em>float</em>) – The intercept of the linear series.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The y-values of the linear series.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.Series</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id24">
+<span class="sig-name descname"><span class="pre">generate_save_path_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pathlib.Path</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.generate_save_path_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id24" title="Permalink to this definition"></a></dt>
+<dd><p>Generates the path to the PDF file where the charts will be saved.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file</strong> (<em>bool</em><em>, </em><em>optional</em>) – Determines whether or not the filename should be appended to the file path.
+Defaults to False.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The file path object.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>PosixPath</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id25">
+<span class="sig-name descname"><span class="pre">generate_x_labels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.generate_x_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id25" title="Permalink to this definition"></a></dt>
+<dd><p>Generates the x-tick labels for the plots, based on the metrics data and the specified period.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The list of x-tick labels for the plots.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id26">
+<span class="sig-name descname"><span class="pre">get_linear_coeffs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.series.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.series.Series</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.get_linear_coeffs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id26" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the linear regression coefficients and coefficient of determination (R-squared)
+for the given x and y data points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>List</em><em>[</em><em>float</em><em>]</em>) – List of x data points.</p></li>
+<li><p><strong>y</strong> (<em>List</em><em>[</em><em>float</em><em>]</em>) – List of y data points.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A tuple containing the slope, intercept, and R-squared value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tuple[float, float, float]</p>
+</dd>
+</dl>
+<p>Calculates the linear regression coefficients for the given x and y data points using the
+<cite>linregress</cite> function from the <cite>scipy.stats</cite> module. The slope, intercept, and R-squared
+value are returned as a tuple.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.get_metric_units_dict">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_metric_units_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.get_metric_units_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.plots.Plots.get_metric_units_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the dictionary that maps the financial metric with its corresponding unit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>None</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the mapping dictionary.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id27">
+<span class="sig-name descname"><span class="pre">get_spacing</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.get_spacing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id27" title="Permalink to this definition"></a></dt>
+<dd><p>Determines the spacing between x-tick labels for the plots, based on the number of metrics plotted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The spacing between x-tick labels.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id28">
+<span class="sig-name descname"><span class="pre">get_y_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.series.Series</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.get_y_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id28" title="Permalink to this definition"></a></dt>
+<dd><p>Extracts the y-axis data for the specified metric.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>metric</strong> (<em>str</em>) – The name of the metric.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The y-axis data for the specified metric.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.Series</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id29">
+<span class="sig-name descname"><span class="pre">get_y_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.get_y_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id29" title="Permalink to this definition"></a></dt>
+<dd><p>Extracts the unit of measure for the y-axis for the specified metric.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metric_type</strong> (<em>str</em>) – The category of the metric.</p></li>
+<li><p><strong>metric</strong> (<em>str</em>) – The name of the metric.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The unit of measure for the y-axis for the specified metric.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id30">
+<span class="sig-name descname"><span class="pre">make_bin_folder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.make_bin_folder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id30" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a ‘bin’ folder if it does not already exist.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id31">
+<span class="sig-name descname"><span class="pre">make_pdf_charts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.make_pdf_charts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id31" title="Permalink to this definition"></a></dt>
+<dd><p>Generates individual PDFs for each figure in self.plots, and saves them in the ‘bin’ folder.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id32">
+<span class="sig-name descname"><span class="pre">make_pdf_title_page</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.make_pdf_title_page"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id32" title="Permalink to this definition"></a></dt>
+<dd><p>Generates a PDF title page using the ticker and period of the company, and saves it in the ‘bin’ folder.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id33">
+<span class="sig-name descname"><span class="pre">plot_data_on_axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">matplotlib.pyplot.axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.series.Series</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">matplotlib.pyplot.axis</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.plot_data_on_axis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id33" title="Permalink to this definition"></a></dt>
+<dd><p>Plots the data trend for the specified metric on the specified axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>plt.subplot</em>) – The axis on which to plot the data.</p></li>
+<li><p><strong>data</strong> (<em>dict</em>) – A dictionary containing the plotting data, including the metric data, labels,
+and units of measure.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id34">
+<span class="sig-name descname"><span class="pre">plot_linear_trend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">matplotlib.pyplot.axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.series.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.series.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">matplotlib.pyplot.axis</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.plot_linear_trend"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id34" title="Permalink to this definition"></a></dt>
+<dd><p>Plots linear regression line on given axis with r-squared value in legend.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>matplotlib axis</em>) – axis object on which the line will be plotted.</p></li>
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – x-values for the data.</p></li>
+<li><p><strong>y</strong> (<em>np.ndarray</em>) – y-values for the data.</p></li>
+<li><p><strong>r2</strong> (<em>float</em>) – r-squared value for the linear regression.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>axis object with the plotted line.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>matplotlib axis</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id35">
+<span class="sig-name descname"><span class="pre">plot_metrics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.plot_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id35" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>The plot_metrics method generates plots of financial metrics for a given company. The method first</dt><dd><p>generates the necessary subplots to hold each metric type. Each metric type is then plotted on
+an individual axis within the metric type’s subplot. Each metric’s trend data is gathered, and
+its trend is plotted on the selected axis. A linear trendline is also plotted along with its
+corresponding R2 value. Finally, each metric type’s subplot is given a title and added to the
+list of plots.</p>
+</dd>
+</dl>
+<p>Args:
+self (Plots): The Plots instance.</p>
+<p>Returns:
+None. The method appends the generated plots to the Plots instance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.scale_y_axis">
+<span class="sig-name descname"><span class="pre">scale_y_axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">matplotlib.pyplot.axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">matplotlib.pyplot.axis</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.scale_y_axis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.plots.Plots.scale_y_axis" title="Permalink to this definition"></a></dt>
+<dd><p>Scales the y-axis of a given axis object based on the value of the
+data_str parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>plt.axis</em>) – The axis to modify.</p></li>
+<li><p><strong>data_str</strong> (<em>str</em>) – A string indicating which type of data is plotted on the y-axis.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The modified axis object, with the y-axis limits set according to the data_str parameter.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>plt.axis</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.select_subplot">
+<span class="sig-name descname"><span class="pre">select_subplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">counter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subplots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">matplotlib.pyplot.subplots</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">matplotlib.pyplot.subplot</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.select_subplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.plots.Plots.select_subplot" title="Permalink to this definition"></a></dt>
+<dd><p>Selects a subplot from the grid of subplots, based on the current counter and the subplots grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>counter</strong> (<em>int</em>) – The current counter value.</p></li>
+<li><p><strong>subplots</strong> (<em>matplotlib.figure.Subplot</em>) – The grid of subplots.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The selected subplot.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>plt.subplot</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="investment_tools.plots.Plots.set_limit">
+<span class="sig-name descname"><span class="pre">set_limit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/investment_tools/plots.html#Plots.set_limit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#investment_tools.plots.Plots.set_limit" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the maximum number of metrics to display in the plots.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>limit</strong> (<em>int</em>) – The maximum number of metrics to display.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The maximum number of metrics to display.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-investment_tools">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-investment_tools" title="Permalink to this headline"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="investment_tools" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, JFD.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
