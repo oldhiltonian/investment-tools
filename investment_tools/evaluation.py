@@ -366,7 +366,6 @@ class BuffetEvaluation(StandardEvaluation):
         self.buffet_outcome = self.buffet_eval()
 
     def buffet_eval(self) -> bool:
-        print("Entering Evaluation.buffet_eval()")
         # 1. is eps increasing reliably?
         test_1_result = self.buffet_test_1_is_eps_increasing()
 
@@ -406,7 +405,6 @@ class BuffetEvaluation(StandardEvaluation):
         # Append each "windowed table" to a self.dict() with keys "3 year", "5 year", etc
         test_5_result_dict = self.buffet_test_5_RoE_projections()
         self.RoE_projections = test_5_result_dict
-        print(test_5_result_dict)
 
     def buffet_test_1_is_eps_increasing(self):
         eps_growth_score = self.standard_scores_dict["eps"]["score"]
@@ -430,13 +428,6 @@ class BuffetEvaluation(StandardEvaluation):
         eps_growth_5Y = round(self.calculate_mean_growth_from_series_trend(eps, 5), 4)
         eps_growth_7Y = round(self.calculate_mean_growth_from_series_trend(eps, 7), 4)
         eps_growth_10Y = round(self.calculate_mean_growth_from_series_trend(eps, 10), 4)
-        print(
-            "growth_rates for 3, 5, 7, 10 years",
-            eps_growth_3Y,
-            eps_growth_5Y,
-            eps_growth_7Y,
-            eps_growth_10Y,
-        )
         return (eps_growth_3Y, eps_growth_5Y, eps_growth_7Y, eps_growth_10Y)
 
     def buffet_test_4_compare_to_TBonds(self):
@@ -445,7 +436,6 @@ class BuffetEvaluation(StandardEvaluation):
         treasury_yield_5Y = self.get_5Y_treasury_yield_data(
             self.get_treasury_yield_api_url()
         )
-        print("Treasury yield 5Y: ", treasury_yield_5Y)
         breakeven_price_vs_5Y_treasury = self.calculate_breakeven_vs_treasury(
             eps.iloc[-1], treasury_yield_5Y
         )
@@ -453,13 +443,11 @@ class BuffetEvaluation(StandardEvaluation):
             current_stock_price, breakeven_price_vs_5Y_treasury, 1.1
         )
 
-        print("Is this stock better than holding TBonds?: ", bool_better_than_treasury)
         return bool_better_than_treasury
 
     def buffet_test_5_RoE_projections(self):
         all_projection_window_data = dict()
         current_stock_price = self.get_current_stock_price()
-        print("current stock price", current_stock_price)
         for span in [3, 5, 7, 10]:
             df = self.setup_test_5_RoE_projection_df(span)
             dataset = self.calc_test_5_RoE_projection_dataset(
@@ -500,9 +488,6 @@ class BuffetEvaluation(StandardEvaluation):
         df.iloc[0]["EPS"] = assumed_EPS
         df.iloc[0]["DPS"] = dividend_per_share
         df.iloc[0]["REPS"] = retained_per_share
-
-        print("roe", mean_roe)
-        print("payout", mean_payout_ratio)
         return df
 
     def calc_test_5_RoE_projection_dataset(self, df, span, current_stock_price):
@@ -638,7 +623,6 @@ class BuffetEvaluation(StandardEvaluation):
         return yield_
 
     def calculate_breakeven_vs_treasury(self, eps, treasury_tield):
-        print("breakeven price", eps / treasury_tield)
         return eps / treasury_tield
 
     def treasury_comparison(self, stock_price, breakeven_price, margin: int = 1):
