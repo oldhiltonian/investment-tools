@@ -455,6 +455,9 @@ class BuffetEvaluation(StandardEvaluation):
             )
             all_projection_window_data[f"{span}Y"] = dataset
         return all_projection_window_data
+    
+    def buffet_test_6_EPS_projections(self):
+        pass
 
     def setup_test_5_RoE_projection_df(self, span):
         future_years = 12
