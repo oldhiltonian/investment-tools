@@ -457,7 +457,15 @@ class BuffetEvaluation(StandardEvaluation):
         return all_projection_window_data
     
     def buffet_test_6_EPS_projections(self):
-        pass
+        for span in [3, 5, 7, 10]:
+            eps_trendline = self.calculate_trendline(self.metrics["eps"], span)
+            current_eps = eps_trendline.iloc[-1]
+            slope, _ = self.get_slope_and_intercept(eps_trendline)
+            future_eps = [current_eps]
+            for year in range(0, 13):
+                future_eps.append(future_eps[-1] + slope)
+            pass
+        ### not complete yet
 
     def setup_test_5_RoE_projection_df(self, span):
         future_years = 12
@@ -560,8 +568,43 @@ class BuffetEvaluation(StandardEvaluation):
             dataset["PE_low"] = PE_low
             dataset["PEq_high"] = PEq_high
             dataset["PEq_low"] = PEq_low
-            dataset["Projection Table"] = df
+            dataset["RoE Projection Table"] = df
         return dataset
+
+
+
+
+    def setup_test_6_EPS_projection_dataset(self, df, span, current_stock_price):
+        '''Not complete yet.'''
+
+        future_years = 12
+        df_index = range(future_years)
+        df_columns = [
+            "EPS",
+            "FV_price_PE_high",
+            "FV_price_PE_low",
+            "FV_price_PEq_high",
+            "FV_price_PEq_low",
+            "PV_price_PE_high",
+            "PV_price_PE_low",
+            "PV_price_PEq_high",
+            "PV_price_PEq_low",
+            "RoR_current_price_to_FV_PE_high",
+            "RoR_current_price_to_FV_PE_low",
+            "RoR_current_price_to_FV_PEq_high",
+            "RoR_current_price_to_FV_PEq_low",
+        ]
+        df = pd.DataFrame(index=df_index, columns=df_columns)
+        mean_roe = self.metrics["returnOnEquity"][-span:].mean()
+        mean_payout_ratio = self.metrics["dividendPayoutRatio"][-span:].mean()
+        assumed_EPS = self.calculate_trendline_series(self.metrics["eps"])[-1]
+        assumed_EqPS = self.calculate_trendline_series(self.metrics["EqPS"])[-1]
+        df.iloc[0]["EqPS"] = assumed_EqPS
+        df.iloc[0]["EPS"] = assumed_EPS
+        return df
+
+
+
 
     def get_current_stock_price(self):
         current_stock_price = pdr.get_data_yahoo(
